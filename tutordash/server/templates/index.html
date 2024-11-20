@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tutor Dash">
+
+    <title>Tutor Dash</title>
+
+    <!-- Favicon -->
+    <!-- TODO -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
+    <!-- CSS -->
+    <!-- <link rel="stylesheet" href="css/normalize.css"> -->
+    <!-- <link rel="stylesheet" href="css/styles.css"> -->
+    <link href="{{ url_for('static', path='/css/dash.css') }}" rel="stylesheet">
+    <!-- TODO self-host -->
+    <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="section">
+                <div class="header">
+                    Administration
+                </div>
+                <div class="content">
+                    <ul>
+                        <li>Configuration</li>
+                        <li>Some other stuff</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="header">
+                    Plugins
+                </div>
+                <div class="content" hx-get="{{ url_for('sidebar_plugins') }}" hx-trigger="revealed"></div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="header">
+                {% block workspace_header %}{% endblock %}
+            </div>
+            <div class="content">
+                {% block workspace_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span>Modified: Just now</span>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+
+<ul>
+{% for plugin in installed_plugins %}
+    <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }}</a></li>
+{% endfor %}
+</ul>

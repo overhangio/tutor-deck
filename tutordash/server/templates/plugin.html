@@ -1,0 +1,8 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}{{ plugin_name }}{% endblock %}
+
+{% block workspace_content %}
+Enabled: <input type="checkbox" name="enabled" {% if is_enabled %}checked{% endif %}
+    hx-post="{{ url_for('toggle_plugin', name=plugin_name) }}" />
+{% endblock %}
