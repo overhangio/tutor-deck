@@ -14,9 +14,11 @@
     <!-- CSS -->
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
     <!-- <link rel="stylesheet" href="css/styles.css"> -->
-    <link href="{{ url_for('static', path='/css/dash.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='/css/dash.css') }}" rel="stylesheet">
     <!-- TODO self-host -->
     <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
+    <!-- WS extension https://htmx.org/extensions/ws/ TODO self host -->
+    <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
 </head>
 
 <body>
@@ -29,7 +31,7 @@
                 <div class="content">
                     <ul>
                         <li>Configuration</li>
-                        <li>Some other stuff</li>
+                        <li><a href="{{ url_for('tutor_logs') }}">Command logs</a></li>
                     </ul>
                 </div>
             </div>
@@ -55,6 +57,8 @@
     <div class="status-bar">
         <span>Modified: Just now</span>
     </div>
+
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

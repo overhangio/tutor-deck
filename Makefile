@@ -4,7 +4,7 @@ SRC_DIRS = ./tutordash
 BLACK_OPTS = --exclude templates ${SRC_DIRS}
 
 runserver: ## Run a development server
-	tutor dash run --reload
+	tutor dash run --dev
 
 scss: ## Compile SCSS files
 	sass ${SASS_OPTS} tutordash/server/static/scss/:tutordash/server/static/css/ 

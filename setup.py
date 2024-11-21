@@ -44,7 +44,8 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "tutor>=18.0.0,<19.0.0",
-        "fastapi[standard]",
+        "quart",
+        "aiofiles"
     ],
     extras_require={
         "dev": [

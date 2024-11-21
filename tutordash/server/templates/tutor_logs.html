@@ -1,0 +1,19 @@
+{% extends 'index.html' %}
+
+{% block workspace_header %}Tutor command logs{% endblock %}
+
+{% block workspace_content %}
+<pre id="tutor-log" hx-ext="ws" ws-connect="{{ url_for('tutor_logs_stream') }}"></pre>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // TODO this is absolutely going to break html. We need to html-escape all the things.
+    htmx.on("htmx:wsAfterMessage", function(evt) {
+        const logs = document.getElementById("tutor-log");
+        const text = document.createTextNode(evt.detail.message);
+        logs.appendChild(text);
+        logs.scrollTop = logs.scrollHeight;
+    });
+</script>
+{% endblock %}
