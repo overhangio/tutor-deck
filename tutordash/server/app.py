@@ -1,5 +1,6 @@
 import asyncio
 import os
+import shlex
 
 # import sys
 # import time
@@ -10,10 +11,8 @@ import aiofiles
 # from contextlib import contextmanager
 
 import tutor.env
-from quart import Quart, render_template, request, websocket
+from quart import Quart, render_template, request, websocket, redirect, url_for
 from tutor import hooks
-
-# from tutor.commands.cli import cli
 from tutor.types import Config
 
 
@@ -56,6 +55,13 @@ app = Quart(
 
 
 def run(root: str, **app_kwargs: t.Any) -> None:
+    # import module to trigger all the right imports and hooks
+    # TODO how do we handle this now that we call the tutor binary directly? Should we
+    # even deal with hooks at all? We have to to figure out plugin configuration,
+    # information, etc.
+    # pylint: disable=unused-import,import-outside-toplevel
+    from tutor.commands.cli import cli
+
     hooks.Actions.CORE_READY.do()  # discover plugins
     hooks.Actions.PROJECT_ROOT_READY.do(root)
     app.logger.info("Dash tutor logs location: %s", TutorProject.tutor_stdout_path())
@@ -95,23 +101,38 @@ async def toggle_plugin(name: str):
     return {}
 
 
-# @app.post("/tutor")
-# async def run_tutor():
-#     """
-#     Run an arbitrary tutor command.
-#     """
-#     try:
-#         with capture_stdout() as stdout:
-#             # pylint: disable=no-value-for-parameter
-#             cli(["config", "printvalue", "DOCKER_IMAGE_OPENEDX"])
-#     except SystemExit as e:
-#         if e.code == 0:
-#             # success!
-#             return {}
-#         else:
-#             # TODO Return 500?
-#             return {}
-#     # TODO
+@app.post("/tutor/cli")
+async def tutor_cli():
+    # Run command asynchronously
+    # TODO parse command from JSON request body
+    # app.add_background_task(subprocess_exec, ["tutor", "config", "printvalue", "DOCKER_IMAGE_OPENEDX"])
+    # app.add_background_task(subprocess_exec, ["tutor" "local", "launch"])
+    # await subprocess_exec(["tutor", "config", "printvalue", "pouac"])
+    await subprocess_exec(["tutor", "dev", "dc", "run", "pouac"])
+    return redirect(url_for("tutor_logs"))
+
+
+async def subprocess_exec(command: list[str]):
+    path = TutorProject.tutor_stdout_path()
+    # if os.path.exists(path):
+    #     # TODO return 400? We can't run two commands at the same time
+    #     return {}
+    with open(path, "w", encoding="utf8") as stdout:
+        # Print command
+        # TODO this doesn't seem to work. For some reason, the command is added at the
+        # bottom of the file!!!
+        stdout.write(f"$ {shlex.join(command)}\n")
+        # Run command
+        proc = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=stdout,
+            stderr=stdout,
+            stdin=asyncio.subprocess.DEVNULL,
+        )
+        while proc.returncode is None:
+            await proc.communicate()
+            await asyncio.sleep(0.1)
+    return {}
 
 
 @app.get("/tutor/logs")
@@ -150,21 +171,3 @@ async def stream_file(path: str) -> t.Iterator[str]:
                 yield content
             else:
                 await asyncio.sleep(0.1)
-
-
-# @contextmanager
-# def capture_stdout():
-#     sys_stdout = sys.stdout
-#     try:
-#         while os.path.exists(TutorProject.tutor_stdout_path()):
-#             # TODO thread-safe, lock-based implementation that does not use sleep()
-#             await asyncio.sleep(0.1)
-#         with open(TutorProject.tutor_stdout_path(), "wb", encoding="utf8") as stdout:
-#             sys.stdout = stdout
-#             sys.stderr = stdout
-#             yield stdout
-#     finally:
-#         if os.path.exists(TutorProject.tutor_stdout_path()):
-#             # TODO more reliable implementation
-#             os.remove(TutorProject.tutor_stdout_path())
-#         sys.stdout = sys_stdout
