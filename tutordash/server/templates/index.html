@@ -40,7 +40,18 @@
                 <div class="header">
                     Plugins
                 </div>
-                <div class="content" hx-get="{{ url_for('sidebar_plugins') }}" hx-trigger="revealed"></div>
+                <div class="content">
+                    <ul>
+                        {% for plugin in installed_plugins %}
+                        <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }}</a></li>
+                        {% endfor %}
+                        <form action="{{ url_for('tutor_cli') }}" method="POST">
+                            <input type="hidden" name="args[]" value="local">
+                            <input type="hidden" name="args[]" value="launch">
+                            <button type="submit">Apply changes</button>
+                        </form>
+                    </ul>
+                </div>
             </div>
         </div>
 

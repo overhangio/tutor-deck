@@ -191,14 +191,8 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 
 @app.get("/")
 async def home() -> str:
-    return await render_template("index.html")
-
-
-@app.get("/sidebar/plugins")
-async def sidebar_plugins() -> str:
-    # TODO get rid of this view and render from home()
     return await render_template(
-        "sidebar/_plugins.html",
+        "index.html",
         installed_plugins=sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate())),
     )
 
