@@ -55,6 +55,7 @@ body {
     .workspace {
         flex: 1;
         padding: 20px;
+        overflow: scroll;
 
         .header {
             margin-bottom: 16px;

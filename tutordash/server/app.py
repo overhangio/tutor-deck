@@ -1,19 +1,22 @@
 import asyncio
+from contextlib import contextmanager
 import os
 import shlex
+import subprocess
+import threading
 
-# import sys
-# import time
 import typing as t
 
 import aiofiles
 
-# from contextlib import contextmanager
 
 import tutor.env
 from quart import Quart, render_template, request, websocket, redirect, url_for
-from tutor import hooks
+from tutor.exceptions import TutorError
+from tutor import fmt, hooks
 from tutor.types import Config
+import tutor.utils
+from tutor.commands.cli import cli
 
 
 class TutorProject:
@@ -55,13 +58,6 @@ app = Quart(
 
 
 def run(root: str, **app_kwargs: t.Any) -> None:
-    # import module to trigger all the right imports and hooks
-    # TODO how do we handle this now that we call the tutor binary directly? Should we
-    # even deal with hooks at all? We have to to figure out plugin configuration,
-    # information, etc.
-    # pylint: disable=unused-import,import-outside-toplevel
-    from tutor.commands.cli import cli
-
     hooks.Actions.CORE_READY.do()  # discover plugins
     hooks.Actions.PROJECT_ROOT_READY.do(root)
     app.logger.info("Dash tutor logs location: %s", TutorProject.tutor_stdout_path())
@@ -75,6 +71,7 @@ async def home():
 
 @app.get("/sidebar/plugins")
 async def sidebar_plugins():
+    # TODO get rid of this view and render from home()
     return await render_template(
         "sidebar/_plugins.html",
         installed_plugins=sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate())),
@@ -104,35 +101,97 @@ async def toggle_plugin(name: str):
 @app.post("/tutor/cli")
 async def tutor_cli():
     # Run command asynchronously
+    # TODO return 400 if thread is active
     # TODO parse command from JSON request body
-    # app.add_background_task(subprocess_exec, ["tutor", "config", "printvalue", "DOCKER_IMAGE_OPENEDX"])
-    # app.add_background_task(subprocess_exec, ["tutor" "local", "launch"])
-    # await subprocess_exec(["tutor", "config", "printvalue", "pouac"])
-    await subprocess_exec(["tutor", "dev", "dc", "run", "pouac"])
+    thread = threading.Thread(
+        target=run_tutor_cli,
+        # args=[["dev", "dc", "run", "pouac"]],
+        # args=[["config", "printvalue", "DOCKER_IMAGE_OPENEDX"]],
+        # args=[["config", "printvalue", "POUAC"]],
+        args=[["local", "launch", "--non-interactive"]],
+    )
+    thread.start()
     return redirect(url_for("tutor_logs"))
 
 
-async def subprocess_exec(command: list[str]):
-    path = TutorProject.tutor_stdout_path()
-    # if os.path.exists(path):
-    #     # TODO return 400? We can't run two commands at the same time
-    #     return {}
-    with open(path, "w", encoding="utf8") as stdout:
-        # Print command
-        # TODO this doesn't seem to work. For some reason, the command is added at the
-        # bottom of the file!!!
-        stdout.write(f"$ {shlex.join(command)}\n")
-        # Run command
-        proc = await asyncio.create_subprocess_exec(
-            *command,
-            stdout=stdout,
-            stderr=stdout,
-            stdin=asyncio.subprocess.DEVNULL,
-        )
-        while proc.returncode is None:
-            await proc.communicate()
-            await asyncio.sleep(0.1)
-    return {}
+def run_tutor_cli(args: list[str]) -> None:
+    """
+    Execute some arbitrary tutor command. Capture the output in a dedicated file.
+
+    TODO Return the exit code?
+    TODO Refactor this
+    """
+    with open(TutorProject.tutor_stdout_path(), "w", encoding="utf8") as stdout:
+        # useless because overwritten by Popen
+        stdout.write(f"$ tutor {shlex.join(args)}\n")
+
+    # Override execute function
+    with patch_objects(
+        [
+            (tutor.utils, "execute", execute),
+            (fmt.click, "echo", click_echo),
+            (fmt.click, "style", click_style),
+        ]
+    ):
+        try:
+            # Call tutor command
+            cli(args)
+        except TutorError as e:
+            with open(TutorProject.tutor_stdout_path(), "a", encoding="utf8") as stdout:
+                stdout.write(e.args[0])
+        except SystemExit as e:
+            # TODO what to do with e.code?
+            pass
+
+
+@contextmanager
+def patch_objects(refs):
+    old_objects = []
+    for module, object_name, new_object in refs:
+        # backup old object
+        old_objects.append((module, object_name, getattr(module, object_name)))
+        # override object
+        setattr(module, object_name, new_object)
+    try:
+        yield
+    finally:
+        # restore old objects
+        for module, object_name, old_object in old_objects:
+            setattr(module, object_name, old_object)
+
+
+def click_echo(text, **kwargs):
+    with open(TutorProject.tutor_stdout_path(), "a", encoding="utf8") as stdout:
+        stdout.write(text)
+        stdout.write("\n")
+
+
+def click_style(text, **kwargs):
+    """
+    Strip ANSI colors
+
+    TODO convert to HTML color codes?
+    """
+    return text
+
+
+def execute(*command: str) -> int:
+    """
+    TODO refactor this
+    """
+    with open(TutorProject.tutor_stdout_path(), "ab") as stdout:
+        with subprocess.Popen(command, stdout=stdout, stderr=stdout) as p:
+            try:
+                result = p.wait(timeout=None)
+            except Exception as e:
+                p.kill()
+                p.wait()
+                raise TutorError(f"Command failed: {' '.join(command)}") from e
+            if result > 0:
+                raise TutorError(
+                    f"Command failed with status {result}: {' '.join(command)}"
+                )
+    return result
 
 
 @app.get("/tutor/logs")
