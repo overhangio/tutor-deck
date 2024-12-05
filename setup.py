@@ -50,6 +50,7 @@ setup(
     extras_require={
         "dev": [
             "tutor[dev]>=18.0.0,<19.0.0",
+            "types-aiofiles"
         ]
     },
     entry_points={"tutor.plugin.v1": ["dash = tutordash.plugin"]},

@@ -21,13 +21,18 @@ Usage
 Development
 ***********
 
+Install locally::
+
+    pip install -e .[dev]
+
 Install npm requirements::
 
     npm clean-install
 
-Compile SCSS files and watch for changes::
+Compile SCSS files::
 
-    make scss-watch
+    make scss       # compile once
+    make scss-watch # compile and watch for changes
 
 Run a development server::
 

@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import contextmanager
+import logging
 import os
 import shlex
 import subprocess
@@ -11,42 +12,54 @@ import aiofiles
 
 
 import tutor.env
-from quart import Quart, render_template, request, websocket, redirect, url_for
+from quart import (
+    Quart,
+    render_template,
+    request,
+    websocket,
+    redirect,
+    url_for,
+)
+from quart.helpers import WerkzeugResponse
 from tutor.exceptions import TutorError
 from tutor import fmt, hooks
 from tutor.types import Config
 import tutor.utils
 from tutor.commands.cli import cli
 
+logger = logging.getLogger(__name__)
+
 
 class TutorProject:
     """
-    TODO This big god class is not very elegant.
+    Provide access to the current Tutor project root and configuration.
     """
 
     CONFIG: dict[str, t.Any] = {}
     ROOT: str = ""
 
-    @staticmethod
-    def installed_plugins() -> list[str]:
-        return sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate()))
-
-    @staticmethod
-    def enabled_plugins() -> list[str]:
-        return sorted(set(hooks.Filters.PLUGINS_LOADED.iterate()))
-
-    @hooks.Actions.CONFIG_LOADED.add()
-    @staticmethod
-    def _dash_update_tutor_config(config: Config) -> None:
-        TutorProject.CONFIG = config
-
-    @hooks.Actions.PROJECT_ROOT_READY.add()
-    @staticmethod
-    def _dash_update_tutor_root(root: str) -> None:
-        TutorProject.ROOT = root
+    @classmethod
+    def connect(cls, root: str) -> None:
+        """
+        Call whenever we are ready to connect to the Tutor hooks API.
+        """
+        if not cls.ROOT:
+            # Hook up TutorProject with Tutor hooks -- just once
+            hooks.Actions.PROJECT_ROOT_READY.add()(cls._dash_on_project_root_ready)
+            hooks.Actions.CONFIG_LOADED.add()(cls._dash_on_config_loaded)
+        hooks.Actions.CORE_READY.do()  # discover plugins
+        hooks.Actions.PROJECT_ROOT_READY.do(root)
 
     @classmethod
-    def tutor_stdout_path(cls):
+    def _dash_on_project_root_ready(cls, root: str) -> None:
+        cls.ROOT = root
+
+    @classmethod
+    def _dash_on_config_loaded(cls, config: Config) -> None:
+        cls.CONFIG = config
+
+    @classmethod
+    def tutor_stdout_path(cls) -> str:
         return tutor.env.data_path(cls.ROOT, "dash", "tutor.log")
 
 
@@ -58,19 +71,21 @@ app = Quart(
 
 
 def run(root: str, **app_kwargs: t.Any) -> None:
-    hooks.Actions.CORE_READY.do()  # discover plugins
-    hooks.Actions.PROJECT_ROOT_READY.do(root)
+    """
+    Bootstrap the Quart app and run it.
+    """
+    TutorProject.connect(root)
     app.logger.info("Dash tutor logs location: %s", TutorProject.tutor_stdout_path())
     app.run(**app_kwargs)
 
 
 @app.get("/")
-async def home():
+async def home() -> str:
     return await render_template("index.html")
 
 
 @app.get("/sidebar/plugins")
-async def sidebar_plugins():
+async def sidebar_plugins() -> str:
     # TODO get rid of this view and render from home()
     return await render_template(
         "sidebar/_plugins.html",
@@ -79,14 +94,14 @@ async def sidebar_plugins():
 
 
 @app.get("/plugin/<name>")
-async def plugin(name: str):
+async def plugin(name: str) -> str:
     # TODO check that plugin exists
-    is_enabled = name in TutorProject.enabled_plugins()
+    is_enabled = name in hooks.Filters.PLUGINS_LOADED.iterate()
     return await render_template("plugin.html", plugin_name=name, is_enabled=is_enabled)
 
 
 @app.post("/plugin/<name>/toggle")
-async def toggle_plugin(name: str):
+async def toggle_plugin(name: str) -> dict[str, str]:
     # TODO check plugin exists
     form = await request.form
     enabled = form.get("enabled")
@@ -95,11 +110,14 @@ async def toggle_plugin(name: str):
         # as pydantic or a rest framework?
         return {}
 
+    # TODO actually toggle plugin
+    logger.info("Toggling plugin %s", name)
+
     return {}
 
 
 @app.post("/tutor/cli")
-async def tutor_cli():
+async def tutor_cli() -> WerkzeugResponse:
     # Run command asynchronously
     # TODO return 400 if thread is active
     # TODO parse command from JSON request body
@@ -135,17 +153,19 @@ def run_tutor_cli(args: list[str]) -> None:
     ):
         try:
             # Call tutor command
-            cli(args)
+            cli(args)  # pylint: disable=no-value-for-parameter
         except TutorError as e:
             with open(TutorProject.tutor_stdout_path(), "a", encoding="utf8") as stdout:
                 stdout.write(e.args[0])
-        except SystemExit as e:
+        except SystemExit:
             # TODO what to do with e.code?
             pass
 
 
 @contextmanager
-def patch_objects(refs):
+def patch_objects(
+    refs: list[tuple[object, str, t.Callable[[t.Any], t.Any]]]
+) -> t.Iterator[None]:
     old_objects = []
     for module, object_name, new_object in refs:
         # backup old object
@@ -153,20 +173,20 @@ def patch_objects(refs):
         # override object
         setattr(module, object_name, new_object)
     try:
-        yield
+        yield None
     finally:
         # restore old objects
         for module, object_name, old_object in old_objects:
             setattr(module, object_name, old_object)
 
 
-def click_echo(text, **kwargs):
+def click_echo(text: str, **_kwargs: t.Any) -> None:
     with open(TutorProject.tutor_stdout_path(), "a", encoding="utf8") as stdout:
         stdout.write(text)
         stdout.write("\n")
 
 
-def click_style(text, **kwargs):
+def click_style(text: str, **_kwargs: t.Any) -> str:
     """
     Strip ANSI colors
 
@@ -195,12 +215,12 @@ def execute(*command: str) -> int:
 
 
 @app.get("/tutor/logs")
-async def tutor_logs():
+async def tutor_logs() -> str:
     return await render_template("tutor_logs.html")
 
 
 @app.websocket("/tutor/logs/stream")
-async def tutor_logs_stream():
+async def tutor_logs_stream() -> None:
     while True:
         async for content in stream_file(TutorProject.tutor_stdout_path()):
             try:
@@ -211,7 +231,7 @@ async def tutor_logs_stream():
         await asyncio.sleep(0.1)
 
 
-async def stream_file(path: str) -> t.Iterator[str]:
+async def stream_file(path: str) -> t.AsyncGenerator[str]:
     """
     Async stream content from file.
 
