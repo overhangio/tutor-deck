@@ -1,16 +1,12 @@
 import asyncio
 import contextlib
-import os
 import shlex
 import subprocess
 import tempfile
 import threading
-
 import typing as t
 
 import aiofiles
-
-import tutor.env
 from quart import (
     Quart,
     render_template,
@@ -20,6 +16,8 @@ from quart import (
     url_for,
 )
 from quart.helpers import WerkzeugResponse
+
+import tutor.env
 from tutor.exceptions import TutorError
 from tutor import fmt, hooks
 from tutor.types import Config
@@ -67,12 +65,6 @@ class TutorCli:
 
     INSTANCE: t.Optional["TutorCli"] = None
 
-    def __init__(self, args: list[str]) -> None:
-        self.args = args
-        self.log_path = tempfile.mktemp(prefix="tutor-dash-", suffix=".log")
-        # TODO how do we ensure that the log file is deleted?
-        TutorCli.INSTANCE = self
-
     @classmethod
     def run_parallel(cls, args: list[str]) -> None:
         """
@@ -82,69 +74,92 @@ class TutorCli:
         thread = threading.Thread(target=tutor_cli_runner.run)
         thread.start()
 
+        async def stop_on_reload() -> None:
+            """
+            This background task will stop the runner whenever the Quart app is
+            requested to stop. This happens for instance on dev reload.
+            """
+            try:
+                while True:
+                    await asyncio.sleep(1)
+            finally:
+                app.logger.info(
+                    "#################### thread.is_alive: %s Stopping command: %s...",
+                    thread.is_alive(),
+                    tutor_cli_runner.tutor_command,
+                )
+                tutor_cli_runner.stop()
+                thread.join()
+
+        app.add_background_task(stop_on_reload)
+
+    @classmethod
+    def stop_instance(cls) -> None:
+        """
+        Stop all running instances
+        """
+        if cls.INSTANCE:
+            # TODO stop only actually running instances
+            cls.INSTANCE.stop()
+
+    def __init__(self, args: list[str]) -> None:
+        """
+        Every created instance is assigned to cls.INSTANCE.
+        """
+        self.args = args
+        self.log_file = tempfile.NamedTemporaryFile(
+            "ab", prefix="tutor-dash-", suffix=".log"
+        )
+        self._stop_flag = threading.Event()
+        TutorCli.INSTANCE = self
+
+    @property
+    def log_path(self) -> str:
+        """
+        Path to the log file
+        """
+        return self.log_file.name
+
+    @property
+    def tutor_command(self) -> str:
+        """
+        Tutor command executed by this runner.
+        """
+        return shlex.join(["tutor"] + self.args)
+
     def run(self) -> None:
         """
         Execute some arbitrary tutor command.
 
         Output will be captured in the log file.
-        TODO Return the exit code?
         """
         app.logger.info(
-            "Running command: tutor %s (logs: %s)", shlex.join(self.args), self.log_path
+            "Running command: tutor %s (logs: %s)", self.tutor_command, self.log_path
         )
-        with open(self.log_path, "w", encoding="utf8") as stdout:
-            # TODO useless because overwritten by Popen
-            stdout.write(f"$ tutor {shlex.join(self.args)}\n")
-
-        # TODO refactor this ugly mocking
-        def _mock_click_echo(text: str, **_kwargs: t.Any) -> None:
-            with open(self.log_path, "a", encoding="utf8") as stdout:
-                stdout.write(text)
-                stdout.write("\n")
-
-        def _mock_click_style(text: str, **_kwargs: t.Any) -> str:
-            """
-            Strip ANSI colors
-
-            TODO convert to HTML color codes?
-            """
-            return text
-
-        def _mock_execute(*command: str) -> int:
-            """
-            TODO refactor this
-            """
-            with open(self.log_path, "ab") as stdout:
-                with subprocess.Popen(command, stdout=stdout, stderr=stdout) as p:
-                    try:
-                        result = p.wait(timeout=None)
-                    except Exception as e:
-                        p.kill()
-                        p.wait()
-                        raise TutorError(f"Command failed: {' '.join(command)}") from e
-                    if result > 0:
-                        raise TutorError(
-                            f"Command failed with status {result}: {' '.join(command)}"
-                        )
-            return result
 
         # Override execute function
         with patch_objects(
             [
-                (tutor.utils, "execute", _mock_execute),
-                (fmt.click, "echo", _mock_click_echo),
-                (fmt.click, "style", _mock_click_style),
+                (tutor.utils, "execute", self._mock_execute),
+                (fmt.click, "echo", self._mock_click_echo),
+                (fmt.click, "style", self._mock_click_style),
             ]
         ):
             try:
                 # Call tutor command
                 cli(self.args)  # pylint: disable=no-value-for-parameter
             except TutorError as e:
-                with open(self.log_path, "a", encoding="utf8") as stdout:
-                    stdout.write(e.args[0])
+                # This happens for incorrect commands
+                self.log_file.write(e.args[0].encode())
             except SystemExit:
-                # TODO what to do with e.code?
                 pass
+            self.log_file.flush()
+
+    def stop(self) -> None:
+        """
+        Stop all subprocess.Popen commands.
+        """
+        self._stop_flag.set()
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
@@ -154,18 +169,61 @@ class TutorCli:
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
-        # TODO super ugly. Any way to do better?
-        if not os.path.exists(self.log_path):
-            return
-        async with aiofiles.open(self.log_path, "r", encoding="utf8") as f:
+        async with aiofiles.open(self.log_path, "rb") as f:
+            # Note that file reading needs to happen from the file path, because it maye
+            # be done from a separate thread, where the file object is not available.
             while True:
-                if not os.path.exists(self.log_path):
-                    break
                 content = await f.read()
                 if content:
-                    yield content
+                    yield content.decode()
                 else:
                     await asyncio.sleep(0.1)
+
+    # Mocking functions to override tutor functions that write to stdout
+    def _mock_click_echo(self, text: str, **_kwargs: t.Any) -> None:
+        """
+        Mock click.echo to write to log file
+        """
+        self.log_file.write(text.encode())
+        self.log_file.write(b"\n")
+
+    def _mock_click_style(self, text: str, **_kwargs: t.Any) -> str:
+        """
+        Mock click.style to strip ANSI colors
+
+        TODO convert to HTML color codes?
+        """
+        return text
+
+    def _mock_execute(self, *command: str) -> int:
+        """
+        Mock tutor.utils.execute.
+        """
+        command_string = shlex.join(command)
+        with subprocess.Popen(
+            command, stdout=self.log_file, stderr=self.log_file
+        ) as popen:
+            while popen.returncode is None:
+                try:
+                    popen.wait(timeout=0.5)
+                except subprocess.TimeoutExpired as e:
+                    # Check every now and then whether we should stop
+                    if self._stop_flag.is_set():
+                        popen.kill()
+                        popen.wait()
+                        raise TutorError(
+                            f"Command interrupted: {command_string}"
+                        ) from e
+                except Exception as e:
+                    popen.kill()
+                    popen.wait()
+                    raise TutorError(f"Command failed: {command_string}") from e
+
+            if popen.returncode > 0:
+                raise TutorError(
+                    f"Command failed with status {popen.returncode}: {command_string}"
+                )
+            return popen.returncode
 
 
 app = Quart(
@@ -185,17 +243,19 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 
 @app.get("/")
 async def home() -> str:
-    return await render_template(
-        "index.html",
-        installed_plugins=sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate())),
-    )
+    return await render_template("index.html", **shared_template_context())
 
 
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     is_enabled = name in hooks.Filters.PLUGINS_LOADED.iterate()
-    return await render_template("plugin.html", plugin_name=name, is_enabled=is_enabled)
+    return await render_template(
+        "plugin.html",
+        plugin_name=name,
+        is_enabled=is_enabled,
+        **shared_template_context(),
+    )
 
 
 @app.post("/plugin/<name>/toggle")
@@ -217,15 +277,26 @@ async def toggle_plugin(name: str) -> dict[str, str]:
 @app.post("/tutor/cli")
 async def tutor_cli() -> WerkzeugResponse:
     # Run command asynchronously
+    # if TutorCli.is_thread_alive():
     # TODO return 400 if thread is active
+    # TODO important how to handle different commands? Currently, commands are not killed properly...
+    TutorCli.stop_instance()
     # TODO parse command from JSON request body
     TutorCli.run_parallel(
-        # ["dev", "dc", "run", "pouac"],
+        ["dev", "start"],
+        # ["dev", "dc", "run", "--no-deps", "lms", "bash"],
         # ["config", "printvalue", "DOCKER_IMAGE_OPENEDX"],
-        ["config", "printvalue", "POUAC"],
+        # ["config", "printvalue", "POUAC"],
         # ["local", "launch", "--non-interactive"],
     )
     return redirect(url_for("tutor_logs"))
+
+
+@app.post("/tutor/cli/stop")
+async def tutor_cli_stop() -> dict[str, str]:
+    # TODO actually use this?
+    TutorCli.stop_instance()
+    return {}
 
 
 @contextlib.contextmanager
@@ -248,17 +319,28 @@ def patch_objects(
 
 @app.get("/tutor/logs")
 async def tutor_logs() -> str:
-    return await render_template("tutor_logs.html")
+    return await render_template("tutor_logs.html", **shared_template_context())
 
 
 @app.websocket("/tutor/logs/stream")
 async def tutor_logs_stream() -> None:
     while True:
         if TutorCli.INSTANCE:
+            await websocket.send(f"$ {TutorCli.INSTANCE.tutor_command}\n")
             async for content in TutorCli.INSTANCE.iter_logs():
                 try:
                     await websocket.send(content)
                 except asyncio.CancelledError:
                     return
-        # Exiting the loop means that the file no longer exists, so we wait a little
         await asyncio.sleep(0.1)
+
+
+def shared_template_context() -> dict[str, t.Any]:
+    """
+    Common context shared between all views that make use of the base template.
+
+    TODO isn't there a better way to achieve that? Either template variable or Quart feature.
+    """
+    return {
+        "installed_plugins": sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate())),
+    }
