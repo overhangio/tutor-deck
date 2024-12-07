@@ -8,9 +8,10 @@
 
 {% block scripts %}
 <script>
-    // TODO this is absolutely going to break html. We need to html-escape all the things.
     htmx.on("htmx:wsAfterMessage", function(evt) {
         const logs = document.getElementById("tutor-log");
+
+        // Note that HTML is automatically escaped
         const text = document.createTextNode(evt.detail.message);
         logs.appendChild(text);
         logs.scrollTop = logs.scrollHeight;

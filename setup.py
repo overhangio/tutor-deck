@@ -45,12 +45,14 @@ setup(
     install_requires=[
         "tutor>=18.0.0,<19.0.0",
         "quart",
-        "aiofiles"
+        "aiofiles",
     ],
     extras_require={
         "dev": [
             "tutor[dev]>=18.0.0,<19.0.0",
-            "types-aiofiles"
+            "quart",
+            "aiofiles",
+            "types-aiofiles",
         ]
     },
     entry_points={"tutor.plugin.v1": ["dash = tutordash.plugin"]},

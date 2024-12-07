@@ -50,6 +50,9 @@
                             <input type="hidden" name="args[]" value="launch">
                             <button type="submit">Apply changes</button>
                         </form>
+                        <form action="{{ url_for('tutor_cli_stop') }}" method="POST">
+                            <button type="submit">Stop</button>
+                        </form>
                     </ul>
                 </div>
             </div>

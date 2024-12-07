@@ -24,6 +24,8 @@ from tutor.types import Config
 import tutor.utils
 from tutor.commands.cli import cli
 
+SHORT_SLEEP_SECONDS = 0.1
+
 
 class TutorProject:
     """
@@ -59,59 +61,22 @@ class TutorCli:
     Run Tutor commands and capture the output in a file.
 
     Output must be a file because subprocess.Popen requires stdout.fileno() to be
-    available. We store This file must be unique because it is accessed from a different thread.
-    Basically, the log file is the API between threads.
+    available. We store logs in temporary files.
+
+    Tutor commands are not meant to be run in parallel. Thus, there must be only one
+    instance running at any time: calling functions are responsible for calling
+    TutorCliPool instead of this class.
     """
-
-    INSTANCE: t.Optional["TutorCli"] = None
-
-    @classmethod
-    def run_parallel(cls, args: list[str]) -> None:
-        """
-        Run a command in a separate thread.
-        """
-        tutor_cli_runner = cls(args)
-        thread = threading.Thread(target=tutor_cli_runner.run)
-        thread.start()
-
-        async def stop_on_reload() -> None:
-            """
-            This background task will stop the runner whenever the Quart app is
-            requested to stop. This happens for instance on dev reload.
-            """
-            try:
-                while True:
-                    await asyncio.sleep(1)
-            finally:
-                app.logger.info(
-                    "#################### thread.is_alive: %s Stopping command: %s...",
-                    thread.is_alive(),
-                    tutor_cli_runner.tutor_command,
-                )
-                tutor_cli_runner.stop()
-                thread.join()
-
-        app.add_background_task(stop_on_reload)
-
-    @classmethod
-    def stop_instance(cls) -> None:
-        """
-        Stop all running instances
-        """
-        if cls.INSTANCE:
-            # TODO stop only actually running instances
-            cls.INSTANCE.stop()
 
     def __init__(self, args: list[str]) -> None:
         """
-        Every created instance is assigned to cls.INSTANCE.
+        Each instance can be interrupted from other threads via the stop flag.
         """
         self.args = args
         self.log_file = tempfile.NamedTemporaryFile(
             "ab", prefix="tutor-dash-", suffix=".log"
         )
         self._stop_flag = threading.Event()
-        TutorCli.INSTANCE = self
 
     @property
     def log_path(self) -> str:
@@ -121,7 +86,7 @@ class TutorCli:
         return self.log_file.name
 
     @property
-    def tutor_command(self) -> str:
+    def command(self) -> str:
         """
         Tutor command executed by this runner.
         """
@@ -134,17 +99,11 @@ class TutorCli:
         Output will be captured in the log file.
         """
         app.logger.info(
-            "Running command: tutor %s (logs: %s)", self.tutor_command, self.log_path
+            "Running command: tutor %s (logs: %s)", self.command, self.log_path
         )
 
         # Override execute function
-        with patch_objects(
-            [
-                (tutor.utils, "execute", self._mock_execute),
-                (fmt.click, "echo", self._mock_click_echo),
-                (fmt.click, "style", self._mock_click_style),
-            ]
-        ):
+        with self.patch_objects():
             try:
                 # Call tutor command
                 cli(self.args)  # pylint: disable=no-value-for-parameter
@@ -157,18 +116,23 @@ class TutorCli:
 
     def stop(self) -> None:
         """
-        Stop all subprocess.Popen commands.
+        Sets the stop flag, whic is monitored by all subprocess.Popen commands.
         """
+        app.logger.info(
+            "Stopping Tutor command: %s...",
+            self.command,
+        )
         self._stop_flag.set()
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
-        Async stream content from file.
+        Async stream content from file. Output is prefixed by the running command.
 
         This will handle gracefully file deletion. Note however that if the file is
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
+        yield f"$ {self.command}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
             # be done from a separate thread, where the file object is not available.
@@ -177,9 +141,29 @@ class TutorCli:
                 if content:
                     yield content.decode()
                 else:
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(SHORT_SLEEP_SECONDS)
 
     # Mocking functions to override tutor functions that write to stdout
+    @contextlib.contextmanager
+    def patch_objects(self) -> t.Iterator[None]:
+        refs = [
+            (tutor.utils, "execute", self._mock_execute),
+            (fmt.click, "echo", self._mock_click_echo),
+            (fmt.click, "style", self._mock_click_style),
+        ]
+        old_objects = []
+        for module, object_name, new_object in refs:
+            # backup old object
+            old_objects.append((module, object_name, getattr(module, object_name)))
+            # override object
+            setattr(module, object_name, new_object)
+        try:
+            yield None
+        finally:
+            # restore old objects
+            for module, object_name, old_object in old_objects:
+                setattr(module, object_name, old_object)
+
     def _mock_click_echo(self, text: str, **_kwargs: t.Any) -> None:
         """
         Mock click.echo to write to log file
@@ -212,7 +196,7 @@ class TutorCli:
                         popen.kill()
                         popen.wait()
                         raise TutorError(
-                            f"Command interrupted: {command_string}"
+                            f"Stopping child command: {command_string}"
                         ) from e
                 except Exception as e:
                     popen.kill()
@@ -224,6 +208,76 @@ class TutorCli:
                     f"Command failed with status {popen.returncode}: {command_string}"
                 )
             return popen.returncode
+
+
+class TutorCliPool:
+    INSTANCE: t.Optional["TutorCli"] = None
+    THREAD: t.Optional[threading.Thread] = None
+
+    @classmethod
+    def run_parallel(cls, args: list[str]) -> None:
+        """
+        Run a command in a separate thread. This command automatically stops any running
+        command.
+        """
+        # Stop any running command
+        cls.stop()
+
+        # Start thread
+        cls.INSTANCE = TutorCli(args)
+        cls.THREAD = threading.Thread(target=cls.INSTANCE.run)
+        cls.THREAD.start()
+
+        # Watch for exit
+        app.add_background_task(cls.stop_on_exit, cls.INSTANCE, cls.THREAD)
+
+    @classmethod
+    def stop(cls) -> None:
+        """
+        Stop running instance.
+
+        This is a no-op when there is no running thread, so it's safe to call any time.
+        """
+        if cls.INSTANCE and cls.THREAD:
+            cls.stop_runner_thread(cls.INSTANCE, cls.THREAD)
+
+    @staticmethod
+    def stop_runner_thread(
+        tutor_cli_runner: TutorCli, thread: threading.Thread
+    ) -> None:
+        """
+        Set runner stop flag and wait for thread to complete.
+        """
+        if thread.is_alive():
+            tutor_cli_runner.stop()
+            thread.join()
+
+    @classmethod
+    async def stop_on_exit(
+        cls, tutor_cli_runner: TutorCli, thread: threading.Thread
+    ) -> None:
+        """
+        This background task will stop the runner whenever the Quart app is
+        requested to stop/exit/shutdown. This happens for instance on dev reload.
+        """
+        try:
+            while thread.is_alive():
+                await asyncio.sleep(SHORT_SLEEP_SECONDS)
+        finally:
+            cls.stop_runner_thread(tutor_cli_runner, thread)
+
+    @classmethod
+    async def iter_logs(cls) -> t.AsyncGenerator[str, None]:
+        """
+        Iterate indefinitely from any running instance. When an existing instance is
+        replaced by another one, previous logs are not deleted. New ones are simply
+        appended.
+        """
+        while True:
+            if cls.INSTANCE:
+                async for log in cls.INSTANCE.iter_logs():
+                    yield log
+            await asyncio.sleep(SHORT_SLEEP_SECONDS)
 
 
 app = Quart(
@@ -279,10 +333,8 @@ async def tutor_cli() -> WerkzeugResponse:
     # Run command asynchronously
     # if TutorCli.is_thread_alive():
     # TODO return 400 if thread is active
-    # TODO important how to handle different commands? Currently, commands are not killed properly...
-    TutorCli.stop_instance()
     # TODO parse command from JSON request body
-    TutorCli.run_parallel(
+    TutorCliPool.run_parallel(
         ["dev", "start"],
         # ["dev", "dc", "run", "--no-deps", "lms", "bash"],
         # ["config", "printvalue", "DOCKER_IMAGE_OPENEDX"],
@@ -293,28 +345,9 @@ async def tutor_cli() -> WerkzeugResponse:
 
 
 @app.post("/tutor/cli/stop")
-async def tutor_cli_stop() -> dict[str, str]:
-    # TODO actually use this?
-    TutorCli.stop_instance()
-    return {}
-
-
-@contextlib.contextmanager
-def patch_objects(
-    refs: list[tuple[object, str, t.Callable[[t.Any], t.Any]]]
-) -> t.Iterator[None]:
-    old_objects = []
-    for module, object_name, new_object in refs:
-        # backup old object
-        old_objects.append((module, object_name, getattr(module, object_name)))
-        # override object
-        setattr(module, object_name, new_object)
-    try:
-        yield None
-    finally:
-        # restore old objects
-        for module, object_name, old_object in old_objects:
-            setattr(module, object_name, old_object)
+async def tutor_cli_stop() -> WerkzeugResponse:
+    TutorCliPool.stop()
+    return redirect(url_for("tutor_logs"))
 
 
 @app.get("/tutor/logs")
@@ -324,15 +357,11 @@ async def tutor_logs() -> str:
 
 @app.websocket("/tutor/logs/stream")
 async def tutor_logs_stream() -> None:
-    while True:
-        if TutorCli.INSTANCE:
-            await websocket.send(f"$ {TutorCli.INSTANCE.tutor_command}\n")
-            async for content in TutorCli.INSTANCE.iter_logs():
-                try:
-                    await websocket.send(content)
-                except asyncio.CancelledError:
-                    return
-        await asyncio.sleep(0.1)
+    async for content in TutorCliPool.iter_logs():
+        try:
+            await websocket.send(content)
+        except asyncio.CancelledError:
+            return
 
 
 def shared_template_context() -> dict[str, t.Any]:
