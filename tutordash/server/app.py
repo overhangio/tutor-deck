@@ -9,9 +9,9 @@ import typing as t
 import aiofiles
 from quart import (
     Quart,
+    make_response,
     render_template,
     request,
-    websocket,
     redirect,
     url_for,
 )
@@ -118,10 +118,7 @@ class TutorCli:
         """
         Sets the stop flag, whic is monitored by all subprocess.Popen commands.
         """
-        app.logger.info(
-            "Stopping Tutor command: %s...",
-            self.command,
-        )
+        app.logger.info("Stopping Tutor command: %s...", self.command)
         self._stop_flag.set()
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
@@ -273,11 +270,9 @@ class TutorCliPool:
         replaced by another one, previous logs are not deleted. New ones are simply
         appended.
         """
-        while True:
-            if cls.INSTANCE:
-                async for log in cls.INSTANCE.iter_logs():
-                    yield log
-            await asyncio.sleep(SHORT_SLEEP_SECONDS)
+        while cls.INSTANCE:
+            async for log in cls.INSTANCE.iter_logs():
+                yield log
 
 
 app = Quart(
@@ -341,27 +336,46 @@ async def tutor_cli() -> WerkzeugResponse:
         # ["config", "printvalue", "POUAC"],
         # ["local", "launch", "--non-interactive"],
     )
-    return redirect(url_for("tutor_logs"))
+    return redirect(url_for("tutor_cli_logs"))
 
 
 @app.post("/tutor/cli/stop")
 async def tutor_cli_stop() -> WerkzeugResponse:
     TutorCliPool.stop()
-    return redirect(url_for("tutor_logs"))
+    return redirect(url_for("tutor_cli_logs"))
 
 
 @app.get("/tutor/logs")
-async def tutor_logs() -> str:
-    return await render_template("tutor_logs.html", **shared_template_context())
+async def tutor_cli_logs() -> str:
+    return await render_template("tutor_cli_logs.html", **shared_template_context())
 
 
-@app.websocket("/tutor/logs/stream")
-async def tutor_logs_stream() -> None:
-    async for content in TutorCliPool.iter_logs():
-        try:
-            await websocket.send(content)
-        except asyncio.CancelledError:
-            return
+@app.get("/tutor/cli/logs/stream")
+async def tutor_cli_logs_stream() -> None:
+    # Websockets were not working for us in dev mode, we were unable to stop the server
+    # as long as there were open connection. We only need single-direction
+    # communication, so we use server-sent events
+    # https://github.com/pallets/quart/issues/333
+    # https://quart.palletsprojects.com/en/latest/how_to_guides/server_sent_events.html
+    async def send_events():
+        while True:
+            # TODO this is again causing the stream to never stop...
+            async for data in TutorCliPool.iter_logs():
+                event = f"data: {data}\nevent: logs\n"
+                # TODO encode one way or another to be able to send EOL characters and other weird chars
+                yield event.encode()
+            await asyncio.sleep(SHORT_SLEEP_SECONDS)
+
+    response = await make_response(
+        send_events(),
+        {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Transfer-Encoding": "chunked",
+        },
+    )
+    response.timeout = None
+    return response
 
 
 def shared_template_context() -> dict[str, t.Any]:

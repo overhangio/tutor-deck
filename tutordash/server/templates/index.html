@@ -17,8 +17,8 @@
     <link href="{{ url_for('static', filename='/css/dash.css') }}" rel="stylesheet">
     <!-- TODO self-host -->
     <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
-    <!-- WS extension https://htmx.org/extensions/ws/ TODO self host -->
-    <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
+    <!-- SSE extension https://htmx.org/extensions/sse/ TODO self host and move to dedicated page-->
+    <script src="https://unpkg.com/htmx-ext-sse@2.2.2/sse.js"></script>
 </head>
 
 <body>
@@ -31,7 +31,7 @@
                 <div class="content">
                     <ul>
                         <li>Configuration</li>
-                        <li><a href="{{ url_for('tutor_logs') }}">Command logs</a></li>
+                        <li><a href="{{ url_for('tutor_cli_logs') }}">Command logs</a></li>
                     </ul>
                 </div>
             </div>

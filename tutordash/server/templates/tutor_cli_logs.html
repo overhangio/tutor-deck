@@ -1,0 +1,22 @@
+{% extends 'index.html' %}
+
+{% block workspace_header %}Tutor command logs{% endblock %}
+
+{% block workspace_content %}
+<pre id="tutor-log" hx-ext="sse" sse-connect="{{ url_for('tutor_cli_logs_stream') }}" sse-swap="logs"></pre>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // TODO fix me
+    htmx.on("htmx:sseBeforeMessage", function(evt) {
+        // Don't swap content, we want to append
+        evt.preventDefault();
+
+        // Note that HTML is automatically escaped
+        const text = document.createTextNode(evt.detail.data);
+        evt.detail.elt.appendChild(text);
+        evt.detail.elt.scrollTop = evt.detail.elt.scrollHeight;
+    });
+</script>
+{% endblock %}
