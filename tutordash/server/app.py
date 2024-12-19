@@ -34,7 +34,7 @@ class TutorProject:
     Provide access to the current Tutor project root and configuration.
     """
 
-    CONFIG: dict[str, t.Any] = {}
+    CONFIG: dict[str, t.Any] = {}  # TODO this attribute is unused. Delete it?
     ROOT: str = ""
 
     @classmethod
@@ -282,7 +282,6 @@ app = Quart(
     static_url_path="/static",
     static_folder="static",
 )
-SHUTDOWN_EVENT = asyncio.Event()
 
 
 def run(root: str, **app_kwargs: t.Any) -> None:
@@ -291,29 +290,8 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     """
     TutorProject.connect(root)
 
-    # Manually shutdown application on SIGINT/SIGTERM
-    # This does not work in development because the signal handler is overridden by app.run().
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
-    # Monitor disconnection
-    # loop.background_tasks.add(task)
-    # app.background_tasks.add(task)
-
-    # import signal
-    # for s in (signal.SIGINT, signal.SIGTERM):
-    #     loop.add_signal_handler(s, shutdown)
-
     # TODO app.run() should be called only in development
-    # app.run(loop=loop, **app_kwargs)
     app.run(**app_kwargs)
-
-
-def shutdown() -> None:
-    """
-    For now, this function is not called anywhere
-    """
-    app.logger.info("Shutdown requested...")
-    SHUTDOWN_EVENT.set()
 
 
 @app.get("/")
@@ -384,12 +362,8 @@ async def tutor_cli_logs_stream() -> ResponseTypes:
     # TODO check that request accepts event stream (see howto)
     async def send_events() -> t.AsyncIterator[bytes]:
         while True:
-            if SHUTDOWN_EVENT.is_set():
-                # TODO explain this
-                break
             # TODO this is again causing the stream to never stop...
             async for data in TutorCliPool.iter_logs():
-                # TODO important encode one way or another to be able to send EOL characters and other weird chars
                 json_data = json.dumps(data)
                 event = f"data: {json_data}\nevent: logs\n\n"
                 yield event.encode()
