@@ -43,13 +43,8 @@
                 <div class="content">
                     <ul>
                         {% for plugin in installed_plugins %}
-                        <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }}</a></li>
+                        <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
                         {% endfor %}
-                        <form action="{{ url_for('tutor_cli') }}" method="POST">
-                            <input type="hidden" name="args[]" value="local">
-                            <input type="hidden" name="args[]" value="launch">
-                            <button type="submit">Apply changes</button>
-                        </form>
                         <form action="{{ url_for('tutor_cli_stop') }}" method="POST">
                             <button type="submit">Stop</button>
                         </form>

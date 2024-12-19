@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import json
 import shlex
 import subprocess
 import tempfile
@@ -16,6 +17,7 @@ from quart import (
     url_for,
 )
 from quart.helpers import WerkzeugResponse
+from quart.typing import ResponseTypes
 
 import tutor.env
 from tutor.exceptions import TutorError
@@ -280,6 +282,7 @@ app = Quart(
     static_url_path="/static",
     static_folder="static",
 )
+SHUTDOWN_EVENT = asyncio.Event()
 
 
 def run(root: str, **app_kwargs: t.Any) -> None:
@@ -287,7 +290,30 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     Bootstrap the Quart app and run it.
     """
     TutorProject.connect(root)
+
+    # Manually shutdown application on SIGINT/SIGTERM
+    # This does not work in development because the signal handler is overridden by app.run().
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
+    # Monitor disconnection
+    # loop.background_tasks.add(task)
+    # app.background_tasks.add(task)
+
+    # import signal
+    # for s in (signal.SIGINT, signal.SIGTERM):
+    #     loop.add_signal_handler(s, shutdown)
+
+    # TODO app.run() should be called only in development
+    # app.run(loop=loop, **app_kwargs)
     app.run(**app_kwargs)
+
+
+def shutdown() -> None:
+    """
+    For now, this function is not called anywhere
+    """
+    app.logger.info("Shutdown requested...")
+    SHUTDOWN_EVENT.set()
 
 
 @app.get("/")
@@ -308,34 +334,19 @@ async def plugin(name: str) -> str:
 
 
 @app.post("/plugin/<name>/toggle")
-async def toggle_plugin(name: str) -> dict[str, str]:
+async def toggle_plugin(name: str) -> WerkzeugResponse:
     # TODO check plugin exists
     form = await request.form
-    enabled = form.get("enabled")
-    if enabled not in ["on", "off"]:
-        # TODO request validation. Can't we validate requests with a proper tool, such
-        # as pydantic or a rest framework?
-        return {}
-
-    # TODO actually toggle plugin
-    app.logger.info("Toggling plugin %s", name)
-
-    return {}
+    enable_plugin = form.get("enabled") == "on"
+    return tutor_cli(["plugins", "enable" if enable_plugin else "disable", name])
 
 
-@app.post("/tutor/cli")
-async def tutor_cli() -> WerkzeugResponse:
+def tutor_cli(command: list[str]) -> WerkzeugResponse:
     # Run command asynchronously
     # if TutorCli.is_thread_alive():
     # TODO return 400 if thread is active
     # TODO parse command from JSON request body
-    TutorCliPool.run_parallel(
-        ["dev", "start"],
-        # ["dev", "dc", "run", "--no-deps", "lms", "bash"],
-        # ["config", "printvalue", "DOCKER_IMAGE_OPENEDX"],
-        # ["config", "printvalue", "POUAC"],
-        # ["local", "launch", "--non-interactive"],
-    )
+    TutorCliPool.run_parallel(command)
     return redirect(url_for("tutor_cli_logs"))
 
 
@@ -351,18 +362,36 @@ async def tutor_cli_logs() -> str:
 
 
 @app.get("/tutor/cli/logs/stream")
-async def tutor_cli_logs_stream() -> None:
-    # Websockets were not working for us in dev mode, we were unable to stop the server
-    # as long as there were open connection. We only need single-direction
-    # communication, so we use server-sent events
-    # https://github.com/pallets/quart/issues/333
-    # https://quart.palletsprojects.com/en/latest/how_to_guides/server_sent_events.html
-    async def send_events():
+async def tutor_cli_logs_stream() -> ResponseTypes:
+    """
+    We only need single-direction communication, so we use server-sent events, and not
+    websockets.
+    https://quart.palletsprojects.com/en/latest/how_to_guides/server_sent_events.html
+
+    Note that server interruption with ctrl+c does not work in Python 3.12 and 3.13
+    because of this bug:
+    https://github.com/pallets/quart/issues/333
+    https://github.com/python/cpython/issues/123720
+
+    Events are sent with the following format:
+
+        data: "json-encoded string..."
+        event: logs
+
+    Data is JSON-encoded such that we can sent newline characters, etc.
+    """
+
+    # TODO check that request accepts event stream (see howto)
+    async def send_events() -> t.AsyncIterator[bytes]:
         while True:
+            if SHUTDOWN_EVENT.is_set():
+                # TODO explain this
+                break
             # TODO this is again causing the stream to never stop...
             async for data in TutorCliPool.iter_logs():
-                event = f"data: {data}\nevent: logs\n"
-                # TODO encode one way or another to be able to send EOL characters and other weird chars
+                # TODO important encode one way or another to be able to send EOL characters and other weird chars
+                json_data = json.dumps(data)
+                event = f"data: {json_data}\nevent: logs\n\n"
                 yield event.encode()
             await asyncio.sleep(SHORT_SLEEP_SECONDS)
 
@@ -374,7 +403,7 @@ async def tutor_cli_logs_stream() -> None:
             "Transfer-Encoding": "chunked",
         },
     )
-    response.timeout = None
+    setattr(response, "timeout", None)
     return response
 
 
@@ -386,4 +415,5 @@ def shared_template_context() -> dict[str, t.Any]:
     """
     return {
         "installed_plugins": sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate())),
+        "enabled_plugins": sorted(set(hooks.Filters.PLUGINS_LOADED.iterate())),
     }

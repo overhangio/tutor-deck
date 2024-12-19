@@ -11,6 +11,8 @@ Installation
 
     pip install git+https://github.com/overhangio/tutor-dash
 
+.. TODO how to package css files?
+
 Usage
 *****
 

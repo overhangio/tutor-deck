@@ -55,7 +55,7 @@ body {
     .workspace {
         flex: 1;
         padding: 20px;
-        overflow: scroll;
+        overflow: hidden;
 
         .header {
             margin-bottom: 16px;
@@ -66,6 +66,14 @@ body {
         .content {
             outline: none;
             min-height: 200px;
+            height: 100%;
+            overflow: hidden;
+            padding-bottom: 20px; // necessary to display the bottom scrollbar
+
+            pre {
+                overflow: scroll;
+                height: calc(100% - 20px); // must match .content padding-bottom to display scrollbar
+            }
         }
     }
 }

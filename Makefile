@@ -6,11 +6,11 @@ BLACK_OPTS = --exclude templates ${SRC_DIRS}
 runserver: ## Run a development server
 	tutor dash run --dev
 
-scss: ## Compile SCSS files
+css: ## Compile SCSS files to CSS
 	sass ${SASS_OPTS} tutordash/server/static/scss/:tutordash/server/static/css/ 
 
-scss-watch: ## Compile SCSS files and watch for changes
-	$(MAKE) scss SASS_OPTS="--watch"
+css-watch: ## Compile SCSS files to CSS and watch for changes
+	$(MAKE) css SASS_OPTS="--watch"
 
 # Warning: These checks are not necessarily run on every PR.
 test: test-lint test-types test-format  # Run some static checks.

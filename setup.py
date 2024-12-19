@@ -6,13 +6,13 @@ from setuptools import find_packages, setup
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 
-def load_readme():
+def load_readme() -> str:
     with io.open(os.path.join(HERE, "README.rst"), "rt", encoding="utf8") as f:
         return f.read()
 
 
-def load_about():
-    about = {}
+def load_about() -> dict[str, str]:
+    about: dict[str, str] = {}
     with io.open(
         os.path.join(HERE, "tutordash", "__about__.py"),
         "rt",
@@ -43,13 +43,13 @@ setup(
     include_package_data=True,
     python_requires=">=3.9",
     install_requires=[
-        "tutor>=18.0.0,<19.0.0",
+        "tutor>=19.0.0,<20.0.0",
         "quart",
         "aiofiles",
     ],
     extras_require={
         "dev": [
-            "tutor[dev]>=18.0.0,<19.0.0",
+            "tutor[dev]>=19.0.0,<20.0.0",
             "quart",
             "aiofiles",
             "types-aiofiles",
