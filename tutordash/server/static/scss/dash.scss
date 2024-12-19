@@ -70,7 +70,7 @@ body {
             overflow: hidden;
             padding-bottom: 20px; // necessary to display the bottom scrollbar
 
-            pre {
+            pre#tutor-logs {
                 overflow: scroll;
                 height: calc(100% - 20px); // must match .content padding-bottom to display scrollbar
             }

@@ -6,4 +6,23 @@
 Enabled: <form method="POST" action="{{ url_for('toggle_plugin', name=plugin_name) }}">
     <input type="checkbox" name="enabled" onchange="this.form.submit()" {% if is_enabled %}checked{% endif %} />
 </form>
+
+{% if is_enabled %}
+<h2>Configuration</h2>
+
+{% if config_unique %}
+<h3>Unique settings</h3>
+{% for key, value in config_unique.items() %}
+<p>{{ key }}: <pre>{{ value }}</pre></p>
+{% endfor %}
+{% endif %}
+
+{% if config_defaults %}
+<h3>Default settings</h3>
+{% for key, value in config_defaults.items() %}
+<p>{{ key }}: <pre>{{ value }}</pre></p>
+{% endfor %}
+{% endif %}
+
+{% endif %}
 {% endblock %}
