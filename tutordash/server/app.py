@@ -25,12 +25,10 @@ app = Quart(
 )
 
 
-def run(root: str, **app_kwargs: t.Any) -> None:
+def run(**app_kwargs: t.Any) -> None:
     """
     Bootstrap the Quart app and run it.
     """
-    tutorclient.Project.connect(root)
-
     # TODO app.run() should be called only in development
     app.run(**app_kwargs)
 

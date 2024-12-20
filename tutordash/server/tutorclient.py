@@ -22,35 +22,6 @@ from . import constants
 logger = logging.getLogger(__name__)
 
 
-class Project:
-    """
-    Provide access to the current Tutor project root and configuration.
-    """
-
-    CONFIG: dict[str, t.Any] = {}  # TODO this attribute is unused. Delete it?
-    ROOT: str = ""
-
-    @classmethod
-    def connect(cls, root: str) -> None:
-        """
-        Call whenever we are ready to connect to the Tutor hooks API.
-        """
-        if not cls.ROOT:
-            # Hook up TutorProject with Tutor hooks -- just once
-            hooks.Actions.PROJECT_ROOT_READY.add()(cls._dash_on_project_root_ready)
-            hooks.Actions.CONFIG_LOADED.add()(cls._dash_on_config_loaded)
-        hooks.Actions.CORE_READY.do()  # discover plugins
-        hooks.Actions.PROJECT_ROOT_READY.do(root)
-
-    @classmethod
-    def _dash_on_project_root_ready(cls, root: str) -> None:
-        cls.ROOT = root
-
-    @classmethod
-    def _dash_on_config_loaded(cls, config: Config) -> None:
-        cls.CONFIG = config
-
-
 class Cli:
     """
     Run Tutor commands and capture the output in a file.
@@ -275,6 +246,16 @@ class CliPool:
 
 class Client:
 
+    # Full user config, updated whenever it's loaded in tutor.
+    CONFIG: Config = {}
+
+    @classmethod
+    def update_config(cls, config: Config) -> None:
+        """
+        Store config on load.
+        """
+        cls.CONFIG = config
+
     @classmethod
     def installed_plugins(cls) -> list[str]:
         return sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate()))
@@ -288,14 +269,7 @@ class Client:
         plugin_config = hooks.Filters.CONFIG_UNIQUE.iterate_from_context(
             hooks.Contexts.app(name).name
         )
-        # TODO IMPORTANT enable/disable/enable does not work because of the Python
-        # module import cache. After a plugin module is imported, the plugin is
-        # disabled, and when we try to enable it again the module is not imported,
-        # because of the import cache.
-        user_config = {
-            key: Project.CONFIG.get(key, value) for key, value in plugin_config
-        }
-        return user_config
+        return {key: cls.CONFIG.get(key, value) for key, value in plugin_config}
 
     @classmethod
     def plugin_config_defaults(cls, name: str) -> Config:
@@ -303,3 +277,6 @@ class Client:
             hooks.Contexts.app(name).name
         )
         return dict(config)
+
+
+hooks.Actions.CONFIG_LOADED.add()(Client.update_config)
