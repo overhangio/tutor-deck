@@ -2,14 +2,22 @@
     {% for key, value in config.items() %}
     <div class="item">
         <span>{{ key }}:</span>
-        {% if value is boolean %}
-        <input type="checkbox" name="{{ key }}" {% if value %}checked{% endif %} />
-        {% else %}
-        <input type="text" value="{{ value }}" size="50"/>
-        {% endif %}
+        <form
+            action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
+            method="POST"
+            oninput="this.querySelector('button[type=submit]').disabled = false">
+            {% if value is boolean %}
+            <input type="checkbox" name="value" {% if value %}checked{% endif %} />
+            {% else %}
+            <input type="text" name="value" value="{{ value }}" size="50"/>
+            {% endif %}
+            <button type="submit" disabled>update</button>
+        </form>
 
         {% if key in user_config %}
-        <form method="POST"><input type="button" value="unset" /></form>
+        <form action="{{ url_for('config_unset', name=key, next=url_for('plugin', name=plugin_name)) }}" method="POST">
+            <button type="submit">unset</button>
+        </form>
         {% endif %}
     </div>
     {% endfor %}

@@ -299,8 +299,17 @@ class Client:
 
     @classmethod
     def plugin_config_defaults(cls, name: str) -> Config:
-        config = hooks.Filters.CONFIG_DEFAULTS.iterate_from_context(
-            hooks.Contexts.app(name).name
+        """
+        Return the plugin default settings, with values potentially overridden in the
+        user configuration.
+        """
+        config_defaults = dict(
+            hooks.Filters.CONFIG_DEFAULTS.iterate_from_context(
+                hooks.Contexts.app(name).name
+            )
         )
+        user_config = Project.get_user_config()
         # TODO render default config values
-        return dict(config)
+        return {
+            key: user_config.get(key, value) for key, value in config_defaults.items()
+        }

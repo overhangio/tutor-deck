@@ -3,7 +3,7 @@
 {% block workspace_header %}Tutor command logs{% endblock %}
 
 {% block workspace_content %}
-<pre id="tutor-log" hx-ext="sse" sse-connect="{{ url_for('tutor_cli_logs_stream') }}" sse-swap="logs"></pre>
+<pre id="tutor-log" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
 {% endblock %}
 
 {% block scripts %}

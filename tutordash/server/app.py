@@ -66,22 +66,38 @@ async def toggle_plugin(name: str) -> WerkzeugResponse:
     return redirect(url_for("plugin", name=name))
 
 
+@app.post("/config/<name>/set")
+async def config_set(name: str) -> WerkzeugResponse:
+    form = await request.form
+    value = form.get("value", "")
+    tutorclient.CliPool.run_sequential(["config", "save", "--set", f"{name}={value}"])
+    # TODO error management
+    return redirect(request.args.get("next", "/"))
+
+
+@app.post("/config/<name>/unset")
+async def config_unset(name: str) -> WerkzeugResponse:
+    tutorclient.CliPool.run_sequential(["config", "save", f"--unset={name}"])
+    # TODO error management
+    return redirect(request.args.get("next", "/"))
+
+
 # def tutor_cli(command: list[str]) -> WerkzeugResponse:
 #     # Run command asynchronously
 #     # if TutorCli.is_thread_alive():
 #     # TODO return 400 if thread is active
 #     # TODO parse command from JSON request body
 #     tutorclient.CliPool.run_parallel(app, command)
-#     return redirect(url_for("tutor_cli_logs"))
+#     return redirect(url_for("cli_logs"))
 
 
-@app.get("/tutor/cli/logs")
-async def tutor_cli_logs() -> str:
-    return await render_template("tutor_cli_logs.html", **shared_template_context())
+@app.get("/cli/logs")
+async def cli_logs() -> str:
+    return await render_template("cli_logs.html", **shared_template_context())
 
 
-@app.get("/tutor/cli/logs/stream")
-async def tutor_cli_logs_stream() -> ResponseTypes:
+@app.get("/cli/logs/stream")
+async def cli_logs_stream() -> ResponseTypes:
     """
     We only need single-direction communication, so we use server-sent events, and not
     websockets.
@@ -122,10 +138,10 @@ async def tutor_cli_logs_stream() -> ResponseTypes:
     return response
 
 
-@app.post("/tutor/cli/stop")
-async def tutor_cli_stop() -> WerkzeugResponse:
+@app.post("/cli/stop")
+async def cli_stop() -> WerkzeugResponse:
     tutorclient.CliPool.stop()
-    return redirect(url_for("tutor_cli_logs"))
+    return redirect(url_for("cli_logs"))
 
 
 def shared_template_context() -> dict[str, t.Any]:

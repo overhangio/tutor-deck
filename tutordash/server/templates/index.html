@@ -30,7 +30,7 @@
                 <div class="content">
                     <ul>
                         <li>Configuration</li>
-                        <li><a href="{{ url_for('tutor_cli_logs') }}">Command logs</a></li>
+                        <li><a href="{{ url_for('cli_logs') }}">Command logs</a></li>
                     </ul>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                         {% for plugin in installed_plugins %}
                         <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
                         {% endfor %}
-                        <form action="{{ url_for('tutor_cli_stop') }}" method="POST">
+                        <form action="{{ url_for('cli_stop') }}" method="POST">
                             <button type="submit">Stop</button>
                         </form>
                     </ul>
