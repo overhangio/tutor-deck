@@ -74,6 +74,12 @@ body {
                 overflow: scroll;
                 height: calc(100% - 20px); // must match .content padding-bottom to display scrollbar
             }
+
+            .config {
+                .item form {
+                    display: inline-block;
+                }
+            }
         }
     }
 }

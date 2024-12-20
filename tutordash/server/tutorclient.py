@@ -15,11 +15,47 @@ from tutor.exceptions import TutorError
 from tutor import fmt, hooks
 from tutor.types import Config
 import tutor.commands.cli
+import tutor.config
 import tutor.utils
 
 from . import constants
 
 logger = logging.getLogger(__name__)
+
+
+class Project:
+    """
+    Provide access to the current Tutor project root and configuration.
+    """
+
+    # Project root
+    ROOT: str = ""
+
+    # Full configuration
+    CONFIG: dict[str, t.Any] = {}
+
+    _HOOKED: bool = False
+
+    @classmethod
+    def connect(cls, root: str) -> None:
+        """
+        Call whenever we are ready to connect to the Tutor hooks API.
+        """
+        if not cls._HOOKED:
+            cls._HOOKED = True
+            hooks.Actions.CONFIG_LOADED.add()(cls._update_config)
+        cls.ROOT = root
+
+    @classmethod
+    def _update_config(cls, config: Config) -> None:
+        cls.CONFIG = config
+
+    @classmethod
+    def get_user_config(cls) -> Config:
+        """
+        TODO load config dynamically from root anytime it is changed on disk? Maybe take the chance to clear sys.modules cache on reload?
+        """
+        return tutor.config.get_user(cls.ROOT)
 
 
 class Cli:
@@ -246,16 +282,6 @@ class CliPool:
 
 class Client:
 
-    # Full user config, updated whenever it's loaded in tutor.
-    CONFIG: Config = {}
-
-    @classmethod
-    def update_config(cls, config: Config) -> None:
-        """
-        Store config on load.
-        """
-        cls.CONFIG = config
-
     @classmethod
     def installed_plugins(cls) -> list[str]:
         return sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate()))
@@ -269,14 +295,12 @@ class Client:
         plugin_config = hooks.Filters.CONFIG_UNIQUE.iterate_from_context(
             hooks.Contexts.app(name).name
         )
-        return {key: cls.CONFIG.get(key, value) for key, value in plugin_config}
+        return {key: Project.CONFIG.get(key, value) for key, value in plugin_config}
 
     @classmethod
     def plugin_config_defaults(cls, name: str) -> Config:
         config = hooks.Filters.CONFIG_DEFAULTS.iterate_from_context(
             hooks.Contexts.app(name).name
         )
+        # TODO render default config values
         return dict(config)
-
-
-hooks.Actions.CONFIG_LOADED.add()(Client.update_config)

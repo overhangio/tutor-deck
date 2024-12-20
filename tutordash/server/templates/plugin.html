@@ -10,18 +10,18 @@ Enabled: <form method="POST" action="{{ url_for('toggle_plugin', name=plugin_nam
 {% if is_enabled %}
 <h2>Configuration</h2>
 
-{% if config_unique %}
 <h3>Unique settings</h3>
-{% for key, value in config_unique.items() %}
-<p>{{ key }}: <pre>{{ value }}</pre></p>
-{% endfor %}
+{% if plugin_config_unique %}
+{% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
+{% else %}
+<p>None defined</p>
 {% endif %}
 
-{% if config_defaults %}
 <h3>Default settings</h3>
-{% for key, value in config_defaults.items() %}
-<p>{{ key }}: <pre>{{ value }}</pre></p>
-{% endfor %}
+{% if plugin_config_defaults %}
+{% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
+{% else %}
+<p>None defined</p>
 {% endif %}
 
 {% endif %}

@@ -25,10 +25,12 @@ app = Quart(
 )
 
 
-def run(**app_kwargs: t.Any) -> None:
+def run(root: str, **app_kwargs: t.Any) -> None:
     """
     Bootstrap the Quart app and run it.
     """
+    tutorclient.Project.connect(root)
+
     # TODO app.run() should be called only in development
     app.run(**app_kwargs)
 
@@ -46,8 +48,9 @@ async def plugin(name: str) -> str:
         "plugin.html",
         plugin_name=name,
         is_enabled=is_enabled,
-        config_unique=tutorclient.Client.plugin_config_unique(name),
-        config_defaults=tutorclient.Client.plugin_config_defaults(name),
+        plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
+        plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
+        user_config=tutorclient.Project.get_user_config(),
         **shared_template_context(),
     )
 
