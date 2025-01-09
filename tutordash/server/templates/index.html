@@ -44,6 +44,9 @@
                         {% for plugin in installed_plugins %}
                         <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
                         {% endfor %}
+                        <form action="{{ url_for('cli_local_launch') }}" method="POST">
+                            <button type="submit">Launch (local)</button>
+                        </form>
                         <form action="{{ url_for('cli_stop') }}" method="POST">
                             <button type="submit">Stop</button>
                         </form>

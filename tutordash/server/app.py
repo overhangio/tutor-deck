@@ -100,6 +100,12 @@ async def config_unset(name: str) -> WerkzeugResponse:
 #     return redirect(url_for("cli_logs"))
 
 
+@app.post("/cli/local/launch")
+async def cli_local_launch() -> WerkzeugResponse:
+    tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
+    return redirect(url_for("cli_logs"))
+
+
 @app.get("/cli/logs")
 async def cli_logs() -> str:
     return await render_template("cli_logs.html", **shared_template_context())
