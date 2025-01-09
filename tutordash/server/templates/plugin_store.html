@@ -1,0 +1,18 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}Plugin store{% endblock %}
+
+{% block workspace_content %}
+<ul>
+    {% for plugin in plugins %}
+    <li>{{ plugin.name }}: {{ plugin.short_description }}
+        <!-- TODO convert markdown to html -->
+        <p>{{ plugin.description }}</p>
+        <ul>
+            <li>url: {{ plugin.url }}</li>
+            <li>index: {{ plugin.index }}</li>
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

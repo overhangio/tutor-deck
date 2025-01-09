@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import logging
+import os
 import shlex
 import subprocess
 import tempfile
@@ -17,6 +18,7 @@ from tutor.types import Config
 import tutor.commands.cli
 import tutor.config
 import tutor.utils
+import tutor.plugins.indexes
 
 from . import constants
 
@@ -31,24 +33,17 @@ class Project:
     # Project root
     ROOT: str = ""
 
-    # Full configuration
-    CONFIG: dict[str, t.Any] = {}
-
-    _HOOKED: bool = False
-
     @classmethod
     def connect(cls, root: str) -> None:
         """
         Call whenever we are ready to connect to the Tutor hooks API.
         """
-        if not cls._HOOKED:
-            cls._HOOKED = True
-            hooks.Actions.CONFIG_LOADED.add()(cls._update_config)
         cls.ROOT = root
 
     @classmethod
-    def _update_config(cls, config: Config) -> None:
-        cls.CONFIG = config
+    def get_config(cls) -> Config:
+        # TODO cache?
+        return tutor.config.load_full(cls.ROOT)
 
     @classmethod
     def get_user_config(cls) -> Config:
@@ -283,6 +278,12 @@ class CliPool:
 class Client:
 
     @classmethod
+    def plugins_in_store(cls) -> list[tutor.plugins.indexes.IndexEntry]:
+        if not os.path.exists(tutor.plugins.indexes.Indexes.CACHE_PATH):
+            CliPool.run_sequential(["plugins", "update"])
+        return list(tutor.plugins.indexes.iter_cache_entries())
+
+    @classmethod
     def installed_plugins(cls) -> list[str]:
         return sorted(set(hooks.Filters.PLUGINS_INSTALLED.iterate()))
 
@@ -295,7 +296,8 @@ class Client:
         plugin_config = hooks.Filters.CONFIG_UNIQUE.iterate_from_context(
             hooks.Contexts.app(name).name
         )
-        return {key: Project.CONFIG.get(key, value) for key, value in plugin_config}
+        config = Project.get_config()
+        return {key: config.get(key, value) for key, value in plugin_config}
 
     @classmethod
     def plugin_config_defaults(cls, name: str) -> Config:

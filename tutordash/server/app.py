@@ -40,6 +40,15 @@ async def home() -> str:
     return await render_template("index.html", **shared_template_context())
 
 
+@app.get("/plugin/store")
+async def plugin_store() -> str:
+    return await render_template(
+        "plugin_store.html",
+        plugins=tutorclient.Client.plugins_in_store(),
+        **shared_template_context(),
+    )
+
+
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
