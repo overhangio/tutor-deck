@@ -1,5 +1,7 @@
 import asyncio
 import json
+import logging
+import sys
 import typing as t
 
 
@@ -30,6 +32,13 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     Bootstrap the Quart app and run it.
     """
     tutorclient.Project.connect(root)
+
+    # Configure logging
+    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    tutorclient.logger.addHandler(handler)
+    tutorclient.logger.setLevel(logging.INFO)
 
     # TODO app.run() should be called only in development
     app.run(**app_kwargs)

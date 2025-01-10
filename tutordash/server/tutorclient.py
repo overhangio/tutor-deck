@@ -75,6 +75,10 @@ class Cli:
         )
         self._stop_flag = threading.Event()
 
+    def log_to_file(self, content: str) -> None:
+        with open(self.log_path, mode="ab") as f:
+            f.write(content.encode())
+
     @property
     def log_path(self) -> str:
         """
@@ -105,14 +109,13 @@ class Cli:
                 tutor.commands.cli.cli(self.args)
             except TutorError as e:
                 # This happens for incorrect commands
-                self.log_file.write(e.args[0].encode())
+                self.log_to_file(e.args[0])
             except SystemExit:
                 pass
-            self.log_file.flush()
 
     def stop(self) -> None:
         """
-        Sets the stop flag, whic is monitored by all subprocess.Popen commands.
+        Sets the stop flag, which is monitored by all subprocess.Popen commands.
         """
         logger.info("Stopping Tutor command: %s...", self.command)
         self._stop_flag.set()
@@ -161,8 +164,7 @@ class Cli:
         """
         Mock click.echo to write to log file
         """
-        self.log_file.write(text.encode())
-        self.log_file.write(b"\n")
+        self.log_to_file(f"{text}\n")
 
     def _mock_click_style(self, text: str, **_kwargs: t.Any) -> str:
         """
