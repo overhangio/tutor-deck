@@ -3,7 +3,7 @@
 {% block workspace_header %}{{ plugin_name }}{% endblock %}
 
 {% block workspace_content %}
-Enabled: <form method="POST" action="{{ url_for('toggle_plugin', name=plugin_name) }}">
+Enabled: <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
     <input type="checkbox" name="enabled" onchange="this.form.submit()" {% if is_enabled %}checked{% endif %} />
 </form>
 

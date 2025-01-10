@@ -3,8 +3,17 @@
 {% block workspace_header %}Plugin store{% endblock %}
 
 {% block workspace_content %}
+<form action="{{ url_for('plugins_update') }}" method="POST">
+    <button type="submit">Refresh</button>
+</form>
+
 {% for plugin in plugins %}
 <h2>{{ plugin.name }}</h2>
+{% if plugin.is_installed %}
+<p>Installed: ✅ <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST"><button type="submit">Upgrade</button></form></p>
+{% else %}
+<p><form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST"><button type="submit">Install</button></form></p>
+{% endif %}
 <p{{ plugin.short_description }}></p>
 <!-- TODO is that actually safe? -->
 <p>{{ plugin.description|safe }}</p>

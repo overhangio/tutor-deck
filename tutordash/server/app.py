@@ -51,12 +51,14 @@ async def home() -> str:
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
+    installed_plugins = tutorclient.Client.installed_plugins()
     plugins: list[dict[str, str]] = [
         {
             "name": p.name,
             "url": p.url,
             "index": p.index,
             "description": markdown(p.description),
+            "is_installed": p.name in installed_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
     ]
@@ -84,7 +86,7 @@ async def plugin(name: str) -> str:
 
 
 @app.post("/plugin/<name>/toggle")
-async def toggle_plugin(name: str) -> WerkzeugResponse:
+async def plugin_toggle(name: str) -> WerkzeugResponse:
     # TODO check plugin exists
     form = await request.form
     enable_plugin = form.get("enabled") == "on"
@@ -93,6 +95,22 @@ async def toggle_plugin(name: str) -> WerkzeugResponse:
     # TODO error management
     return redirect(url_for("plugin", name=name))
 
+
+@app.post("/plugin/<name>/install")
+async def plugin_install(name: str) -> WerkzeugResponse:
+    tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
+    return redirect(url_for("cli_logs"))
+
+
+@app.post("/plugin/<name>/upgrade")
+async def plugin_upgrade(name: str) -> WerkzeugResponse:
+    tutorclient.CliPool.run_parallel(app, ["plugins", "upgrade", name])
+    return redirect(url_for("cli_logs"))
+
+@app.post("/plugins/update")
+async def plugins_update() -> WerkzeugResponse:
+    tutorclient.CliPool.run_parallel(app, ["plugins", "update"])
+    return redirect(url_for("cli_logs"))
 
 @app.post("/config/<name>/set")
 async def config_set(name: str) -> WerkzeugResponse:
