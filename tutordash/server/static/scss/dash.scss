@@ -65,11 +65,10 @@ body {
             outline: none;
             min-height: 200px;
             height: 100%;
-            overflow: hidden;
+            overflow: scroll;
             padding-bottom: 20px; // necessary to display the bottom scrollbar
 
             pre#tutor-logs {
-                overflow: scroll;
                 height: calc(100% - 20px); // must match .content padding-bottom to display scrollbar
             }
 
@@ -80,14 +79,4 @@ body {
             }
         }
     }
-}
-
-.status-bar {
-    height: 24px;
-    border-top: 1px solid #363636;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    font-size: 12px;
-    color: #888;
 }

@@ -3,16 +3,14 @@
 {% block workspace_header %}Plugin store{% endblock %}
 
 {% block workspace_content %}
+{% for plugin in plugins %}
+<h2>{{ plugin.name }}</h2>
+<p{{ plugin.short_description }}></p>
+<!-- TODO is that actually safe? -->
+<p>{{ plugin.description|safe }}</p>
 <ul>
-    {% for plugin in plugins %}
-    <li>{{ plugin.name }}: {{ plugin.short_description }}
-        <!-- TODO convert markdown to html -->
-        <p>{{ plugin.description }}</p>
-        <ul>
-            <li>url: {{ plugin.url }}</li>
-            <li>index: {{ plugin.index }}</li>
-        </ul>
-    </li>
-    {% endfor %}
+    <li>url: {{ plugin.url }}</li>
+    <li>index: {{ plugin.index }}</li>
 </ul>
+{% endfor %}
 {% endblock %}

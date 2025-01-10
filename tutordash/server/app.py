@@ -4,7 +4,7 @@ import logging
 import sys
 import typing as t
 
-
+from markdown import markdown
 from quart import (
     Quart,
     make_response,
@@ -51,9 +51,19 @@ async def home() -> str:
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
+    plugins: list[dict[str, str]] = [
+        {
+            "name": p.name,
+            "url": p.url,
+            "index": p.index,
+            "description": markdown(p.description),
+        }
+        for p in tutorclient.Client.plugins_in_store()
+    ]
+
     return await render_template(
         "plugin_store.html",
-        plugins=tutorclient.Client.plugins_in_store(),
+        plugins=plugins,
         **shared_template_context(),
     )
 

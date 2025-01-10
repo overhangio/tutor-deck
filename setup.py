@@ -46,6 +46,7 @@ setup(
         "tutor>=19.0.0,<20.0.0",
         "quart",
         "aiofiles",
+        "markdown",
     ],
     extras_require={
         "dev": [
