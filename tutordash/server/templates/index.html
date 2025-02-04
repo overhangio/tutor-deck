@@ -10,6 +10,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/img/favicon.png') }}">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
     <!-- CSS -->
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
     <!-- <link rel="stylesheet" href="css/styles.css"> -->
@@ -25,31 +26,24 @@
         <div class="sidebar">
             <div class="section">
                 <div class="header">
-                    Administration
+                    <img src="{{ url_for('static', filename='/img/Edly Red Icon.svg') }}" height="40rem"/>
+                    <span>Edly</span>
                 </div>
                 <div class="content">
                     <ul>
-                        <li><a href="{{ url_for('plugin_store') }}">Plugin store</a></li>
-                        <li><a href="{{ url_for('cli_logs') }}">Command logs</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="header">
-                    Plugins
-                </div>
-                <div class="content">
-                    <ul>
-                        {% for plugin in installed_plugins %}
-                        <li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
-                        {% endfor %}
-                        <form action="{{ url_for('cli_local_launch') }}" method="POST">
-                            <button type="submit">Launch (local)</button>
-                        </form>
-                        <form action="{{ url_for('cli_stop') }}" method="POST">
-                            <button type="submit">Stop</button>
-                        </form>
+                        <a href="{{ url_for('plugin_store') }}">
+                            <li class="sidebar-tab">
+                                <img class="tab-logo" src="{{ url_for('static', filename='/img/shopping-bag.svg') }}" height="20rem"/>
+                                <span>Plugin Marketplace</span>
+                            </li>
+                        </a>
+                        <p></p>
+                        <a href="{{ url_for('installed_plugins') }}">
+                            <li class="sidebar-tab">
+                                <img class="tab-logo" src="{{ url_for('static', filename='/img/stack.svg') }}" height="25rem"/>
+                                <span>My Plugins</span>
+                            </li>
+                        </a>
                     </ul>
                 </div>
             </div>
@@ -64,7 +58,7 @@
             </div>
         </div>
     </div>
-
+    <script src="{{ url_for('static', filename='/js/dash.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 

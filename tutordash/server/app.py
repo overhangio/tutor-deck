@@ -70,6 +70,15 @@ async def plugin_store() -> str:
     )
 
 
+@app.get("/plugin/installed")
+async def installed_plugins() -> str:
+    return await render_template(
+        "installed_plugins.html",
+        # plugins=plugins,
+        **shared_template_context(),
+    )
+
+
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
