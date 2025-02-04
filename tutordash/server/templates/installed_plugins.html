@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}My Plugins{% endblock %}
+
+{% block workspace_content %}
+<form action="{{ url_for('plugins_update') }}" method="POST">
+    <button type="submit">Refresh</button>
+</form>
+
+{% for plugin in installed_plugins %}
+<li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
+{% endfor %}
+{% endblock %}
