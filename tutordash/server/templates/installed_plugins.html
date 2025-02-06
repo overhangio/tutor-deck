@@ -1,13 +1,43 @@
 {% extends "index.html" %}
 
-{% block workspace_header %}My Plugins{% endblock %}
+{% block workspace_header %}
+<div>
+    <div class="title">My Plugins</div>
+    <div class="description">View all your installed plugins in one place.</div>
+</div>
+<div class="local-launch-button">
+    <form action="{{ url_for('plugins_update') }}" method="POST">
+        <button type="submit">Local Launch</button>
+    </form>
+</div>
+{% endblock %}
 
 {% block workspace_content %}
-<form action="{{ url_for('plugins_update') }}" method="POST">
+<div class="search-row">
+    <div class="search-container">
+        <input type="text" class="form-control search-input" placeholder="Search">
+        <i class="fas fa-search search-icon"></i>
+    </div>
+</div>
+<!-- <form action="{{ url_for('plugins_update') }}" method="POST">
     <button type="submit">Refresh</button>
-</form>
+</form> -->
 
-{% for plugin in installed_plugins %}
-<li><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }} {% if plugin in enabled_plugins %} ✅{% endif %}</a></li>
-{% endfor %}
+<div class="my-plugins-list">
+    {% for plugin in installed_plugins %}
+    <div>
+        <li>
+            <a href="{{ url_for('plugin', name=plugin) }}">{{ plugin }}</a>
+            <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
+                {% if plugin in enabled_plugins %} 
+                    <input class="form-check-input" id="flexSwitchCheckChecked" type="checkbox" onchange="this.form.submit()" checked {% if is_enabled %}checked{% endif %} />
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Default switch checkbox input</label>
+                {% else %}
+                <!-- <input class="form-check-input" id="flexSwitchCheckChecked" type="checkbox" onchange="this.form.submit()" checked /> -->
+                {% endif %}
+            </form>
+        </li>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
