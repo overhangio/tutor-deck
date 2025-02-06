@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}
+<div class="info-container">
+    <div>
+        <div class="page-title">{% block page_title %}{% endblock %}</div>
+        <div class="page-description">{% block page_description %}{% endblock %}</div>
+    </div>
+    <div>
+        <div>{% block page_button %}{% endblock %}</div>
+    </div>
+</div>
+<div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" class="form-control search-input" placeholder="Search...">
+</div>
+{% endblock %}
