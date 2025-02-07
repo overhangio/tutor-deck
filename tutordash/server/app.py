@@ -72,9 +72,21 @@ async def plugin_store() -> str:
 
 @app.get("/plugin/installed")
 async def installed_plugins() -> str:
+    installed_plugins = tutorclient.Client.installed_plugins()
+    enabled_plugins = tutorclient.Client.enabled_plugins()
+    plugins: list[dict[str, str]] = [
+        {
+            "name": p.name,
+            "url": p.url,
+            "index": p.index,
+            "description": markdown(p.description),
+            "is_enabled": p.name in enabled_plugins,
+        }
+        for p in tutorclient.Client.plugins_in_store() if p.name in installed_plugins
+    ]
     return await render_template(
         "installed_plugins.html",
-        # plugins=plugins,
+        plugins=plugins,
         **shared_template_context(),
     )
 
