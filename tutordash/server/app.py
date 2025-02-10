@@ -161,9 +161,7 @@ async def config_unset(name: str) -> WerkzeugResponse:
 
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
-    breakpoint()
-    # TODO uncomment in production
-    # tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
+    tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
     return redirect(url_for("cli_logs"))
 
 
