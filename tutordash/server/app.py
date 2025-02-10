@@ -79,6 +79,7 @@ async def installed_plugins() -> str:
             "name": p.name,
             "url": p.url,
             "index": p.index,
+            "author": p.author.split('<')[0].strip(),
             "description": markdown(p.description),
             "is_enabled": p.name in enabled_plugins,
         }
@@ -110,7 +111,7 @@ async def plugin(name: str) -> str:
 async def plugin_toggle(name: str) -> WerkzeugResponse:
     # TODO check plugin exists
     form = await request.form
-    enable_plugin = form.get("enabled") == "on"
+    enable_plugin = form.get("checked") == "on"
     command = ["plugins", "enable" if enable_plugin else "disable", name]
     tutorclient.CliPool.run_sequential(command)
     # TODO error management
@@ -160,7 +161,9 @@ async def config_unset(name: str) -> WerkzeugResponse:
 
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
-    tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
+    breakpoint()
+    # TODO uncomment in production
+    # tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
     return redirect(url_for("cli_logs"))
 
 

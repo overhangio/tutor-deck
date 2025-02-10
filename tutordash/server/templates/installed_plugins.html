@@ -3,8 +3,21 @@
 {% block page_title %}Plugin Marketplace{% endblock %}
 {% block page_description %}View and install available plugins.{% endblock %}
 {% block page_button %}
-<form action="{{ url_for('plugins_update') }}" method="POST">
-    <button class="btn btn-primary" type="submit">Local Launch</button>
+<button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">Local Launch</button>
+{% endblock %}
+{% block model_icon %}
+<img src="{{ url_for('static', filename='/img/Featured icon.svg') }}" alt=""> 
+{% endblock %}
+{% block modal_title %}
+Run local launch for all plugins?
+{% endblock %}
+{% block modal_description %}
+Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.
+{% endblock %}
+{% block modal_footer %}
+<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Not Now</button>
+<form method="POST" action="{{ url_for('cli_local_launch')}}">
+    <button type="submit" class="btn btn-primary">Run Local Launch</button>
 </form>
 {% endblock %}
 
@@ -12,19 +25,14 @@
 <div class="installed-plugins-list">
     {% for plugin in plugins %}
     <div class="installed-plugin">
-        <div>
-            <div><a href="{{ url_for('plugin', name=plugin) }}">{{ plugin.name }}</a></div>
-            <div>Edly</div>
-            <div>{{ plugin.description|safe }}</div>
+        <div class="details">
+            <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
+            <div class="author">{{ plugin.author }}</div>
+            <div class="description">{{ plugin.description|safe }}</div>
         </div>
-        <div>
-            <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
-                {% if plugin in enabled_plugins %} 
-                    <input class="form-check-input" id="flexSwitchCheckChecked" type="checkbox" onchange="this.form.submit()" checked {% if is_enabled %}checked{% endif %} />
-                    <label class="form-check-label" for="flexSwitchCheckDefault">Default switch checkbox input</label>
-                {% else %}
-                <!-- <input class="form-check-input" id="flexSwitchCheckChecked" type="checkbox" onchange="this.form.submit()" checked /> -->
-                {% endif %}
+        <div class="form-check form-switch">
+            <form method="POST" action="{{ url_for('plugin_toggle', name=plugin.name) }}">
+                <input type="checkbox" name="checked" class="form-check-input" role="switch" onchange="this.form.submit()" {% if plugin.is_enabled %} id="flexSwitchCheckDefault" checked {% else %} id="flexSwitchCheckChecked" {% endif %} />
             </form>
         </div>
     </div>
