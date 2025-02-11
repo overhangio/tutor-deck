@@ -39,3 +39,10 @@ Running local launch will allow all changes to plugins to take effect. This coul
     {% endfor %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('my-plugins').classList.toggle('sidebar-tab-selected');
+    document.querySelectorAll('my-plugins-logo').classList.toggle('sidebar-tab-logo-selected');
+</script>
+{% endblock %}
