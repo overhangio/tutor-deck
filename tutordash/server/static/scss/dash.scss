@@ -1,82 +1,227 @@
+$edly-logo-red: #DC1F26;
+$dark-gray: #4a4a4a;
+$gray: #535862;
+$light-gray: #888;
+$black: #181D27;
+$white: #e6f3ff;
+$blue: #1570EF;
+$light-blue: #2E90FA;
+$font-family_1: Arial;
+
 * {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
-
+html {
+	height: 100%;
+	margin: 0;
+}
 body {
-    font-family: Roboto, sans-serif;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+	height: 100%;
+	margin: 0;
+	font-family: $font-family_1;
+	height: 100vh;
+}
+.main-container {
+	display: flex;
+	.sidebar {
+		flex: 0 0 19em;
+		border-right: 1px solid #c4c4c4;
+		box-shadow: 2px 0px #e3e3e3;
+		display: flex;
+		flex-direction: column;
+		height: 55em;
+		.section {
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			height: 100%;
+			.header {
+				flex: 0 0 6em;
+				border-bottom: 1px solid #c4c4c4;
+				display: flex;
+				align-items: center;
+				.image {
+					margin-left: 2em;
+					width: 2em;
+					img {
+						width: 100%;
+						height: auto;
+					}
+				}
+				.text {
+					font-size: 2rem;
+					color: $edly-logo-red;
+					font-weight: bold;
+					margin-left: 0.25em;
+				}
+			}
+			.content {
+				display: flex;
+				flex-direction: column;
+				div {
+					flex: 0 0 8em;
+					display: flex;
+					flex-direction: column;
+					justify-content: space-evenly;
+					margin-top: 1em;
+					a {
+						list-style: none;
+						text-decoration: none;
+						color: $dark-gray;
+						font-size: 16px;
+						font-weight: 600;
+						margin: 0em 1em;
+						border-radius: 1em;
+						&:hover {
+							background-color: $white;
+						}
+						li {
+							padding: 0.5em 1em;
+							span {
+								margin-left: 0.5em;
+							}
+                            .sidebar-tab-logo-selected {
+                                filter: invert(39%) sepia(98%) saturate(3884%) hue-rotate(205deg) brightness(95%) contrast(96%);
+                            }
+						}
+
+                        .sidebar-tab-selected {
+                            color: $blue;
+                            background-color: $white;
+                            border-radius: inherit;
+                        }
+					}
+				}
+			}
+		}
+	}
+	.workspace {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+		.page-title {
+			font-size: 30px;
+			font-weight: 600;
+		}
+		.page-description {
+			font-size: 16px;
+			color: $gray;
+		}
+		.header {
+			display: flex;
+			flex-direction: column;
+			margin: 2em;
+			.info-container {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				div {
+					display: flex;
+					flex-direction: column;
+				}
+				.launch-button {
+					display: flex;
+					justify-content: center;
+					button {
+						width: 9em;
+						height: 2.5em;
+						background-color: $light-blue;
+					}
+				}
+			}
+			.search-container {
+				display: flex;
+				justify-content: flex-end;
+				align-items: center;
+				margin-top: 3em;
+
+                .search-input {
+                    height: 3em;
+                    width: 20em;
+                    border-radius: 10px;
+                    padding-left: 2.5em;
+                    border: 1px solid #c4c4c4;
+                }
+
+                img {
+                    position: relative;
+                    left: 2em;
+                }
+			}
+		}
+		.content {
+			flex-grow: 1;
+			margin: 0em 2em 2em 2em;
+			.installed-plugins-list {
+				border: 1px solid #c4c4c4;
+				border-radius: 1em;
+				display: flex;
+				flex-direction: column;
+				.installed-plugin {
+					display: flex;
+					justify-content: space-between;
+					padding: 1em 2em;
+					border-bottom: 1px solid #c4c4c4;
+					&:last-child {
+						border-bottom: none;
+					}
+					div {
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+						.name {
+							font-size: 1.25em;
+							a {
+								text-decoration: none;
+								text-transform: capitalize;
+							}
+						}
+						.author {
+							font-size: 1.15em;
+							color: $gray;
+						}
+						.description {
+							font-size: 1em;
+							color: $black;
+							p {
+								width: 50em;
+								white-space: nowrap;
+								overflow: hidden;
+								text-overflow: ellipsis;
+							}
+						}
+					}
+					.details {
+						width: 30em;
+					}
+					.form-check-input {
+						width: 3.5em;
+						height: 2em;
+					}
+				}
+			}
+		}
+	}
 }
 
-.main-container {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
 
-    .sidebar {
-        width: 250px;
-        border-right: 1px solid #363636;
-        display: flex;
-        flex-direction: column;
-
-        .section {
-            border-bottom: 1px solid #363636;
-            min-height: min-content;
-
-            .header {
-                padding: 8px;
-                border-bottom: 1px solid #363636;
-            }
-
-            .content {
-                padding: 8px;
-
-                ul {
-                    list-style: none;
-
-                    li {
-                        padding: 4px 8px;
-                        cursor: pointer;
-                        border-radius: 4px;
-
-                        &:hover {
-                            background-color: #929292;
-                        }
-                    }
-
-                }
-            }
-        }
-    }
-
-    .workspace {
-        flex: 1;
-        padding: 20px;
-        overflow: hidden;
-
-        .header {
-            margin-bottom: 16px;
-            color: #888;
-            font-size: 14px;
-        }
-
-        .content {
-            outline: none;
-            min-height: 200px;
-            height: 100%;
-            overflow: scroll;
-            padding-bottom: 20px; // necessary to display the bottom scrollbar
-
-            pre#tutor-logs {
-                height: calc(100% - 20px); // must match .content padding-bottom to display scrollbar
-            }
-
-            .config {
-                .item form {
-                    display: inline-block;
-                }
-            }
-        }
-    }
+.modal {
+	.modal-dialog {
+		max-width: 34em;
+	}
+	.modal-title {
+		color: $black;
+	}
+	.modal-description {
+		color: $gray;
+	}
+	.modal-footer {
+		button {
+			&:last-child {
+				width: 11em;
+				height: 2.5em;
+				background-color: $light-blue;
+			}
+		}
+	}
 }
