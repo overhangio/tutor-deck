@@ -1,6 +1,10 @@
 {% extends "index.html" %}
 
-{% block workspace_header %}{{ plugin_name }}{% endblock %}
+{% block workspace_header %}
+{{ plugin_name }}
+{% endblock %}
+
+{% set sidebar_active_tab = "my-plugins" %}
 
 {% block workspace_content %}
 Enabled: <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
