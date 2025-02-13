@@ -14,10 +14,8 @@
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
     <!-- <link rel="stylesheet" href="css/styles.css"> -->
     <link href="{{ url_for('static', filename='/css/dash.css') }}" rel="stylesheet">
-    <!-- TODO self-host -->
-    <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
-    <!-- SSE extension https://htmx.org/extensions/sse/ TODO self host and move to dedicated page-->
-    <script src="https://unpkg.com/htmx-ext-sse@2.2.2/sse.js"></script>
+    <script src="url_for('static', filename='/js/htmx.min.js')"></script>
+    <script src="url_for('static', filename='/js/sse.js')"></script>
 </head>
 
 <body>
