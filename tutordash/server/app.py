@@ -74,16 +74,25 @@ async def plugin_store() -> str:
 async def installed_plugins() -> str:
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
-    plugins: list[dict[str, str]] = [
-        {
-            "name": p.name,
+    store_plugins: dict[str, dict[str, str]] = {
+        p.name: {
             "url": p.url,
             "index": p.index,
             "author": p.author.split('<')[0].strip(),
             "description": markdown(p.description),
-            "is_enabled": p.name in enabled_plugins,
         }
-        for p in tutorclient.Client.plugins_in_store() if p.name in installed_plugins
+        for p in tutorclient.Client.plugins_in_store()
+    }
+    plugins: list[dict[str, str]] = [
+        {
+            "name": plugin_name,
+            "url": store_plugins[plugin_name]["url"] if plugin_name in store_plugins else "",
+            "index": store_plugins[plugin_name]["index"] if plugin_name in store_plugins else "",
+            "author": store_plugins[plugin_name]["author"].split('<')[0].strip() if plugin_name in store_plugins else "",
+            "description": markdown(store_plugins[plugin_name]["description"]) if plugin_name in store_plugins else "",
+            "is_enabled": plugin_name in enabled_plugins,
+        }
+        for plugin_name in installed_plugins
     ]
     return await render_template(
         "installed_plugins.html",
