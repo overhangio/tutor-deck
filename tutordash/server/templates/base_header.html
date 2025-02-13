@@ -1,8 +1,8 @@
 {% extends "index.html" %}
 
 {% block workspace_header %}
-<div class="info-container">
-    <div>
+<div class="header-bar">
+    <div class="info-container">
         <div class="page-title">{% block page_title %}{% endblock %}</div>
         <div class="page-description">{% block page_description %}{% endblock %}</div>
     </div>
@@ -11,7 +11,7 @@
     </div>
 </div>
 <div class="search-container">
-    <img src="{{ url_for('static', filename='/img/search.svg') }}"></img>
+    <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
     <input id="search-input" type="text" class="form-control search-input" placeholder="Search...">
 </div>
 {% endblock %}

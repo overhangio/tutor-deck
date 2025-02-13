@@ -1,25 +1,37 @@
-{% extends "workspace_header_general.html" %}
+{% extends "base_header.html" %}
 
-{% block page_title %}My Plugins{% endblock %}
-{% block page_description %}View all your installed plugins in one place.{% endblock %}
-{% block page_button %}
-<button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">Local Launch</button>
+{% block page_title %}
+My Plugins
 {% endblock %}
+
+{% block page_description %}
+View all your installed plugins in one place.
+{% endblock %}
+
+{% block page_button %}
+<button class="modal-button open_modal_button" type="button">Local Launch</button>
+{% endblock %}
+
 {% block model_icon %}
 <img src="{{ url_for('static', filename='/img/Featured icon.svg') }}" alt=""> 
 {% endblock %}
+
 {% block modal_title %}
 Run local launch for all plugins?
 {% endblock %}
+
 {% block modal_description %}
 Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.
 {% endblock %}
+
 {% block modal_footer %}
-<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Not Now</button>
+<button type="button" class="modal-button close-modal-button">Not Now</button>
 <form method="POST" action="{{ url_for('cli_local_launch')}}">
-    <button type="submit" class="btn btn-primary">Run Local Launch</button>
+    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
 </form>
 {% endblock %}
+
+{% set sidebar_active_tab = "my-plugins" %}
 
 {% block workspace_content %}
 <div class="installed-plugins-list">
@@ -30,19 +42,16 @@ Running local launch will allow all changes to plugins to take effect. This coul
             <div class="author">{{ plugin.author }}</div>
             <div class="description">{{ plugin.description|safe }}</div>
         </div>
-        <div class="form-check form-switch">
-            <form method="POST" action="{{ url_for('plugin_toggle', name=plugin.name) }}">
-                <input type="checkbox" name="checked" class="form-check-input" role="switch" onchange="this.form.submit()" {% if plugin.is_enabled %} id="flexSwitchCheckDefault" checked {% else %} id="flexSwitchCheckChecked" {% endif %} />
-            </form>
+
+        <div class="form-switch">
+            <label class="switch">
+                <form method="POST" action="{{ url_for('plugin_toggle', name=plugin.name) }}">
+                    <input type="checkbox" name="checked" onchange="this.form.submit()" {% if plugin.is_enabled %} checked {% endif %} />
+                    <span class="slider round"></span>
+                </form>
+            </label>
         </div>
     </div>
     {% endfor %}
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.getElementById('my-plugins').classList.toggle('sidebar-tab-selected');
-    document.getElementById('my-plugins-logo').classList.toggle('sidebar-tab-logo-selected');
-</script>
 {% endblock %}
