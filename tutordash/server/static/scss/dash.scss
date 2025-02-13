@@ -187,6 +187,11 @@ body {
 							a {
 								text-decoration: none;
 								text-transform: capitalize;
+
+								&:visited {
+									text-decoration: none;
+									color: $blue;
+								}
 							}
 						}
 						.author {
