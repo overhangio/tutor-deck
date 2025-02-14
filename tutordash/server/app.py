@@ -57,7 +57,8 @@ async def plugin_store() -> str:
             "name": p.name,
             "url": p.url,
             "index": p.index,
-            "description": markdown(p.description),
+            "author": p.author.split('<')[0].strip(),
+            "description": markdown(p.description.replace("\n", " ")),
             "is_installed": p.name in installed_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
@@ -105,10 +106,16 @@ async def installed_plugins() -> str:
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     is_enabled = name in tutorclient.Client.enabled_plugins()
+    is_installed = name in tutorclient.Client.installed_plugins()
+    author = next((p.author.split('<')[0].strip() for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
+    description = next((markdown(p.description) for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
     return await render_template(
         "plugin.html",
         plugin_name=name,
         is_enabled=is_enabled,
+        is_installed=is_installed,
+        author_name=author,
+        plugin_description=description,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),

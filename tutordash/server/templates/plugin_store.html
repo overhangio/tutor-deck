@@ -8,26 +8,61 @@ Plugin Marketplace
 View and install available plugins.
 {% endblock %}
 
+{% block page_button %}
+<form action="{{ url_for('plugins_update') }}" method="POST">
+    <button class="modal-button" type="submit">Refresh</button>
+</form>
+{% endblock %}
+
 {% set sidebar_active_tab = "plugin-marketplace" %}
 
 {% block workspace_content %}
-<form action="{{ url_for('plugins_update') }}" method="POST">
-    <button type="submit">Refresh</button>
-</form>
+<div class="store-plugins">
+    {% for plugin in plugins %}
+        <div class="plugin">
+            <div class="header">
+                <div class="title">
+                    <div class="name">
+                    <a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a>
+                    </div>
+                    <div class="author">
+                        By {{ plugin.author }}
+                    </div>
+                </div>
+                <div class="status">
+                    {% if plugin.is_installed %}
+                    <img src="{{ url_for('static', filename='/img/CheckCircle.svg') }}" alt="">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="body">
+                <!-- TODO is that actually safe? -->
+                {{ plugin.description|safe }}
+            </div>
+            <div class="footer">
+                <div class="meta">
 
-{% for plugin in plugins %}
-<h2>{{ plugin.name }}</h2>
-{% if plugin.is_installed %}
-<p>Installed: ✅ <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST"><button type="submit">Upgrade</button></form></p>
-{% else %}
-<p><form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST"><button type="submit">Install</button></form></p>
-{% endif %}
-<p{{ plugin.short_description }}></p>
-<!-- TODO is that actually safe? -->
-<p>{{ plugin.description|safe }}</p>
-<ul>
-    <li>url: {{ plugin.url }}</li>
-    <li>index: {{ plugin.index }}</li>
-</ul>
-{% endfor %}
+                </div>
+                <div class="plugin-button">
+                    {% if plugin.is_installed %}
+                    <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST">
+                        <button type="submit">Upgrade</button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('plugin_install', name=plugin.name) }}" method="POST">
+                        <button type="submit">Install</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        
+        
+        <!-- <p{{ plugin.short_description }}></p>
+        <ul>
+            <li>url: {{ plugin.url }}</li>
+            <li>index: {{ plugin.index }}</li>
+        </ul> -->
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}

@@ -12,7 +12,7 @@ document.getElementById("search-input").addEventListener("input", function () {
 	});
 });
 
-let open = document.querySelectorAll(".open_modal_button");
+let open = document.querySelectorAll(".open-modal-button");
 const modal_container = document.getElementById("modal_container");
 let close = document.querySelectorAll(".close-modal-button");
 

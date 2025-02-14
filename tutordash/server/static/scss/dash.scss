@@ -6,6 +6,7 @@ $black: #181d27;
 $white: #e6f3ff;
 $blue: #1570ef;
 $light-blue: #2e90fa;
+$green: #009951;
 $font-family_1: Arial;
 
 * {
@@ -121,14 +122,23 @@ body {
 						font-weight: 600;
 					}
 					.page-description {
-						font-size: 16px;
+						font-size: 1.25em;
 						color: $gray;
 					}
 				}
 
-				.launch-button {
+				.page-button {
 					display: flex;
 					justify-content: center;
+
+					.installed {
+						display: flex;
+						align-items: center;
+						width: 6em;
+						justify-content: space-around;
+						color: $green;
+						font-size: 1em;
+					}
 					button {
 						width: 9em;
 						height: 2.5em;
@@ -212,65 +222,83 @@ body {
 					.details {
 						width: 30em;
 					}
-					.form-switch {
-						.switch {
-							position: relative;
-							display: inline-block;
-							width: 60px;
-							height: 34px;
+				}
+			}
+			.store-plugins {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
 
-							.slider {
-								position: absolute;
-								cursor: pointer;
-								top: 0;
-								left: 0;
-								right: 0;
-								bottom: 0;
-								background-color: #ccc;
-								-webkit-transition: 0.4s;
-								transition: 0.4s;
-								&:before {
-									position: absolute;
-									content: "";
-									height: 26px;
-									width: 26px;
-									left: 4px;
-									bottom: 4px;
-									background-color: white;
-									-webkit-transition: 0.4s;
-									transition: 0.4s;
+				.plugin {
+					border: 1px solid $light-gray;
+					border-radius: 1em;
+					display: flex;
+					flex-direction: column;
+					width: 26em;
+					margin-bottom: 1.5em;
+					padding: 1em;
+					justify-content: space-between;
+
+					.header {
+						display: flex;
+						flex-direction: row;
+						justify-content: space-between;
+						margin: 0px;
+						height: 4em;
+
+						.title {
+							display: flex;
+							flex-direction: column;
+							text-transform: capitalize;
+							justify-content: space-around;
+
+							.name {
+								a {
+									color: $blue;
+									text-decoration: none;
+									font-size: 1.75em;
+
+									&:visited {
+										text-decoration: none;
+									}
 								}
 							}
 
-							.slider.round {
-								border-radius: 34px;
+							.author {
+								font-size: 1em;
+								color: $gray;
 							}
+						}
 
-							.slider.round:before {
-								border-radius: 50%;
-							}
-
-							input {
-								opacity: 0;
-								width: 0;
-								height: 0;
-
-								&:checked + .slider {
-									background-color: #2196f3;
-								}
-
-								&:focus + .slider {
-									box-shadow: 0 0 1px #2196f3;
-								}
-
-								&:checked + .slider:before {
-									-webkit-transform: translateX(26px);
-									-ms-transform: translateX(26px);
-									transform: translateX(26px);
-								}
+						.status {
+							img {
+								width: 1.5em;
 							}
 						}
 					}
+					.body {
+						p {
+							width: 100%;
+							height: auto;
+							display: -webkit-box;
+							-webkit-line-clamp: 3; // Limit to 3 lines
+							-webkit-box-orient: vertical;
+							overflow: hidden;
+							text-overflow: ellipsis;
+							white-space: normal;
+						}
+					}
+				}
+			}
+			.status {
+				display: flex;
+
+				.status-text {
+					width: 25em;
+				}
+
+				.switch-text {
+					margin-left: 1em;
 				}
 			}
 		}
@@ -363,6 +391,66 @@ body {
 				background-color: $light-blue;
 				color: $white;
 				font-size: 1em;
+			}
+		}
+	}
+}
+
+.form-switch {
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #ccc;
+			-webkit-transition: 0.4s;
+			transition: 0.4s;
+			&:before {
+				position: absolute;
+				content: "";
+				height: 26px;
+				width: 26px;
+				left: 4px;
+				bottom: 4px;
+				background-color: white;
+				-webkit-transition: 0.4s;
+				transition: 0.4s;
+			}
+		}
+
+		.slider.round {
+			border-radius: 34px;
+		}
+
+		.slider.round:before {
+			border-radius: 50%;
+		}
+
+		input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+
+			&:checked + .slider {
+				background-color: #2196f3;
+			}
+
+			&:focus + .slider {
+				box-shadow: 0 0 1px #2196f3;
+			}
+
+			&:checked + .slider:before {
+				-webkit-transform: translateX(26px);
+				-ms-transform: translateX(26px);
+				transform: translateX(26px);
 			}
 		}
 	}
