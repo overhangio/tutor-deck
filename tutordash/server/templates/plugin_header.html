@@ -1,0 +1,34 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}
+<div class="header-address">
+    <span>Plugin Marketplace</span>
+    <span>/ {{ plugin_name }}</span>
+</div>
+<div class="header-bar">
+    <div class="info-container">
+        <div class="page-title">{{ plugin_name }}</div>
+        <div class="page-description">By {{ author_name }}</div>
+    </div>
+    <div class="page-button">
+        {% block page_button %}
+        {% if plugin_name in installed_plugins %}
+        <div class="installed">
+            <img src="{{ url_for('static', filename='/img/CheckCircle.svg')}}" alt="">
+            Installed
+        </div>
+        {% else %}
+        <form action="{{ url_for('plugin_install', name=plugin_name) }}" method="POST">
+            <button type="submit">Install</button>
+        </form>
+        {% endif %}
+        {% endblock %}
+    </div>
+</div>
+{% block plugin_description %}
+<div>
+    {{ plugin_description | safe }}
+</div>
+{% endblock %}
+
+{% endblock %}

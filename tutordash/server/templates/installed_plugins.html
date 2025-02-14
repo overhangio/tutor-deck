@@ -1,5 +1,7 @@
 {% extends "base_header.html" %}
 
+{% from 'switch_macro.html' import switch %}
+
 {% block page_title %}
 My Plugins
 {% endblock %}
@@ -9,7 +11,7 @@ View all your installed plugins in one place.
 {% endblock %}
 
 {% block page_button %}
-<button class="modal-button open_modal_button" type="button">Local Launch</button>
+<button class="modal-button open-modal-button" type="button">Local Launch</button>
 {% endblock %}
 
 {% block model_icon %}
@@ -43,14 +45,7 @@ Running local launch will allow all changes to plugins to take effect. This coul
             <div class="description">{{ plugin.description|safe }}</div>
         </div>
 
-        <div class="form-switch">
-            <label class="switch">
-                <form method="POST" action="{{ url_for('plugin_toggle', name=plugin.name) }}">
-                    <input type="checkbox" name="checked" onchange="this.form.submit()" {% if plugin.is_enabled %} checked {% endif %} />
-                    <span class="slider round"></span>
-                </form>
-            </label>
-        </div>
+        {{ switch(plugin.name, plugin.is_enabled)}}
     </div>
     {% endfor %}
 </div>

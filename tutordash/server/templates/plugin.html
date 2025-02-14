@@ -1,18 +1,33 @@
-{% extends "index.html" %}
+{% extends "plugin_header.html" %}
 
-{% block workspace_header %}
-{{ plugin_name }}
-{% endblock %}
+{% set sidebar_active_tab = "" %}
 
-{% set sidebar_active_tab = "my-plugins" %}
+{% from 'switch_macro.html' import switch %}
 
 {% block workspace_content %}
-Enabled: <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
-    <input type="checkbox" name="enabled" onchange="this.form.submit()" {% if is_enabled %}checked{% endif %} />
-</form>
+
+<div class="status">
+    {% if is_installed %}
+    <div class="status-text">
+        Status
+    </div>
+    {{ switch(plugin_name, is_enabled) }}
+    <div class="switch-text">
+        <div class="title">
+            {% if is_enabled %} Enabled {% else %} Disabled {% endif %}
+        </div>
+        <div class="description">
+            {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
 
 {% if is_enabled %}
-<h2>Configuration</h2>
+<div class="parameter-info">
+    <h2>Plugin Parameters</h2>
+    <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>
+</div>
 
 <h3>Unique settings</h3>
 {% if plugin_config_unique %}
@@ -29,4 +44,5 @@ Enabled: <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_nam
 {% endif %}
 
 {% endif %}
+
 {% endblock %}
