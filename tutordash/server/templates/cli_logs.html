@@ -1,9 +1,18 @@
-{% extends 'index.html' %}
+{% extends "index.html" %}
 
-{% block workspace_header %}Tutor command logs{% endblock %}
+{% block workspace_header %}
+<div class="header-bar">
+    <div class="info-container">
+        <div class="page-title">{% block page_title %}CLI Logs{% endblock %}</div>
+        <div class="page-description">{% block page_description %}{% endblock %}</div>
+    </div>
+</div>
+{% endblock %}
 
 {% block workspace_content %}
-<pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
+<div class="tutor-logs-container">
+    <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
+</div>
 {% endblock %}
 
 {% block scripts %}
