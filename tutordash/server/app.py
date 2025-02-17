@@ -80,7 +80,7 @@ async def installed_plugins() -> str:
             "url": p.url,
             "index": p.index,
             "author": p.author.split('<')[0].strip(),
-            "description": markdown(p.description),
+            "description": markdown(p.description.replace("\n", " ")),
         }
         for p in tutorclient.Client.plugins_in_store()
     }
@@ -105,6 +105,7 @@ async def installed_plugins() -> str:
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
+    show_logs = request.args.get("show_logs")
     is_enabled = name in tutorclient.Client.enabled_plugins()
     is_installed = name in tutorclient.Client.installed_plugins()
     author = next((p.author.split('<')[0].strip() for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
@@ -119,6 +120,7 @@ async def plugin(name: str) -> str:
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
+        show_logs=show_logs,
         **shared_template_context(),
     )
 
@@ -137,13 +139,13 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
 @app.post("/plugin/<name>/install")
 async def plugin_install(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
-    return redirect(url_for("cli_logs"))
+    return redirect(url_for("plugin", name=name, show_logs=True))
 
 
 @app.post("/plugin/<name>/upgrade")
 async def plugin_upgrade(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "upgrade", name])
-    return redirect(url_for("cli_logs"))
+    return redirect(url_for("plugin", name=name, show_logs=True))
 
 @app.post("/plugins/update")
 async def plugins_update() -> WerkzeugResponse:
@@ -183,7 +185,8 @@ async def cli_local_launch() -> WerkzeugResponse:
 
 @app.get("/cli/logs")
 async def cli_logs() -> str:
-    return await render_template("cli_logs.html", **shared_template_context())
+    name = request.args.get("name")
+    return await render_template("cli_logs.html", name=name, **shared_template_context())
 
 
 @app.get("/cli/logs/stream")
