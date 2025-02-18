@@ -155,7 +155,12 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     command = ["plugins", "enable" if enable_plugin else "disable", name]
     tutorclient.CliPool.run_sequential(command)
     # TODO error management
-    return redirect(url_for("plugin", name=name))
+    response = await make_response(redirect(url_for("plugin", name=name)))
+    if enable_plugin:
+        response.set_cookie(name, "requires launch", max_age=60*60*24*30)
+    else:
+        response.delete_cookie(name)
+    return response
 
 
 @app.post("/plugin/<name>/install")
@@ -202,7 +207,11 @@ async def config_unset(name: str) -> WerkzeugResponse:
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
-    return redirect(url_for("cli_logs"))
+    response = await make_response(redirect(url_for("cli_logs")))
+    for cookie_name in request.cookies:
+        if cookie_name != 'csrf_token':
+            response.delete_cookie(cookie_name)
+    return response
 
 
 @app.get("/cli/logs")
