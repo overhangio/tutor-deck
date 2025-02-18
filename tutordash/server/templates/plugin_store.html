@@ -55,14 +55,44 @@ View and install available plugins.
                     {% endif %}
                 </div>
             </div>
-        
-        
-        <!-- <p{{ plugin.short_description }}></p>
-        <ul>
-            <li>url: {{ plugin.url }}</li>
-            <li>index: {{ plugin.index }}</li>
-        </ul> -->
         </div>
     {% endfor %}
+</div>
+{% endblock %}
+
+{% block footer %}
+<div class="pagination">
+    <a href="{{ url_for('plugin_store', page=current_page+1)}}">
+        <div class="pagination-button">
+            &#62;
+        </div>
+    </a>
+    {% if page_count > 4 %}
+        {% for i in range(1, 5) %} 
+        <a href="{{ url_for('plugin_store', page=i)}}">
+            <div class="pagination-button">
+                {{i}}
+            </div>
+        </a>
+            {% if i == 2 %}
+            <div class="pagination-button">
+                ...
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {% for i in range(1,page_count+1) %} 
+        <a href="{{ url_for('plugin_store', page=i)}}">
+            <div class="pagination-button">
+                {{i}}
+            </div>
+        </a>
+        {% endfor %}
+    {% endif %}
+    <a href="{{ url_for('plugin_store', page=current_page-1)}}">
+        <div class="pagination-button">
+            &#60;
+        </div>
+    </a>
 </div>
 {% endblock %}

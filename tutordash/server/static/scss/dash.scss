@@ -2,6 +2,7 @@ $edly-logo-red: #dc1f26;
 $dark-gray: #4a4a4a;
 $gray: #535862;
 $light-gray: #888;
+$extra-light-gray: #c4c4c4;
 $black: #181d27;
 $white: #e6f3ff;
 $blue: #1570ef;
@@ -26,7 +27,7 @@ body {
 	display: flex;
 	.sidebar {
 		flex: 0 0 19em;
-		border-right: 1px solid #c4c4c4;
+		border-right: 1px solid $extra-light-gray;
 		box-shadow: 2px 0px #e3e3e3;
 		display: flex;
 		flex-direction: column;
@@ -38,7 +39,7 @@ body {
 			height: 100%;
 			.header {
 				flex: 0 0 6em;
-				border-bottom: 1px solid #c4c4c4;
+				border-bottom: 1px solid $extra-light-gray;
 				display: flex;
 				align-items: center;
 				.image {
@@ -102,6 +103,7 @@ body {
 		flex-grow: 1;
 		display: flex;
 		flex-direction: column;
+		height: 100vh;
 		.header {
 			display: flex;
 			flex-direction: column;
@@ -163,7 +165,7 @@ body {
 					width: 20em;
 					border-radius: 10px;
 					padding-left: 2.5em;
-					border: 1px solid #c4c4c4;
+					border: 1px solid $extra-light-gray;
 				}
 
 				img {
@@ -174,9 +176,11 @@ body {
 		}
 		.content {
 			flex-grow: 1;
+			max-height: 75vh;
 			margin: 0em 2em 2em 2em;
+			border-bottom: 1px solid $extra-light-gray;
 			.installed-plugins-list {
-				border: 1px solid #c4c4c4;
+				border: 1px solid $extra-light-gray;
 				border-radius: 1em;
 				display: flex;
 				flex-direction: column;
@@ -184,7 +188,7 @@ body {
 					display: flex;
 					justify-content: space-between;
 					padding: 1em 2em;
-					border-bottom: 1px solid #c4c4c4;
+					border-bottom: 1px solid $extra-light-gray;
 					&:last-child {
 						border-bottom: none;
 					}
@@ -299,6 +303,41 @@ body {
 
 				.switch-text {
 					margin-left: 1em;
+				}
+			}
+			.tutor-logs-container {
+				height: 100%;
+			}
+			#tutor-logs {
+				width: 100%;
+				background-color: black;
+				color: white;
+				padding: 2em;
+				border-radius: 1em;
+				font-family: inherit;
+				line-height: 1.5em;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				overflow-y: auto;
+				height: 100%;
+			}
+		}
+		.footer {
+			display: flex;
+			justify-content: flex-end;
+			padding: 0em 2em;
+
+			.pagination {
+				display: flex;
+				width: 20em;
+				display: flex;
+				justify-content: space-between;
+				border: 1px solid $light-gray;
+				padding: 1em 2em;
+				border-radius: 1em;
+
+				div {
+					cursor: pointer;
 				}
 			}
 		}
@@ -454,18 +493,4 @@ body {
 			}
 		}
 	}
-}
-
-#tutor-logs {
-	width: 100%;
-	background-color: black;
-	color: white;
-	padding: 2em;
-	border-radius: 1em;
-	font-family: inherit;
-	line-height: 1.5em;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	overflow-y: auto;
-	max-height: 50%;
 }
