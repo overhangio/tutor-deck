@@ -9,7 +9,6 @@ $blue: #1570ef;
 $light-blue: #2e90fa;
 $green: #009951;
 $font-family_1: Arial;
-
 * {
 	box-sizing: border-box;
 }
@@ -175,9 +174,21 @@ body {
 		}
 		.content {
 			flex-grow: 1;
-			max-height: 75vh;
 			margin: 0em 2em 2em 2em;
 			border-bottom: 1px solid $extra-light-gray;
+			#warning-main {
+				display: none;
+				border: 1px solid $extra-light-gray;
+				border-radius: 1em;
+				align-items: center;
+				font-size: 1.25em;
+				color: $gray;
+				margin-bottom: 2em;
+				padding: 1em;
+				span {
+					margin-left: 1em;
+				}
+			}
 			.installed-plugins-list {
 				border: 1px solid $extra-light-gray;
 				border-radius: 1em;
@@ -195,6 +206,7 @@ body {
 						display: flex;
 						flex-direction: column;
 						justify-content: center;
+						flex-grow: 1;
 						.name {
 							font-size: 1.25em;
 							a {
@@ -220,6 +232,13 @@ body {
 								overflow: hidden;
 								text-overflow: ellipsis;
 							}
+						}
+					}
+					.warning {
+						display: none;
+						margin-right: 2em;
+						img {
+							width: 2.5em;
 						}
 					}
 				}

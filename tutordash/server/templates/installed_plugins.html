@@ -36,6 +36,10 @@ Running local launch will allow all changes to plugins to take effect. This coul
 {% set sidebar_active_tab = "my-plugins" %}
 
 {% block workspace_content %}
+<div id="warning-main">
+    <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
+    <span>Changes have been made to some plugins that will only take effect after a local launch.</span>
+</div>
 <div class="installed-plugins-list">
     {% for plugin in plugins %}
     <div class="installed-plugin">
@@ -43,6 +47,9 @@ Running local launch will allow all changes to plugins to take effect. This coul
             <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
             <div class="author">{{ plugin.author }}</div>
             <div class="description">{{ plugin.description|safe }}</div>
+        </div>
+        <div class="warning" id="{{plugin.name}}-warning">
+            <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
         </div>
 
         {{ switch(plugin.name, plugin.is_enabled)}}
