@@ -1,9 +1,8 @@
 function SetWarning(){
-  const warningElements = document.querySelectorAll('[id$="-warning"]');
+  const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');
   const warningMain = document.getElementById('warning-main');
   warningElements.forEach(function(warningElement) {
-    const pluginName = warningElement.id.replace('-warning', '');
-    if (document.cookie.includes(pluginName)) {
+    if (document.cookie.includes(warningElement.id)) {
         warningElement.style.display = 'block';  
         warningMain.style.display = 'flex';
     }
