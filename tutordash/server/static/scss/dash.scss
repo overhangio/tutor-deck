@@ -8,29 +8,34 @@ $white: #e6f3ff;
 $blue: #1570ef;
 $light-blue: #2e90fa;
 $green: #009951;
-$font-family_1: Arial;
+
+@mixin a-tag {
+	text-decoration: none;
+
+	&:visited {
+		text-decoration: none;
+	}
+}
+
 * {
 	box-sizing: border-box;
 }
 html {
+	font-family: Arial;
 	height: 100%;
-	margin: 0;
 }
 body {
-	height: 100%;
 	margin: 0;
-	font-family: $font-family_1;
-	height: 100vh;
 }
 .main-container {
 	display: flex;
 	.sidebar {
 		flex: 0 0 19em;
 		border-right: 1px solid $extra-light-gray;
-		box-shadow: 2px 0px #e3e3e3;
+		box-shadow: 2px 0px $white;
 		display: flex;
 		flex-direction: column;
-		height: 55em;
+		height: 90vh;
 		.section {
 			display: flex;
 			flex-direction: column;
@@ -66,8 +71,8 @@ body {
 					justify-content: space-evenly;
 					margin-top: 1em;
 					a {
+						@include a-tag();
 						list-style: none;
-						text-decoration: none;
 						color: $dark-gray;
 						font-size: 16px;
 						font-weight: 600;
@@ -210,13 +215,9 @@ body {
 						.name {
 							font-size: 1.25em;
 							a {
-								text-decoration: none;
+								@include a-tag();
 								text-transform: capitalize;
-
-								&:visited {
-									text-decoration: none;
-									color: $blue;
-								}
+								color: $blue;
 							}
 						}
 						.author {
@@ -249,7 +250,7 @@ body {
 				justify-content: space-between;
 
 				.plugin {
-					border: 1px solid $light-gray;
+					border: 1px solid $extra-light-gray;
 					border-radius: 1em;
 					display: flex;
 					flex-direction: column;
@@ -344,17 +345,31 @@ body {
 
 			.pagination {
 				display: flex;
-				width: 20em;
-				display: flex;
 				justify-content: space-between;
-				border: 1px solid $light-gray;
-				padding: 1em 2em;
-				border-radius: 1em;
+				border: 1px solid $extra-light-gray;
+				border-radius: 0.5em;
+				align-items: center;
+
+				a {
+					@include a-tag();
+					border-right: 1px solid $extra-light-gray;
+
+					&:last-child {
+						border: none;
+					}
+				}
 
 				div {
 					cursor: pointer;
+					height: 2.5em;
+					align-content: center;
+					width: 3.5em;
+					text-align: center;
 				}
 			}
+		}
+		.void {
+			height: 3em;
 		}
 	}
 }
