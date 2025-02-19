@@ -26,6 +26,7 @@ app = Quart(
     static_folder="static",
 )
 
+ONE_MONTH = 60*60*24*30
 
 def run(root: str, **app_kwargs: t.Any) -> None:
     """
@@ -69,7 +70,7 @@ async def plugin_store() -> str:
         plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
 
     page = request.args.get("page", default=1, type=int)
-    per_page = 6
+    per_page = 9
     total_pages = (len(plugins) + per_page - 1) // per_page
     if page < 1:
         page = 1
@@ -157,7 +158,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     # TODO error management
     response = await make_response(redirect(url_for("plugin", name=name)))
     if enable_plugin:
-        response.set_cookie(name, "requires launch", max_age=60*60*24*30)
+        response.set_cookie(name, "requires launch", max_age=ONE_MONTH)
     else:
         response.delete_cookie(name)
     return response
