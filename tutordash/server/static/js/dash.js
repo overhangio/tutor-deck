@@ -3,7 +3,7 @@ function SetWarning(){
   const warningMain = document.getElementById('warning-main');
   warningElements.forEach(function(warningElement) {
     if (document.cookie.includes(warningElement.id)) {
-        warningElement.style.display = 'block';  
+        warningElement.style.display = 'flex';  
         warningMain.style.display = 'flex';
     }
   });

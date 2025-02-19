@@ -6,6 +6,7 @@
             action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
             method="POST"
             oninput="this.querySelector('button[type=submit]').disabled = false">
+            <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
             {% if value is boolean %}
             <input type="checkbox" name="value" {% if value %}checked{% endif %} />
             {% else %}

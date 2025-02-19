@@ -4,10 +4,15 @@
 
 {% from 'switch_macro.html' import switch %}
 
+{% if is_installed %}
+{% block plugin_description %}
+{% endblock %}
+{% endif %}
+
 {% block workspace_content %}
 
+{% if is_installed %}
 <div class="status">
-    {% if is_installed %}
     <div class="status-text">
         Status
     </div>
@@ -20,10 +25,10 @@
             {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
         </div>
     </div>
-    {% endif %}
 </div>
+{% endif %}
 
-{% if is_enabled %}
+{% if is_enabled and not show_logs %}
 <div class="parameter-info">
     <h2>Plugin Parameters</h2>
     <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>

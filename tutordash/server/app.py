@@ -161,7 +161,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     if enable_plugin:
         response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
     else:
-        response.delete_cookie(name)
+        response.delete_cookie(f"{WARNING_COOKIE_PREFIX}-{name}")
     return response
 
 
@@ -185,9 +185,12 @@ async def plugins_update() -> WerkzeugResponse:
 async def config_set(name: str) -> WerkzeugResponse:
     form = await request.form
     value = form.get("value", "")
+    plugin_name = form.get("plugin_name")
     tutorclient.CliPool.run_sequential(["config", "save", "--set", f"{name}={value}"])
     # TODO error management
-    return redirect(request.args.get("next", "/"))
+    response = await make_response(redirect(request.args.get("next", "/")))
+    response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{plugin_name}", "requires launch", max_age=ONE_MONTH)
+    return response
 
 
 @app.post("/config/<name>/unset")
