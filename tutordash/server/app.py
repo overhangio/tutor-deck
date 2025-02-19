@@ -27,6 +27,7 @@ app = Quart(
 )
 
 ONE_MONTH = 60*60*24*30
+WARNING_COOKIE_PREFIX = "warning-cookie"
 
 def run(root: str, **app_kwargs: t.Any) -> None:
     """
@@ -158,7 +159,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     # TODO error management
     response = await make_response(redirect(url_for("plugin", name=name)))
     if enable_plugin:
-        response.set_cookie(name, "requires launch", max_age=ONE_MONTH)
+        response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
     else:
         response.delete_cookie(name)
     return response
@@ -210,7 +211,7 @@ async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
     response = await make_response(redirect(url_for("cli_logs")))
     for cookie_name in request.cookies:
-        if cookie_name != 'csrf_token':
+        if cookie_name.startswith(WARNING_COOKIE_PREFIX):
             response.delete_cookie(cookie_name)
     return response
 
