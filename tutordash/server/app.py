@@ -167,7 +167,12 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
 
 @app.post("/plugin/<name>/install")
 async def plugin_install(name: str) -> WerkzeugResponse:
-    tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
+    async def bg_install_and_reload():
+        tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
+        while tutorclient.CliPool.THREAD and tutorclient.CliPool.THREAD.is_alive():
+            await asyncio.sleep(0.1)
+        tutorclient.Client.reload_plugins()
+    asyncio.create_task(bg_install_and_reload())
     return redirect(url_for("plugin", name=name, show_logs=True))
 
 
