@@ -1,4 +1,5 @@
 import asyncio
+import importlib_metadata
 import json
 import logging
 import sys
@@ -161,6 +162,9 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     if enable_plugin:
         response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
     else:
+        entrypoints = importlib_metadata.entry_points(name=name)
+        for entrypoint in entrypoints:
+            sys.modules.pop(entrypoint.value)
         response.delete_cookie(f"{WARNING_COOKIE_PREFIX}-{name}")
     return response
 
