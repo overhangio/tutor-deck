@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import importlib_metadata
 import logging
 import os
 import shlex
@@ -19,6 +20,7 @@ import tutor.commands.cli
 import tutor.config
 import tutor.utils
 import tutor.plugins.indexes
+from tutor.plugins.v1 import discover_package
 
 from . import constants
 
@@ -292,6 +294,11 @@ class Client:
     @classmethod
     def enabled_plugins(cls) -> list[str]:
         return list(hooks.Filters.PLUGINS_LOADED.iterate())
+    
+    @classmethod
+    def reload_plugins(cls) -> None:
+        for entrypoint in importlib_metadata.entry_points(group="tutor.plugin.v1"):
+            discover_package(entrypoint)
 
     @classmethod
     def plugin_config_unique(cls, name: str) -> Config:
