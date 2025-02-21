@@ -48,10 +48,6 @@ View and install available plugins.
                     <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST">
                         <button type="submit">Upgrade</button>
                     </form>
-                    {% else %}
-                    <form action="{{ url_for('plugin_install', name=plugin.name) }}" method="POST">
-                        <button type="submit">Install</button>
-                    </form>
                     {% endif %}
                 </div>
             </div>

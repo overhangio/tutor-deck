@@ -1,7 +1,7 @@
 <div class="config">
     {% for key, value in config.items() %}
     <div class="item">
-        <span>{{ key }}:</span>
+        <div>{{ key }}:</div>
         <form
             action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
             method="POST"
