@@ -16,6 +16,7 @@ from quart import (
 )
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
+from tutor.plugins.v1 import discover_package
 
 from . import constants
 from . import tutorclient
@@ -162,9 +163,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     if enable_plugin:
         response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
     else:
-        entrypoints = importlib_metadata.entry_points(name=name)
-        for entrypoint in entrypoints:
-            sys.modules.pop(entrypoint.value)
+        sys.modules.pop(importlib_metadata.entry_points().__getitem__(name).value)
         response.delete_cookie(f"{WARNING_COOKIE_PREFIX}-{name}")
     return response
 
@@ -175,7 +174,7 @@ async def plugin_install(name: str) -> WerkzeugResponse:
         tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
         while tutorclient.CliPool.THREAD and tutorclient.CliPool.THREAD.is_alive():
             await asyncio.sleep(0.1)
-        tutorclient.Client.reload_plugins()
+        discover_package(importlib_metadata.entry_points().__getitem__(name))
     asyncio.create_task(bg_install_and_reload())
     return redirect(url_for("plugin", name=name, show_logs=True))
 
