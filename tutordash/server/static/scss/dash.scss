@@ -1,9 +1,10 @@
 $blue-1: #f5faff;
 $gray-1: #e9eaeb;
 $gray-2: #c4c4c4;
-$edly-logo-red: #dc1f26;
-$dark-gray: #4a4a4a;
-$gray: #535862;
+$gray-3: #888;
+$gray-4: #535862;
+$gray-5: #4a4a4a;
+$red: #dc1f26;
 $light-gray: #888;
 $black: #181d27;
 $blue: #1570ef;
@@ -18,6 +19,23 @@ $green: #009951;
 	}
 }
 
+h1 {
+	font-size: 2.25em;
+	font-weight: bold;
+}
+h2 {
+	font-size: 1.75em;
+	font-weight: bold;
+}
+h3 {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+h4 {
+	font-size: 1em;
+	font-weight: bold;
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -28,81 +46,58 @@ html {
 body {
 	margin: 0;
 }
-.main-container {
-	display: flex;
-	.sidebar {
-		flex: 0 0 19em;
+main {
+	display: grid;
+	grid-template-columns: 18.5em auto;
+
+	nav {
 		border-right: 1px solid $gray-2;
 		box-shadow: 2px 0px $gray-1;
 		display: flex;
 		flex-direction: column;
-		height: 90vh;
-		.section {
+		height: 100%;
+		header {
+			flex: 0 0 5.5em;
+			border-bottom: 1px solid $gray-2;
 			display: flex;
-			flex-direction: column;
-			justify-content: flex-start;
-			height: 100%;
-			.header {
-				flex: 0 0 6em;
-				border-bottom: 1px solid $gray-2;
+			align-items: center;
+			img {
+				margin-left: 1.25em;
+				width: 2em;
+				height: auto;
+			}
+			h2 {
+				color: $red;
+				margin-left: 0.5em;
+			}
+		}
+		menu {
+			padding-inline-start: 0.75em;
+			a {
+				@include a-tag();
 				display: flex;
 				align-items: center;
-				.image {
-					margin-left: 2em;
-					width: 2em;
-					img {
-						width: 100%;
-						height: auto;
-					}
+				color: $gray-5;
+				height: 3em;
+				margin: 0 1em 1em 0;
+				padding-left: 1em;
+				border-radius: 0.5em;
+				&:hover {
+					background-color: $blue-1;
 				}
-				.text {
-					font-size: 2rem;
-					color: $edly-logo-red;
-					font-weight: bold;
-					margin-left: 0.25em;
+				img {
+					width: 1.25em;
+				}
+				.sidebar-tab-logo-selected {
+					filter: invert(39%) sepia(98%) saturate(3884%)
+						hue-rotate(205deg) brightness(95%) contrast(96%);
+				}
+				h4 {
+					margin-left: 1em;
 				}
 			}
-			.content {
-				display: flex;
-				flex-direction: column;
-				div {
-					flex: 0 0 8em;
-					display: flex;
-					flex-direction: column;
-					justify-content: space-evenly;
-					margin-top: 1em;
-					a {
-						@include a-tag();
-						list-style: none;
-						color: $dark-gray;
-						font-size: 16px;
-						font-weight: 600;
-						margin: 0em 1em;
-						border-radius: 0.5em;
-						&:hover {
-							background-color: $blue-1;
-						}
-						li {
-							display: flex;
-							align-items: center;
-							padding: 0.5em 1em;
-							span {
-								margin-left: 0.5em;
-							}
-							.sidebar-tab-logo-selected {
-								filter: invert(39%) sepia(98%) saturate(3884%)
-									hue-rotate(205deg) brightness(95%)
-									contrast(96%);
-							}
-						}
-
-						.sidebar-tab-selected {
-							color: $blue;
-							background-color: $blue-1;
-							border-radius: inherit;
-						}
-					}
-				}
+			.sidebar-tab-selected {
+				color: $blue;
 			}
 		}
 	}
@@ -132,7 +127,7 @@ body {
 					}
 					.page-description {
 						font-size: 1.25em;
-						color: $gray;
+						color: $gray-4;
 					}
 				}
 
@@ -190,7 +185,7 @@ body {
 				border-radius: 0.5em;
 				align-items: center;
 				font-size: 1.25em;
-				color: $gray;
+				color: $gray-4;
 				margin-bottom: 1em;
 				padding: 0.5em 1em;
 				span {
@@ -229,7 +224,7 @@ body {
 						}
 						.author {
 							font-size: 1.15em;
-							color: $gray;
+							color: $gray-4;
 						}
 						.description {
 							font-size: 1em;
@@ -293,7 +288,7 @@ body {
 
 							.author {
 								font-size: 1em;
-								color: $gray;
+								color: $gray-4;
 							}
 						}
 
@@ -364,7 +359,7 @@ body {
 					}
 
 					input {
-						border: 1px solid $light-gray;
+						border: 1px solid $gray-3;
 						border: 1px solid #888;
 						padding: 0.75em;
 						border-radius: 0.5em;
@@ -496,7 +491,7 @@ body {
 			}
 
 			p {
-				color: $gray;
+				color: $gray-4;
 			}
 		}
 
