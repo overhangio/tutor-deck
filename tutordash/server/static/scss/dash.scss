@@ -53,9 +53,6 @@ main {
 	@media (max-width: 900px) {
 		grid-template-columns: 10% 90%;
 	}
-	// @media (max-width: 700px) {
-	// 	grid-template-columns: 15% 80%;
-	// }
 
 	nav {
 		border-right: 1px solid $gray-2;
@@ -137,18 +134,23 @@ main {
 		header {
 			display: flex;
 			flex-direction: column;
-			margin-bottom: 2em;
 			.info {
 				display: flex;
 				flex-direction: row;
 				justify-content: space-between;
 				align-items: center;
 				height: 4em;
+
+				@media (max-width: 600px) {
+					height: 9em;
+					flex-direction: column;
+					align-items: start;
+				}
+
 				.info-container {
 					display: flex;
 					flex-direction: column;
 					justify-content: space-between;
-					height: 100%;
 					.page-title {
 						font-size: 30px;
 						font-weight: 600;
@@ -162,6 +164,10 @@ main {
 				.page-button {
 					display: flex;
 					justify-content: center;
+					@media (max-width: 600px) {
+						width: 100%;
+						justify-content: end;
+					}
 
 					.installed {
 						display: flex;
@@ -196,6 +202,10 @@ main {
 					border-radius: 10px;
 					padding-left: 2.5em;
 					border: 1px solid $gray-2;
+
+					@media (max-width: 600px) {
+						width: 75%;
+					}
 				}
 
 				img {
@@ -211,6 +221,7 @@ main {
 				font-size: 1.25em;
 				color: $gray-4;
 				padding: 0.5em 1em;
+				margin-bottom: 2em;
 				span {
 					margin-left: 1em;
 				}
@@ -240,6 +251,7 @@ main {
 						flex-direction: column;
 						justify-content: center;
 						flex-grow: 1;
+						width: 80%;
 						.name {
 							font-size: 1.25em;
 							a {
@@ -255,8 +267,12 @@ main {
 						.description {
 							font-size: 1em;
 							color: $black;
+							width: 80%;
+
+							@media (max-width: 825px) {
+								display: none;
+							}
 							p {
-								width: 50em;
 								white-space: nowrap;
 								overflow: hidden;
 								text-overflow: ellipsis;
