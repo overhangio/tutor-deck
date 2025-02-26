@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 
 {% block workspace_header %}
-<div class="header-bar">
+<div class="info">
     <div class="info-container">
         <div class="page-title">{% block page_title %}{% endblock %}</div>
         <div class="page-description">{% block page_description %}{% endblock %}</div>
@@ -10,9 +10,13 @@
         {% block page_button %}{% endblock %}
     </div>
 </div>
-<div class="search-container">
+<div class="search">
     <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
     <input id="search-input" type="text" class="form-control search-input" placeholder="Search...">
+</div>
+<div id="warning-main">
+    <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
+    <span>Changes have been made to some plugins that will only take effect after a local launch.</span>
 </div>
 {% endblock %}
 

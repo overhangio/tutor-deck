@@ -37,19 +37,13 @@
             </menu>
         </nav>
 
-        <div class="workspace">
-            <div class="header">
-                {% block workspace_header %}{% endblock %}
-            </div>
-            <div class="content">
-                {% block workspace_content %}{% endblock %}
-            </div>
-            <div class="footer">
-                {% block footer %}{% endblock %}
-            </div>
-            <div class="void"></div>
-        </div>
+        <section>
+            <header>{% block workspace_header %}{% endblock %}</header>
+            <section>{% block workspace_content %}{% endblock %}</section>
+            <footer>{% block footer %}{% endblock %}</footer>
+        </section>
     </main>
+
     <div class="modal-container" id="modal_container">
         <div class="modal-content">
             <div class="modal-header">
