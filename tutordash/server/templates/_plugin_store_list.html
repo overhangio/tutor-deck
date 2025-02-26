@@ -1,0 +1,35 @@
+{% for plugin in plugins %}
+    <div class="plugin">
+        <div class="header">
+            <div class="title">
+                <div class="name">
+                <a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a>
+                </div>
+                <div class="author">
+                    By {{ plugin.author }}
+                </div>
+            </div>
+            <div class="status">
+                {% if plugin.is_installed %}
+                <img src="{{ url_for('static', filename='/img/CheckCircle.svg') }}" alt="">
+                {% endif %}
+            </div>
+        </div>
+        <div class="body">
+            <!-- TODO is that actually safe? -->
+            {{ plugin.description|safe }}
+        </div>
+        <div class="footer">
+            <div class="meta">
+
+            </div>
+            <div class="plugin-button">
+                {% if plugin.is_installed %}
+                <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST">
+                    <button type="submit">Upgrade</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endfor %}

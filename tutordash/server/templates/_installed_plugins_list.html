@@ -1,0 +1,16 @@
+{% from '_switch.html' import switch %}
+
+{% for plugin in plugins %}
+<div class="installed-plugin">
+    <div class="details">
+        <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
+        <div class="author">{{ plugin.author }}</div>
+        <div class="description">{{ plugin.description|safe }}</div>
+    </div>
+    <div class="warning" id="warning-cookie-{{plugin.name}}">
+        <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
+    </div>
+
+    {{ switch(plugin.name, plugin.is_enabled)}}
+</div>
+{% endfor %}
