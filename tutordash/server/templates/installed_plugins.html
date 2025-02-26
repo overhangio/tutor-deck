@@ -33,6 +33,8 @@ Running local launch will allow all changes to plugins to take effect. This coul
 
 {% set sidebar_active_tab = "my-plugins" %}
 
+{% set search_endpoint = url_for('installed_plugins_list') %}
+
 {% block workspace_content %}
 <div id="plugins-list" class="installed-plugins-list" hx-get="{{ url_for('installed_plugins_list')}}" hx-trigger="load"></div>
 {% endblock %}

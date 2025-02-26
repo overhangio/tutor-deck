@@ -54,6 +54,13 @@ async def home() -> str:
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
+    return await render_template(
+        "plugin_store.html",
+        **shared_template_context(),
+    )
+
+@app.get("/plugin/store/list")
+async def plugin_store_list() -> str:
     installed_plugins = tutorclient.Client.installed_plugins()
     plugins: list[dict[str, str]] = [
         {
@@ -67,26 +74,26 @@ async def plugin_store() -> str:
         for p in tutorclient.Client.plugins_in_store()
     ]
 
-    search_query = request.args.get("q", default="", type=str).strip().lower()
+    search_query = request.args.get("search", default="", type=str).strip().lower()
     if search_query:
         plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
 
-    page = request.args.get("page", default=1, type=int)
-    per_page = 9
-    total_pages = (len(plugins) + per_page - 1) // per_page
-    if page < 1:
-        page = 1
-    elif page > total_pages:
-        page = total_pages
-    start = (page - 1) * per_page
-    end = start + per_page
-    plugins = plugins[start:end]
+    # page = request.args.get("page", default=1, type=int)
+    # per_page = 9
+    # total_pages = (len(plugins) + per_page - 1) // per_page
+    # if page < 1:
+    #     page = 1
+    # elif page > total_pages:
+    #     page = total_pages
+    # start = (page - 1) * per_page
+    # end = start + per_page
+    # plugins = plugins[start:end]
 
     return await render_template(
-        "plugin_store.html",
+        "_plugin_store_list.html",
         plugins=plugins,
-        page_count=total_pages,
-        current_page=page,
+        # page_count=total_pages,
+        # current_page=page,
         **shared_template_context(),
     )
 
