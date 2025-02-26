@@ -295,6 +295,8 @@ main {
 				.plugins-container {
 					display: flex;
 					flex-wrap: wrap;
+					justify-content: space-between;
+					gap: 2em;
 
 					.plugin {
 						border: 1px solid $gray-2;
@@ -302,9 +304,10 @@ main {
 						display: flex;
 						flex-direction: column;
 						width: 26em;
-						margin-bottom: 1.5em;
 						padding: 1em;
 						justify-content: space-between;
+						flex: 1 1 calc(30% - 14px);
+						min-width: 250px;
 
 						.header {
 							display: flex;
@@ -376,6 +379,7 @@ main {
 					display: flex;
 					justify-content: flex-end;
 					padding: 0em 2em;
+					margin-top: 2em;
 
 					.pagination {
 						display: flex;
