@@ -52,7 +52,6 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 async def home() -> str:
     return await render_template("index.html", **shared_template_context())
 
-
 @app.get("/plugin/store")
 async def plugin_store() -> str:
     installed_plugins = tutorclient.Client.installed_plugins()
@@ -91,9 +90,15 @@ async def plugin_store() -> str:
         **shared_template_context(),
     )
 
-
 @app.get("/plugin/installed")
 async def installed_plugins() -> str:
+    return await render_template(
+        "installed_plugins.html",
+        **shared_template_context(),
+    )
+
+@app.get("/plugin/installed/list")
+async def installed_plugins_list() -> str:
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
     store_plugins: dict[str, dict[str, str]] = {
@@ -117,12 +122,12 @@ async def installed_plugins() -> str:
         for plugin_name in installed_plugins
     ]
 
-    search_query = request.args.get("q", default="", type=str).strip().lower()
+    search_query = request.args.get("search", default="", type=str).strip().lower()
     if search_query:
         plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
 
     return await render_template(
-        "installed_plugins.html",
+        "_installed_plugins_list.html",
         plugins=plugins,
         **shared_template_context(),
     )

@@ -12,26 +12,19 @@
 </div>
 <div class="search">
     <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
-    <input id="search-input" type="text" class="form-control search-input" placeholder="Search...">
+    <input 
+        id="search-input"
+        type="text" 
+        class="form-control search-input"
+        name="search" 
+        placeholder="Search..." 
+        hx-get="{{ url_for('installed_plugins_list') }}"
+        hx-trigger="input changed delay:300ms, search"
+        hx-target="#plugins-list"
+        hx-indicator="#search-indicator">
 </div>
 <div id="warning-main">
     <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
     <span>Changes have been made to some plugins that will only take effect after a local launch.</span>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.getElementById("search-input").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {  
-            const searchInput = this.value.trim();
-            const url = new URL(window.location.href);
-
-            url.searchParams.set("q", searchInput);  
-
-            url.searchParams.set("page", 1);  
-            window.location.href = url.toString(); 
-        }
-    });
-</script>
 {% endblock %}
