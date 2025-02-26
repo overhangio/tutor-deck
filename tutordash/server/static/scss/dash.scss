@@ -290,80 +290,115 @@ main {
 			}
 			.store-plugins {
 				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
+				flex-direction: column;
 
-				.plugin {
-					border: 1px solid $gray-2;
-					border-radius: 1em;
+				.plugins-container {
 					display: flex;
-					flex-direction: column;
-					width: 26em;
-					margin-bottom: 1.5em;
-					padding: 1em;
-					justify-content: space-between;
+					flex-wrap: wrap;
 
-					.header {
+					.plugin {
+						border: 1px solid $gray-2;
+						border-radius: 1em;
 						display: flex;
-						flex-direction: row;
+						flex-direction: column;
+						width: 26em;
+						margin-bottom: 1.5em;
+						padding: 1em;
 						justify-content: space-between;
-						margin: 0px;
-						height: 4em;
 
-						.title {
+						.header {
 							display: flex;
-							flex-direction: column;
-							text-transform: capitalize;
-							justify-content: space-around;
+							flex-direction: row;
+							justify-content: space-between;
+							margin: 0px;
+							height: 4em;
 
-							.name {
-								a {
-									color: $blue;
-									text-decoration: none;
-									font-size: 1.75em;
+							.title {
+								display: flex;
+								flex-direction: column;
+								text-transform: capitalize;
+								justify-content: space-around;
 
-									&:visited {
+								.name {
+									a {
+										color: $blue;
 										text-decoration: none;
+										font-size: 1.75em;
+
+										&:visited {
+											text-decoration: none;
+										}
 									}
+								}
+
+								.author {
+									font-size: 1em;
+									color: $gray-4;
 								}
 							}
 
-							.author {
+							.status {
+								img {
+									width: 1.5em;
+								}
+							}
+						}
+						.body {
+							p {
+								width: 100%;
+								height: auto;
+								display: -webkit-box;
+								-webkit-line-clamp: 3; // Limit to 3 lines
+								-webkit-box-orient: vertical;
+								overflow: hidden;
+								text-overflow: ellipsis;
+								white-space: normal;
+							}
+						}
+						.footer {
+							padding: 0em;
+							button {
+								width: 5em;
+								height: 2em;
+								background-color: $light-blue;
+								border: none;
+								border-radius: 0.5em;
+								color: white;
 								font-size: 1em;
-								color: $gray-4;
+								cursor: pointer;
+								margin: 0em 0.5em;
+							}
+						}
+					}
+				}
+
+				.pagination-container {
+					display: flex;
+					justify-content: flex-end;
+					padding: 0em 2em;
+
+					.pagination {
+						display: flex;
+						justify-content: space-between;
+						border: 1px solid $gray-2;
+						border-radius: 0.5em;
+						align-items: center;
+
+						a {
+							@include a-tag();
+							border-right: 1px solid $gray-2;
+
+							&:last-child {
+								border: none;
 							}
 						}
 
-						.status {
-							img {
-								width: 1.5em;
-							}
-						}
-					}
-					.body {
-						p {
-							width: 100%;
-							height: auto;
-							display: -webkit-box;
-							-webkit-line-clamp: 3; // Limit to 3 lines
-							-webkit-box-orient: vertical;
-							overflow: hidden;
-							text-overflow: ellipsis;
-							white-space: normal;
-						}
-					}
-					.footer {
-						padding: 0em;
-						button {
-							width: 5em;
-							height: 2em;
-							background-color: $light-blue;
-							border: none;
-							border-radius: 0.5em;
-							color: white;
-							font-size: 1em;
+						div {
 							cursor: pointer;
-							margin: 0em 0.5em;
+							height: 2.5em;
+							align-content: center;
+							width: 3.5em;
+							text-align: center;
 						}
 					}
 				}
@@ -436,36 +471,6 @@ main {
 					word-wrap: break-word;
 					overflow-y: auto;
 					height: 100%;
-				}
-			}
-		}
-		footer {
-			display: flex;
-			justify-content: flex-end;
-			padding: 0em 2em;
-
-			.pagination {
-				display: flex;
-				justify-content: space-between;
-				border: 1px solid $gray-2;
-				border-radius: 0.5em;
-				align-items: center;
-
-				a {
-					@include a-tag();
-					border-right: 1px solid $gray-2;
-
-					&:last-child {
-						border: none;
-					}
-				}
-
-				div {
-					cursor: pointer;
-					height: 2.5em;
-					align-content: center;
-					width: 3.5em;
-					text-align: center;
 				}
 			}
 		}

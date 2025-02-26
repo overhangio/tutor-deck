@@ -78,22 +78,22 @@ async def plugin_store_list() -> str:
     if search_query:
         plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
 
-    # page = request.args.get("page", default=1, type=int)
-    # per_page = 9
-    # total_pages = (len(plugins) + per_page - 1) // per_page
-    # if page < 1:
-    #     page = 1
-    # elif page > total_pages:
-    #     page = total_pages
-    # start = (page - 1) * per_page
-    # end = start + per_page
-    # plugins = plugins[start:end]
+    page = request.args.get("page", default=1, type=int)
+    per_page = 9
+    total_pages = (len(plugins) + per_page - 1) // per_page
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+    start = (page - 1) * per_page
+    end = start + per_page
+    plugins = plugins[start:end]
 
     return await render_template(
         "_plugin_store_list.html",
         plugins=plugins,
-        # page_count=total_pages,
-        # current_page=page,
+        page_count=total_pages,
+        current_page=page,
         **shared_template_context(),
     )
 
