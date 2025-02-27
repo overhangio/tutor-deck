@@ -166,6 +166,7 @@ main {
 				.page-button {
 					display: flex;
 					justify-content: center;
+					margin-bottom: 1.25em;
 					@media (max-width: 600px) {
 						width: 100%;
 						justify-content: end;
@@ -195,7 +196,7 @@ main {
 				display: flex;
 				justify-content: flex-end;
 				align-items: center;
-				margin: 1.25em 0em;
+				margin-bottom: 1.25em;
 
 				.search-input {
 					font-size: 1em;
@@ -433,33 +434,62 @@ main {
 					margin-bottom: 1em;
 					align-items: center;
 					height: 3em;
+					max-width: 60em;
+
+					@media (max-width: 1100px) {
+						flex-direction: column;
+						height: 5em;
+						align-items: start;
+						justify-content: space-between;
+					}
 
 					div {
 						height: 100%;
 						font-weight: 600;
-						width: 25em;
-					}
+						flex: 1;
 
-					input {
-						border: 1px solid $gray-3;
-						border: 1px solid #888;
-						padding: 0.75em;
-						border-radius: 0.5em;
-						font-size: 1em;
-						margin-left: 1em;
-						width: 25em;
+						@media (max-width: 1100px) {
+							flex: 0;
+						}
 					}
+					.config-forms {
+						display: flex;
 
-					button {
-						width: 4em;
-						height: 2em;
-						background-color: $light-blue;
-						border: none;
-						border-radius: 0.5em;
-						color: white;
-						font-size: 1em;
-						cursor: pointer;
-						margin: 0em 0.5em;
+						@media (max-width: 700px) {
+							&:first-child {
+								width: 50%;
+							}
+						}
+						form {
+							display: flex;
+							align-items: center;
+
+							input {
+								border: 1px solid $gray-3;
+								border: 1px solid #888;
+								padding: 0.75em;
+								border-radius: 0.5em;
+								font-size: 1em;
+								margin-left: 1em;
+								width: 25em;
+
+								@media (max-width: 700px) {
+									width: 80%;
+								}
+							}
+
+							button {
+								width: 4em;
+								height: 2em;
+								background-color: $light-blue;
+								border: none;
+								border-radius: 0.5em;
+								color: white;
+								font-size: 1em;
+								cursor: pointer;
+								margin: 0em 0.5em;
+							}
+						}
 					}
 				}
 			}
