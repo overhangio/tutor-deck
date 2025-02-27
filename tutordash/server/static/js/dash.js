@@ -26,3 +26,12 @@ close.forEach((button) => {
 		modal_container.classList.remove("show");
 	});
 });
+
+
+const logsContainer = document.getElementById('tutor-logs');
+
+const observer = new MutationObserver(() => {
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+});
+
+observer.observe(logsContainer, { childList: true, subtree: true });
