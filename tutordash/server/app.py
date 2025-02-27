@@ -16,6 +16,7 @@ from quart import (
 )
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
+from tutor.plugins import indexes
 from tutor.plugins.v1 import discover_package
 
 from . import constants
@@ -52,6 +53,9 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 async def home() -> str:
     return await render_template("index.html", **shared_template_context())
 
+def searched_plugins(pattern: str) -> list[str]:
+    return [plugin._data["name"] for plugin in indexes.iter_cache_entries() if plugin.match(pattern)]
+
 @app.get("/plugin/store")
 async def plugin_store() -> str:
     return await render_template(
@@ -73,10 +77,7 @@ async def plugin_store_list() -> str:
         }
         for p in tutorclient.Client.plugins_in_store()
     ]
-
-    search_query = request.args.get("search", default="", type=str).strip().lower()
-    if search_query:
-        plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
+    plugins = [plugin for plugin in plugins if plugin["name"] in searched_plugins(request.args.get("search"))]
 
     page = request.args.get("page", default=1, type=int)
     per_page = 9
@@ -106,6 +107,7 @@ async def installed_plugins() -> str:
 
 @app.get("/plugin/installed/list")
 async def installed_plugins_list() -> str:
+    indexes
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
     store_plugins: dict[str, dict[str, str]] = {
@@ -128,10 +130,7 @@ async def installed_plugins_list() -> str:
         }
         for plugin_name in installed_plugins
     ]
-
-    search_query = request.args.get("search", default="", type=str).strip().lower()
-    if search_query:
-        plugins = [plugin for plugin in plugins if search_query in plugin["name"].lower()]
+    plugins = [plugin for plugin in plugins if plugin["name"] in searched_plugins(request.args.get("search"))]
 
     return await render_template(
         "_installed_plugins_list.html",
