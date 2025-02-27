@@ -2,25 +2,27 @@
     {% for key, value in config.items() %}
     <div class="item">
         <div>{{ key }}:</div>
-        <form
-            action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
-            method="POST"
-            oninput="this.querySelector('button[type=submit]').disabled = false">
-            <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
-            {% if value is boolean %}
-            <input type="checkbox" name="value" {% if value %}checked{% endif %} />
-            {% else %}
-            <input type="text" name="value" value="{{ value }}" size="50"/>
-            {% endif %}
-            {# TODO how to display lists? #}
-            <button type="submit" disabled>update</button>
-        </form>
+        <div class="config-forms">
+            <form
+                action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
+                method="POST"
+                oninput="this.querySelector('button[type=submit]').disabled = false">
+                <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
+                {% if value is boolean %}
+                <input type="checkbox" name="value" {% if value %}checked{% endif %} />
+                {% else %}
+                <input type="text" name="value" value="{{ value }}" size="50"/>
+                {% endif %}
+                {# TODO how to display lists? #}
+                <button type="submit" disabled>update</button>
+            </form>
 
-        {% if key in user_config %}
-        <form action="{{ url_for('config_unset', name=key, next=url_for('plugin', name=plugin_name)) }}" method="POST">
-            <button type="submit">unset</button>
-        </form>
-        {% endif %}
+            {% if key in user_config %}
+            <form action="{{ url_for('config_unset', name=key, next=url_for('plugin', name=plugin_name)) }}" method="POST">
+                <button type="submit">unset</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
     {% endfor %}
 </div>
