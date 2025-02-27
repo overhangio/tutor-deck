@@ -516,7 +516,6 @@ main {
 	background-color: rgba(0, 0, 0, 0.3);
 	/* Center modal container */
 	display: flex;
-	align-items: center;
 	justify-content: center;
 	position: fixed;
 	opacity: 0; /* to be hidden by default */
@@ -537,13 +536,15 @@ main {
 		border-radius: 2em;
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 		padding: 30px 50px;
-		width: 37.5em;
-		height: 18em;
-		max-width: 100%;
+		width: fit-content;
+		height: fit-content;
+		max-width: 30em;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+		position: inherit;
+		top: 5em;
 
 		.modal-header {
 			display: flex;
