@@ -45,10 +45,12 @@ html {
 }
 body {
 	margin: 0;
+	height: 100%;
 }
 main {
 	display: grid;
 	grid-template-columns: 20% 80%;
+	height: 100%;
 
 	@media (max-width: 900px) {
 		grid-template-columns: 10% 90%;

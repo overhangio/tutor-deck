@@ -25,11 +25,7 @@
 
             </div>
             <div class="plugin-button">
-                {% if plugin.is_installed %}
-                <form action="{{ url_for('plugin_upgrade', name=plugin.name) }}" method="POST">
-                    <button type="submit">Upgrade</button>
-                </form>
-                {% endif %}
+                
             </div>
         </div>
     </div>
