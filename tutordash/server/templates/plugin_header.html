@@ -5,7 +5,7 @@
     <span>Plugin Marketplace</span>
     <span>/ {{ plugin_name }}</span>
 </div>
-<div class="header-bar">
+<div class="info">
     <div class="info-container">
         <div class="page-title">{{ plugin_name }}</div>
         <div class="page-description">By {{ author_name }}</div>
@@ -13,10 +13,9 @@
     <div class="page-button">
         {% block page_button %}
         {% if plugin_name in installed_plugins %}
-        <div class="installed">
-            <img src="{{ url_for('static', filename='/img/CheckCircle.svg')}}" alt="">
-            Installed
-        </div>
+        <form action="{{ url_for('plugin_upgrade', name=plugin_name) }}" method="POST">
+            <button type="submit">Upgrade</button>
+        </form>
         {% else %}
         <form action="{{ url_for('plugin_install', name=plugin_name) }}" method="POST">
             <button type="submit">Install</button>
