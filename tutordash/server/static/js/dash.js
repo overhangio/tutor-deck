@@ -30,12 +30,3 @@ close.forEach((button) => {
 });
 
 
-const logsContainer = document.getElementById('tutor-logs');
-
-const observer = new MutationObserver(() => {
-    logsContainer.scrollTop = logsContainer.scrollHeight;
-});
-if (logsContainer !== null) {
-  observer.observe(logsContainer, { childList: true, subtree: true });
-}
-
