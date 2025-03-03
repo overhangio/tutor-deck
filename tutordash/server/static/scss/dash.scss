@@ -238,7 +238,7 @@ main {
 			margin: 0em;
 			.installed-plugins-list {
 				border: 1px solid $gray-2;
-				border-radius: 1em;
+				border-radius: 0.75em;
 				display: flex;
 				flex-direction: column;
 				.installed-plugin {

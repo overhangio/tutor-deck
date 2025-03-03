@@ -8,7 +8,9 @@ function SetWarning(){
     }
   });
 }
-SetWarning()
+document.body.addEventListener('htmx:afterOnLoad', function(event) {
+  SetWarning();
+});
 
 
 let open = document.querySelectorAll(".open-modal-button");
@@ -33,5 +35,7 @@ const logsContainer = document.getElementById('tutor-logs');
 const observer = new MutationObserver(() => {
     logsContainer.scrollTop = logsContainer.scrollHeight;
 });
+if (logsContainer !== null) {
+  observer.observe(logsContainer, { childList: true, subtree: true });
+}
 
-observer.observe(logsContainer, { childList: true, subtree: true });
