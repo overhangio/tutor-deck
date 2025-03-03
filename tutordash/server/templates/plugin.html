@@ -54,20 +54,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    htmx.on("htmx:sseBeforeMessage", function(evt) {
-        // Don't swap content, we want to append
-        evt.preventDefault();
-
-        // Parse JSON
-        const stdout = JSON.parse(evt.detail.data);
-
-        // Note that HTML is automatically escaped
-        const text = document.createTextNode(stdout);
-        evt.detail.elt.appendChild(text);
-
-        // Scroll to bottom
-        evt.detail.elt.scrollTop = evt.detail.elt.scrollHeight;
-    });
-</script>
+    <script src="{{ url_for('static', filename='js/scroll_logs.js') }}"></script>
 {% endblock %}

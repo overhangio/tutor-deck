@@ -28,5 +28,3 @@ close.forEach((button) => {
 		modal_container.classList.remove("show");
 	});
 });
-
-
