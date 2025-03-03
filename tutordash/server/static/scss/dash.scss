@@ -255,6 +255,13 @@ main {
 						justify-content: center;
 						flex-grow: 1;
 						width: 80%;
+						div {
+							margin-bottom: 0.5em;
+
+							&:last-child {
+								margin-bottom: 0;
+							}
+						}
 						.name {
 							font-size: 1.25em;
 							a {
@@ -276,6 +283,7 @@ main {
 								display: none;
 							}
 							p {
+								margin: 0;
 								white-space: nowrap;
 								overflow: hidden;
 								text-overflow: ellipsis;
@@ -436,7 +444,7 @@ main {
 					height: 3em;
 					max-width: 60em;
 
-					@media (max-width: 1100px) {
+					@media (max-width: 1225px) {
 						flex-direction: column;
 						height: 5em;
 						align-items: start;
@@ -444,8 +452,9 @@ main {
 					}
 
 					div {
+						display: flex;
+						align-items: center;
 						height: 100%;
-						font-weight: 600;
 						flex: 1;
 
 						@media (max-width: 1100px) {
@@ -472,6 +481,7 @@ main {
 								font-size: 1em;
 								margin-left: 1em;
 								width: 25em;
+								flex-shrink: 1;
 
 								@media (max-width: 700px) {
 									width: 80%;
@@ -488,6 +498,17 @@ main {
 								font-size: 1em;
 								cursor: pointer;
 								margin: 0em 0.5em;
+
+								&:disabled {
+									cursor: not-allowed;
+									opacity: 0.5;
+								}
+							}
+							#unset-button {
+								&:disabled {
+									cursor: default;
+									opacity: 0;
+								}
 							}
 						}
 					}
@@ -629,7 +650,7 @@ main {
 				content: "";
 				height: 1.5em;
 				width: 1.5em;
-				left: 0.25em;
+				left: 0.175em;
 				bottom: 0.125em;
 				background-color: white;
 				-webkit-transition: 0.4s;

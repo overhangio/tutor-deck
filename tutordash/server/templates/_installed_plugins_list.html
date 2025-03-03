@@ -4,7 +4,7 @@
 <div class="installed-plugin">
     <div class="details">
         <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
-        <div class="author">{{ plugin.author }}</div>
+        <div class="author">By {{ plugin.author }}</div>
         <div class="description">{{ plugin.description|safe }}</div>
     </div>
     <div class="warning" id="warning-cookie-{{plugin.name}}">

@@ -80,7 +80,7 @@ async def plugin_store_list() -> str:
     plugins = [plugin for plugin in plugins if plugin["name"] in searched_plugins(request.args.get("search"))]
 
     page = request.args.get("page", default=1, type=int)
-    per_page = 9
+    per_page = 100
     total_pages = (len(plugins) + per_page - 1) // per_page
     if page < 1:
         page = 1

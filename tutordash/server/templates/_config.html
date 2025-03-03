@@ -17,11 +17,11 @@
                 <button type="submit" disabled>update</button>
             </form>
 
-            {% if key in user_config %}
+            
             <form action="{{ url_for('config_unset', name=key, next=url_for('plugin', name=plugin_name)) }}" method="POST">
-                <button type="submit">unset</button>
+                <button id="unset-button" type="submit" {% if key not in user_config %}disabled{% endif %}>unset</button>
             </form>
-            {% endif %}
+            
         </div>
     </div>
     {% endfor %}
