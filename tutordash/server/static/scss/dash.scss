@@ -136,6 +136,14 @@ main {
 		header {
 			display: flex;
 			flex-direction: column;
+			.header-address {
+				span {
+					a {
+						@include a-tag();
+						color: $blue;
+					}
+				}
+			}
 			.info {
 				display: flex;
 				flex-direction: row;
