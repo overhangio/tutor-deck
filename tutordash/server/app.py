@@ -1,27 +1,19 @@
 import asyncio
-import importlib_metadata
 import json
 import logging
 import sys
 import typing as t
 
+import importlib_metadata
 from markdown import markdown
-from quart import (
-    Quart,
-    make_response,
-    render_template,
-    request,
-    redirect,
-    url_for,
-)
+from quart import Quart, make_response, redirect, render_template, request, url_for
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
+
 from tutor.plugins import indexes
 from tutor.plugins.v1 import discover_package
 
-from . import constants
-from . import tutorclient
-
+from . import constants, tutorclient
 
 app = Quart(
     __name__,
@@ -156,6 +148,9 @@ async def local_launch() -> str:
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
+    toast = request.args.get("toast")
+    toast_description = request.args.get("toast_description")
+    ask_local_launch = request.args.get("ask_local_launch", False)
     is_enabled = name in tutorclient.Client.enabled_plugins()
     is_installed = name in tutorclient.Client.installed_plugins()
     author = next((p.author.split('<')[0].strip() for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
@@ -167,10 +162,13 @@ async def plugin(name: str) -> str:
         is_installed=is_installed,
         author_name=author,
         plugin_description=description,
+        toast=toast,
+        toast_description=toast_description,
+        ask_local_launch=ask_local_launch,
+        show_logs=show_logs,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
-        show_logs=show_logs,
         **shared_template_context(),
     )
 
@@ -183,7 +181,8 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     command = ["plugins", "enable" if enable_plugin else "disable", name]
     tutorclient.CliPool.run_sequential(command)
     # TODO error management
-    response = await make_response(redirect(url_for("plugin", name=name)))
+    
+    response = await make_response(redirect(url_for("plugin", name=name, toast="Your plugin was successfully enabled" if enable_plugin else "", ask_local_launch=True)))
     if enable_plugin:
         response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
     else:
@@ -200,13 +199,21 @@ async def plugin_install(name: str) -> WerkzeugResponse:
             await asyncio.sleep(0.1)
         discover_package(importlib_metadata.entry_points().__getitem__(name))
     asyncio.create_task(bg_install_and_reload())
-    return redirect(url_for("plugin", name=name, show_logs=True))
+    return redirect(
+        url_for(
+            "plugin", 
+            name=name, 
+            show_logs=True, 
+            toast="Plugin Installed Successfully", 
+            toast_description="Enable it now to start using its features"
+            )
+        )
 
 
 @app.post("/plugin/<name>/upgrade")
 async def plugin_upgrade(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "upgrade", name])
-    return redirect(url_for("plugin", name=name, show_logs=True))
+    return redirect(url_for("plugin", name=name, show_logs=True, toast="Your plugin was successfully updated", ask_local_launch=True))
 
 @app.post("/plugins/update")
 async def plugins_update() -> WerkzeugResponse:
@@ -220,7 +227,7 @@ async def config_set(name: str) -> WerkzeugResponse:
     plugin_name = form.get("plugin_name")
     tutorclient.CliPool.run_sequential(["config", "save", "--set", f"{name}={value}"])
     # TODO error management
-    response = await make_response(redirect(request.args.get("next", "/")))
+    response = await make_response(redirect(url_for("plugin", name=plugin_name, toast="You have successfully modified parameters", ask_local_launch=True)))
     response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{plugin_name}", "requires launch", max_age=ONE_MONTH)
     return response
 
@@ -228,8 +235,12 @@ async def config_set(name: str) -> WerkzeugResponse:
 @app.post("/config/<name>/unset")
 async def config_unset(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_sequential(["config", "save", f"--unset={name}"])
+    form = await request.form
+    plugin_name = form.get("plugin_name")
     # TODO error management
-    return redirect(request.args.get("next", "/"))
+    response = await make_response(redirect(url_for("plugin", name=plugin_name, toast="You have successfully modified parameters", ask_local_launch=True)))
+    response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{plugin_name}", "requires launch", max_age=ONE_MONTH)
+    return response
 
 
 # def tutor_cli(command: list[str]) -> WerkzeugResponse:

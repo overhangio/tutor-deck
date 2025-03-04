@@ -64,10 +64,35 @@
             </div>
         </div>
     </div>
-
+    {% if toast or toast_description %}
     <div class="toast-container">
-        
+        <div class="toast">
+            <div class="toast-content">
+                <img src="{{ url_for('static', filename='/img/Icon.svg' )}}">
+                <div class="message">
+                    <span class="text text-1"> {{ toast }} </span>
+                    <span class="text text-2"> 
+                        {% if ask_local_launch %}
+                        "Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete."
+                        {% else %}
+                        {{ toast_description }} 
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% if ask_local_launch %}
+            <div class="toast-footer">
+                <button type="button" class="modal-button close-toast-button">Not Now</button>
+                <form method="POST" action="{{ url_for('cli_local_launch')}}">
+                    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
     </div>
+    {% endif %}
+    
+
     <script src="{{ url_for('static', filename='/js/dash.js') }}"></script>
 
     {% if sidebar_active_tab %}

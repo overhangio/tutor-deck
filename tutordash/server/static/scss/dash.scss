@@ -19,6 +19,39 @@ $green: #009951;
 	}
 }
 
+@mixin modal-and-toast-footer {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1em;
+
+	button {
+		cursor: pointer;
+		border-radius: 0.5em;
+		padding: 0.5em 1em;
+	}
+
+	.close-modal-button {
+		background: none;
+		border: 1px solid #888;
+		color: $black;
+		padding: 0.5em 1em;
+		margin-right: 1em;
+		font-size: 1em;
+	}
+
+	.close-toast-button {
+		@extend .close-modal-button;
+	}
+
+	.run_modal_button {
+		background: none;
+		border: none;
+		background-color: $light-blue;
+		color: $gray-1;
+		font-size: 1em;
+	}
+}
+
 h1 {
 	font-size: 2.25em;
 	font-weight: bold;
@@ -607,32 +640,7 @@ main {
 		}
 
 		.modal-footer {
-			display: flex;
-			justify-content: flex-end;
-			margin-top: 1em;
-
-			button {
-				cursor: pointer;
-				border-radius: 0.5em;
-				padding: 0.5em 1em;
-			}
-
-			.close-modal-button {
-				background: none;
-				border: 1px solid #888;
-				color: $black;
-				padding: 0.5em 1em;
-				margin-right: 1em;
-				font-size: 1em;
-			}
-
-			.run_modal_button {
-				background: none;
-				border: none;
-				background-color: $light-blue;
-				color: $gray-1;
-				font-size: 1em;
-			}
+			@include modal-and-toast-footer();
 		}
 	}
 }
@@ -708,106 +716,68 @@ main {
 	flex-direction: column;
 	gap: 10px;
 	z-index: 1000;
-}
 
-.toast {
-	position: relative;
-	width: 320px;
-	border-radius: 12px;
-	background: #fff;
-	padding: 20px 35px 20px 25px;
-	box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
-	display: flex;
-	overflow-x: hidden;
-	align-items: center;
-	transform: translateX(calc(100% + 30px));
-	transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
-	box-shadow: 0em 0em 0.5em 0.1em $gray-3;
-	&.active {
-		transform: translateX(0%);
-	}
-	.toast-content {
+	.toast {
+		position: relative;
+		width: 21em;
+		border-radius: 12px;
+		background: #fff;
+		padding: 20px 35px 20px 25px;
 		display: flex;
+		overflow-x: hidden;
 		align-items: center;
-	}
-	.close {
-		position: absolute;
-		top: 10px;
-		right: 15px;
-		padding: 5px;
-		cursor: pointer;
-		opacity: 0.7;
-		&:hover {
-			opacity: 1;
+		transform: translateX(calc(100% + 30px));
+		transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
+		box-shadow: 0em 0em 0.5em 0.1em $gray-3;
+		flex-direction: column;
+		align-items: start;
+		&.active {
+			transform: translateX(0%);
 		}
-	}
-	.progress {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		height: 3px;
-		width: 100%;
-		&:before {
-			content: "";
-			position: absolute;
-			bottom: 0;
-			right: 0;
-			height: 100%;
-			width: 100%;
-			background-color: #4070f4;
-		}
-	}
-	&.info {
-		.icon {
-			color: rgb(13 202 240);
-		}
-		.progress {
-			&:before {
-				background: rgb(13 202 240);
+		.toast-content {
+			display: flex;
+			align-items: center;
+
+			.icon {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 35px;
+				min-width: 35px;
+				font-size: 35px;
+				color: #fff;
+			}
+			.message {
+				display: flex;
+				flex-direction: column;
+				margin-left: 15px;
+
+				.text {
+					font-size: 16px;
+					font-weight: 400;
+					color: #666666;
+					font-optical-sizing: auto;
+					font-style: normal;
+					&.text-1 {
+						font-weight: 600;
+						color: #333;
+					}
+				}
 			}
 		}
-	}
-}
-.toast-content {
-	.icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 35px;
-		min-width: 35px;
-		font-size: 35px;
-		color: #fff;
-	}
-	.message {
-		display: flex;
-		flex-direction: column;
-		margin-left: 15px;
-	}
-}
-.message {
-	.text {
-		font-size: 16px;
-		font-weight: 400;
-		color: #666666;
-		font-family: "Outfit", serif;
-		font-optical-sizing: auto;
-		font-style: normal;
-		&.text-1 {
-			font-weight: 600;
-			color: #333;
+		.toast-footer {
+			@include modal-and-toast-footer();
 		}
-	}
-}
-.progress {
-	&.active {
-		&:before {
-			animation: progress 5s linear forwards;
+		.close {
+			position: absolute;
+			top: 10px;
+			right: 15px;
+			padding: 5px;
+			cursor: pointer;
+			opacity: 0.7;
+			&:hover {
+				opacity: 1;
+			}
 		}
-	}
-}
-
-@keyframes progress {
-	100% {
-		right: 100%;
 	}
 }
