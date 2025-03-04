@@ -114,7 +114,6 @@ async def installed_plugins() -> str:
 
 @app.get("/plugin/installed/list")
 async def installed_plugins_list() -> str:
-    indexes
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
     store_plugins: dict[str, dict[str, str]] = {
@@ -142,6 +141,13 @@ async def installed_plugins_list() -> str:
     return await render_template(
         "_installed_plugins_list.html",
         plugins=plugins,
+        **shared_template_context(),
+    )
+
+@app.get("/local-launch")
+async def local_launch() -> str:
+    return await render_template(
+        "local_launch.html",
         **shared_template_context(),
     )
 
