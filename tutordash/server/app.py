@@ -51,10 +51,17 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 
 @app.get("/")
 async def home() -> str:
-    return await render_template("index.html", **shared_template_context())
+    return await render_template(
+        "installed_plugins.html", 
+        **shared_template_context()
+    )
 
 def searched_plugins(pattern: str) -> list[str]:
-    return [plugin._data["name"] for plugin in indexes.iter_cache_entries() if plugin.match(pattern)]
+    return [
+            plugin._data["name"] 
+            for plugin in indexes.iter_cache_entries() 
+            if plugin.match(pattern)
+        ]
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
