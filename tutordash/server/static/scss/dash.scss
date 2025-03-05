@@ -23,6 +23,7 @@ $green: #009951;
 	display: flex;
 	justify-content: flex-end;
 	margin-top: 1em;
+	width: 100%;
 
 	button {
 		cursor: pointer;
@@ -719,7 +720,7 @@ main {
 
 	.toast {
 		position: relative;
-		width: 21em;
+		width: 30em;
 		border-radius: 12px;
 		background: #fff;
 		padding: 20px 35px 20px 25px;
@@ -736,32 +737,30 @@ main {
 		}
 		.toast-content {
 			display: flex;
-			align-items: center;
+			flex-direction: column;
 
-			.icon {
+			.title {
 				display: flex;
 				align-items: center;
-				justify-content: center;
-				height: 35px;
-				min-width: 35px;
-				font-size: 35px;
-				color: #fff;
+				margin-bottom: 1em;
+				img {
+					margin-right: 1em;
+				}
 			}
 			.message {
 				display: flex;
 				flex-direction: column;
-				margin-left: 15px;
+			}
 
-				.text {
-					font-size: 16px;
-					font-weight: 400;
-					color: #666666;
-					font-optical-sizing: auto;
-					font-style: normal;
-					&.text-1 {
-						font-weight: 600;
-						color: #333;
-					}
+			.text {
+				font-size: 16px;
+				font-weight: 400;
+				color: #666666;
+				font-optical-sizing: auto;
+				font-style: normal;
+				&.text-1 {
+					font-weight: 600;
+					color: #333;
 				}
 			}
 		}

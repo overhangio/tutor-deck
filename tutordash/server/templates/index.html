@@ -68,9 +68,11 @@
     <div class="toast-container">
         <div class="toast">
             <div class="toast-content">
-                <img src="{{ url_for('static', filename='/img/Icon.svg' )}}">
-                <div class="message">
+                <div class="title">
+                    <img src="{{ url_for('static', filename='/img/Icon.svg' )}}">
                     <span class="text text-1"> {{ toast }} </span>
+                </div>
+                <div class="message">
                     <span class="text text-2"> 
                         {% if ask_local_launch %}
                         "Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete."
