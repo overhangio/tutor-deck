@@ -110,11 +110,11 @@ class Cli:
             except TutorError as e:
                 # This happens for incorrect commands
                 self.log_to_file(e.args[0])
-                self.log_to_file("Exit code: 2")
+                self.log_to_file("\nExit code: 2")
             except SystemExit:
-                self.log_to_file("Exit code: 0")
+                self.log_to_file("\nExit code: 0")
             except Exception:
-                self.log_to_file("Exit code: 1")
+                self.log_to_file("\nExit code: 1")
 
     def stop(self) -> None:
         """

@@ -232,6 +232,10 @@ main {
 						font-size: 1em;
 						cursor: pointer;
 					}
+					.cancel-process-button {
+						background-color: $red;
+						cursor: pointer;
+					}
 				}
 			}
 			.search {
@@ -724,7 +728,7 @@ main {
 		border-radius: 12px;
 		background: #fff;
 		padding: 20px 35px 20px 25px;
-		display: flex;
+		display: none;
 		overflow-x: hidden;
 		align-items: center;
 		transform: translateX(calc(100% + 30px));
