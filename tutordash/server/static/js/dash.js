@@ -60,11 +60,9 @@ function hideToast() {
   if (toast !== null) {
     toast.classList.remove("active");
 
-    // Wait for transition to complete before hiding
+    // Wait for transition to complete before removing container
     setTimeout(() => {
       toast.style.display = "none";
     }, 500); // Match this to the CSS transition duration
   }
 }
-
-showToast("info");

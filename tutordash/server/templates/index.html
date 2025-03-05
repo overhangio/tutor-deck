@@ -103,6 +103,12 @@
     {% endif %}
 
     {% block scripts %}{% endblock %}
+
+    {% if not show_logs %}
+    <script>
+        showToast("info");
+    </script>
+    {% endif %}
 </body>
 
 </html>

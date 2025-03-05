@@ -11,14 +11,14 @@ import typing as t
 import aiofiles
 from quart import Quart
 
-import tutor.env
-from tutor.exceptions import TutorError
-from tutor import fmt, hooks
-from tutor.types import Config
 import tutor.commands.cli
 import tutor.config
-import tutor.utils
+import tutor.env
 import tutor.plugins.indexes
+import tutor.utils
+from tutor import fmt, hooks
+from tutor.exceptions import TutorError
+from tutor.types import Config
 
 from . import constants
 
@@ -107,11 +107,15 @@ class Cli:
                 # Call tutor command
                 # pylint: disable=no-value-for-parameter
                 tutor.commands.cli.cli(self.args)
+                self.log_to_file("Exit code: 0")
             except TutorError as e:
                 # This happens for incorrect commands
                 self.log_to_file(e.args[0])
+                self.log_to_file("Exit code: 2")
             except SystemExit:
-                pass
+                self.log_to_file("Exit code: 0")
+            except Exception:
+                self.log_to_file("Exit code: 1")
 
     def stop(self) -> None:
         """
