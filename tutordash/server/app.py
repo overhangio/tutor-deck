@@ -255,7 +255,7 @@ async def config_unset(name: str) -> WerkzeugResponse:
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
-    response = await make_response(redirect(url_for("cli_logs")))
+    response = await make_response(redirect(url_for("cli_logs", toast="Local launch was successfully executed", )))
     for cookie_name in request.cookies:
         if cookie_name.startswith(WARNING_COOKIE_PREFIX):
             response.delete_cookie(cookie_name)
@@ -265,7 +265,8 @@ async def cli_local_launch() -> WerkzeugResponse:
 @app.get("/cli/logs")
 async def cli_logs() -> str:
     name = request.args.get("name")
-    return await render_template("cli_logs.html", name=name, **shared_template_context())
+    toast = request.args.get("toast")
+    return await render_template("cli_logs.html", name=name, toast=toast, **shared_template_context())
 
 
 @app.get("/cli/logs/stream")

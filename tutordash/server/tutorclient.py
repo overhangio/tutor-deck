@@ -107,7 +107,6 @@ class Cli:
                 # Call tutor command
                 # pylint: disable=no-value-for-parameter
                 tutor.commands.cli.cli(self.args)
-                self.log_to_file("Exit code: 0")
             except TutorError as e:
                 # This happens for incorrect commands
                 self.log_to_file(e.args[0])
