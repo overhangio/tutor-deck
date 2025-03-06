@@ -107,14 +107,6 @@ async def plugin_installed_list() -> str:
     )
 
 
-@app.get("/local-launch")
-async def local_launch() -> str:
-    return await render_template(
-        "local_launch.html",
-        **shared_template_context(),
-    )
-
-
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
@@ -287,10 +279,17 @@ async def config_unset(name: str) -> WerkzeugResponse:
 #     return redirect(url_for("cli_logs"))
 
 
+@app.get("/local/launch")
+async def local_launch_view() -> str:
+    return await render_template(
+        "local_launch.html",
+        **shared_template_context(),
+    )
+
+
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
-    # tutorclient.CliPool.run_parallel(app, ["plugins", "list"])
     response = await make_response(
         redirect(
             url_for(
