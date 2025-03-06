@@ -51,14 +51,17 @@
     <div class="modal-container" id="modal_container">
         <div class="modal-content">
             <div class="modal-header">
-                {% block model_icon %}{% endblock %}
+                <img src="{{ url_for('static', filename='/img/Featured icon.svg') }}" alt=""> 
             </div>
             <div class="modal-body">
-                <h3>{% block modal_title%}{% endblock %}</h3>
-                <p>{% block modal_description %}{% endblock %}</p>
+                <h3>Run local launch for all plugins?</h3>
+                <p>Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.</p>
             </div>
             <div class="modal-footer">
-                {% block modal_footer %}{% endblock %}
+                <button type="button" class="modal-button close-modal-button">Not Now</button>
+                <form method="POST" action="{{ url_for('cli_local_launch')}}">
+                    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
+                </form>
             </div>
         </div>
     </div>

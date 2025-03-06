@@ -10,9 +10,9 @@ Running local launch will allow all changes to plugins to take effect. This coul
 
 {% block page_button %}
 {% if show_logs %}
-<button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="modal-button cancel-process-button" type="submit">Cancel</button>
+    <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="modal-button cancel-process-button" type="submit">Cancel</button>
 {% else %}
-<button class="modal-button open-modal-button" type="button">Local Launch</button>
+    <button class="modal-button open-modal-button" type="button">Local Launch</button>
 {% endif %}
 {% endblock %}
 
@@ -22,24 +22,6 @@ Running local launch will allow all changes to plugins to take effect. This coul
 {% block warning %}
 {% endblock %}
 
-{% block model_icon %}
-<img src="{{ url_for('static', filename='/img/Featured icon.svg') }}" alt=""> 
-{% endblock %}
-
-{% block modal_title %}
-Run local launch for all plugins?
-{% endblock %}
-
-{% block modal_description %}
-Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.
-{% endblock %}
-
-{% block modal_footer %}
-<button type="button" class="modal-button close-modal-button">Not Now</button>
-<form method="POST" action="{{ url_for('cli_local_launch')}}">
-    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
-</form>
-{% endblock %}
 
 {% set sidebar_active_tab = "local-launch" %}
 
