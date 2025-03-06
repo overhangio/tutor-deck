@@ -1,1 +1,3 @@
 SHORT_SLEEP_SECONDS = 0.1
+ONE_MONTH = 60 * 60 * 24 * 30
+WARNING_COOKIE_PREFIX = "warning-cookie"

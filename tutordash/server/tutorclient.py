@@ -9,13 +9,12 @@ import threading
 import typing as t
 
 import aiofiles
-from quart import Quart
-
 import tutor.commands.cli
 import tutor.config
 import tutor.env
 import tutor.plugins.indexes
 import tutor.utils
+from quart import Quart
 from tutor import fmt, hooks
 from tutor.exceptions import TutorError
 from tutor.types import Config

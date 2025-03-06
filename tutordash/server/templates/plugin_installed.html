@@ -1,4 +1,4 @@
-{% extends "base_header.html" %}
+{% extends "_base_header.html" %}
 
 {% block page_title %}
 My Plugins
@@ -33,8 +33,8 @@ Running local launch will allow all changes to plugins to take effect. This coul
 
 {% set sidebar_active_tab = "my-plugins" %}
 
-{% set search_endpoint = url_for('installed_plugins_list') %}
+{% set search_endpoint = url_for('plugin_installed_list') %}
 
 {% block workspace_content %}
-<div id="plugins-list" class="installed-plugins-list" hx-get="{{ url_for('installed_plugins_list')}}" hx-trigger="load"></div>
+<div id="plugins-list" class="installed-plugins-list" hx-get="{{ url_for('plugin_installed_list')}}" hx-trigger="load"></div>
 {% endblock %}

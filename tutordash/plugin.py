@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import click
-
 from tutor import hooks
 from tutor.commands.context import Context
 
