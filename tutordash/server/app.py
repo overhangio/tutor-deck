@@ -86,42 +86,18 @@ async def plugin_installed_list() -> str:
     search_query = request.args.get("search", "")
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
-    store_plugins: dict[str, dict[str, str]] = {
-        p.name: {
+    plugins: list[dict[str, str]] = [
+        {
+            "name": p.name,
             "url": p.url,
             "index": p.index,
             "author": p.author.split("<")[0].strip(),
             "description": markdown(p.description.replace("\n", " ")),
+            "is_enabled": p.name in enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
-    }
-    plugins: list[dict[str, str]] = [
-        {
-            "name": plugin_name,
-            "url": (
-                store_plugins[plugin_name]["url"]
-                if plugin_name in store_plugins
-                else ""
-            ),
-            "index": (
-                store_plugins[plugin_name]["index"]
-                if plugin_name in store_plugins
-                else ""
-            ),
-            "author": (
-                store_plugins[plugin_name]["author"].split("<")[0].strip()
-                if plugin_name in store_plugins
-                else ""
-            ),
-            "description": (
-                markdown(store_plugins[plugin_name]["description"])
-                if plugin_name in store_plugins
-                else ""
-            ),
-            "is_enabled": plugin_name in enabled_plugins,
-        }
-        for plugin_name in installed_plugins
-        if plugin_name in tutorclient.Client.plugins_matching_pattern(search_query)
+        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
+        and p.name in installed_plugins
     ]
 
     return await render_template(
