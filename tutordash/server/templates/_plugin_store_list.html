@@ -31,7 +31,9 @@
     </div>
 {% endfor %}
 </div>
+
 <div class="pagination-container">
+    {% if pagination.previous_page or pagination.next_page %}
     <div class="pagination">
         {% if pagination.previous_page %}
         <a hx-get="{{ url_for('plugin_store_list', page=pagination.previous_page)}}" hx-target="#plugins-list">
@@ -55,4 +57,5 @@
         </a>
         {% endif %}
     </div>
+    {% endif %}
 </div>

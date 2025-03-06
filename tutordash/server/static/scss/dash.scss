@@ -350,9 +350,8 @@ main {
 				flex-direction: column;
 
 				.plugins-container {
-					display: flex;
-					flex-wrap: wrap;
-					justify-content: space-between;
+					display: grid;
+					grid-template-columns: repeat(auto-fit, minmax(18em, 1fr));
 					gap: 2em;
 
 					.plugin {
@@ -362,8 +361,8 @@ main {
 						flex-direction: column;
 						padding: 1em;
 						justify-content: space-between;
-						flex: 1 1 calc(30% - 14px);
-						min-width: 250px;
+						width: 100%;
+						min-width: 15em;
 
 						.header {
 							display: flex;

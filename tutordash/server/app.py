@@ -385,8 +385,6 @@ def pagination_context(
     return {
         "current_page": current_page,
         "total_pages": total_pages,
-        "has_previous": current_page > 1,
-        "has_next": current_page < total_pages,
         "previous_page": current_page - 1 if current_page > 1 else None,
         "next_page": current_page + 1 if current_page < total_pages else None,
     }
