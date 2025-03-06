@@ -721,10 +721,12 @@ main {
 	flex-direction: column;
 	gap: 10px;
 	z-index: 1000;
+	max-width: 90%;
 
 	.toast {
 		position: relative;
 		width: 30em;
+		max-width: 100%;
 		border-radius: 12px;
 		background: #fff;
 		padding: 20px 35px 20px 25px;
