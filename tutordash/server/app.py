@@ -9,7 +9,6 @@ from markdown import markdown
 from quart import Quart, make_response, redirect, render_template, request, url_for
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
-from tutor.plugins import indexes
 from tutor.plugins.v1 import discover_package
 
 from . import constants, tutorclient
@@ -43,21 +42,19 @@ async def home() -> str:
     return await render_template("plugin_installed.html", **shared_template_context())
 
 
-def searched_plugins(pattern: str) -> list[str]:
-    return [
-        plugin._data["name"]
-        for plugin in indexes.iter_cache_entries()
-        if plugin.match(pattern)
-    ]
-
-
 @app.get("/plugin/store")
 async def plugin_store() -> str:
     return await render_template("plugin_store.html", **shared_template_context())
 
 
+@app.get("/plugin/installed")
+async def plugin_installed() -> str:
+    return await render_template("plugin_installed.html", **shared_template_context())
+
+
 @app.get("/plugin/store/list")
 async def plugin_store_list() -> str:
+    search_query = request.args.get("search", "")
     installed_plugins = tutorclient.Client.installed_plugins()
     plugins: list[dict[str, str]] = [
         {
@@ -69,43 +66,24 @@ async def plugin_store_list() -> str:
             "is_installed": p.name in installed_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
-    ]
-    plugins = [
-        plugin
-        for plugin in plugins
-        if plugin["name"] in searched_plugins(request.args.get("search"))
+        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
     ]
 
-    page = request.args.get("page", default=1, type=int)
-    per_page = 100
-    total_pages = (len(plugins) + per_page - 1) // per_page
-    if page < 1:
-        page = 1
-    elif page > total_pages:
-        page = total_pages
-    start = (page - 1) * per_page
-    end = start + per_page
-    plugins = plugins[start:end]
+    current_page = int(request.args.get("page", "1"))
+    plugins = current_page_plugins(plugins, current_page)
+    pagination = pagination_context(plugins, current_page)
 
     return await render_template(
         "_plugin_store_list.html",
         plugins=plugins,
-        page_count=total_pages,
-        current_page=page,
-        **shared_template_context(),
-    )
-
-
-@app.get("/plugin/installed")
-async def plugin_installed() -> str:
-    return await render_template(
-        "plugin_installed.html",
+        pagination=pagination,
         **shared_template_context(),
     )
 
 
 @app.get("/plugin/installed/list")
 async def plugin_installed_list() -> str:
+    search_query = request.args.get("search", "")
     installed_plugins = tutorclient.Client.installed_plugins()
     enabled_plugins = tutorclient.Client.enabled_plugins()
     store_plugins: dict[str, dict[str, str]] = {
@@ -143,11 +121,7 @@ async def plugin_installed_list() -> str:
             "is_enabled": plugin_name in enabled_plugins,
         }
         for plugin_name in installed_plugins
-    ]
-    plugins = [
-        plugin
-        for plugin in plugins
-        if plugin["name"] in searched_plugins(request.args.get("search"))
+        if plugin_name in tutorclient.Client.plugins_matching_pattern(search_query)
     ]
 
     return await render_template(
@@ -425,3 +399,27 @@ def shared_template_context() -> dict[str, t.Any]:
         "installed_plugins": tutorclient.Client.installed_plugins(),
         "enabled_plugins": tutorclient.Client.enabled_plugins(),
     }
+
+
+def pagination_context(
+    plugins: list[dict[str, str]], current_page: int
+) -> dict[str, t.Any]:
+    total_pages = (
+        len(plugins) + constants.ITEMS_PER_PAGE - 1
+    ) // constants.ITEMS_PER_PAGE
+    return {
+        "current_page": current_page,
+        "total_pages": total_pages,
+        "has_previous": current_page > 1,
+        "has_next": current_page < total_pages,
+        "previous_page": current_page - 1 if current_page > 1 else None,
+        "next_page": current_page + 1 if current_page < total_pages else None,
+    }
+
+
+def current_page_plugins(
+    plugins: list[dict[str, str]], current_page: int
+) -> list[dict[str, str]]:
+    start_index = (current_page - 1) * constants.ITEMS_PER_PAGE
+    end_index = start_index + constants.ITEMS_PER_PAGE
+    return plugins[start_index:end_index]

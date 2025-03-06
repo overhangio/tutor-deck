@@ -21,8 +21,7 @@
         placeholder="Search..." 
         hx-get="{{ search_endpoint }}"
         hx-trigger="input changed delay:300ms, search"
-        hx-target="#plugins-list"
-        hx-indicator="#search-indicator">
+        hx-target="#plugins-list">
 </div>
 {% endblock %}
 {% block warning %}

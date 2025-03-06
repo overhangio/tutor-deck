@@ -296,6 +296,14 @@ class Client:
         return list(hooks.Filters.PLUGINS_LOADED.iterate())
 
     @classmethod
+    def plugins_matching_pattern(cls, pattern: str) -> list[str]:
+        return [
+            plugin._data["name"]
+            for plugin in cls.plugins_in_store()
+            if plugin.match(pattern)
+        ]
+
+    @classmethod
     def plugin_config_unique(cls, name: str) -> Config:
         plugin_config = hooks.Filters.CONFIG_UNIQUE.iterate_from_context(
             hooks.Contexts.app(name).name
