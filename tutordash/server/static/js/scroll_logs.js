@@ -26,7 +26,7 @@ htmx.on("htmx:sseBeforeMessage", function(evt) {
   
   // Parse JSON
   const stdout = JSON.parse(evt.detail.data);
-  if (stdout.includes("Exit code: 0")){
+  if (stdout.includes("Success!")){
     showToast("info");
   }
 

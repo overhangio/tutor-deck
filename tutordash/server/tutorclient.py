@@ -109,11 +109,10 @@ class Cli:
             except TutorError as e:
                 # This happens for incorrect commands
                 self.log_to_file(e.args[0])
-                self.log_to_file("\nExit code: 2")
             except SystemExit:
-                self.log_to_file("\nExit code: 0")
-            except Exception:
-                self.log_to_file("\nExit code: 1")
+                # TODO All this does is notify us that the command is finisehd and toast can be displayed.
+                # Is there a better way to notify command completion???
+                self.log_to_file("\nSuccess!")
 
     def stop(self) -> None:
         """
