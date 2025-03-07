@@ -30,15 +30,14 @@ close.forEach((button) => {
 });
 
 
-let close_toast = document.querySelector(".close-toast-button");
+let closeToastButtons = document.querySelectorAll(".close-toast-button");
 let toast = document.querySelector(".toast");
 
-if (close_toast !== null){
-  close_toast.addEventListener("click", () => {
-    hideToast();
+closeToastButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+      hideToast(toast);
   });
-}
-
+});
 
 function showToast(type = "success") {
   const toast = document.querySelector(".toast");
@@ -48,11 +47,6 @@ function showToast(type = "success") {
       void toast.offsetHeight;
       toast.classList.add("active");
     }, 1);
-
-    // Auto-remove toast after 5s
-    setTimeout(() => {
-      hideToast();
-    }, 5000);
   }
 }
 
