@@ -113,7 +113,6 @@ async def plugin(name: str) -> str:
     show_logs = request.args.get("show_logs")
     toast = request.args.get("toast")
     toast_description = request.args.get("toast_description")
-    ask_local_launch = request.args.get("ask_local_launch", False)
     is_enabled = name in tutorclient.Client.enabled_plugins()
     is_installed = name in tutorclient.Client.installed_plugins()
     author = next(
@@ -141,7 +140,6 @@ async def plugin(name: str) -> str:
         plugin_description=description,
         toast=toast,
         toast_description=toast_description,
-        ask_local_launch=ask_local_launch,
         show_logs=show_logs,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
@@ -165,7 +163,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=name,
                 toast="Your plugin was successfully enabled" if enable_plugin else "",
-                ask_local_launch=True,
+                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
             )
         )
     )
@@ -210,7 +208,7 @@ async def plugin_upgrade(name: str) -> WerkzeugResponse:
             name=name,
             show_logs=True,
             toast="Your plugin was successfully updated",
-            ask_local_launch=True,
+            toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
         )
     )
 
@@ -234,7 +232,7 @@ async def config_set(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=plugin_name,
                 toast="You have successfully modified parameters",
-                ask_local_launch=True,
+                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
             )
         )
     )
@@ -258,7 +256,7 @@ async def config_unset(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=plugin_name,
                 toast="You have successfully modified parameters",
-                ask_local_launch=True,
+                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
             )
         )
     )

@@ -13,9 +13,9 @@
     <!-- CSS -->
     <!-- <link rel="stylesheet" href="css/normalize.css"> -->
     <!-- <link rel="stylesheet" href="css/styles.css"> -->
-    <link href="{{ url_for('static', filename='/css/dash.css') }}" rel="stylesheet">
-    <script src="{{url_for('static', filename='/js/htmx.min.js')}}"></script>
-    <script src="{{url_for('static', filename='/js/sse.js')}}"></script>
+    <link href="{{ url_for('static', filename='css/dash.css') }}" rel="stylesheet">
+    <script src="{{url_for('static', filename='js/htmx.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/sse.js')}}"></script>
 </head>
 
 <body>
@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    {% if toast or toast_description %}
+    {% if toast %}
     <div class="toast-container">
         <div class="toast">
             <div class="toast-content">
@@ -77,15 +77,11 @@
                 </div>
                 <div class="message">
                     <span class="text text-2"> 
-                        {% if ask_local_launch %}
-                        "Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete."
-                        {% else %}
                         {{ toast_description }} 
-                        {% endif %}
                     </span>
                 </div>
             </div>
-            {% if ask_local_launch %}
+            {% if toast != "Plugin Installed Successfully" %}
             <div class="toast-footer">
                 <button type="button" class="modal-button close-toast-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
@@ -98,7 +94,7 @@
     {% endif %}
     
 
-    <script src="{{ url_for('static', filename='/js/dash.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dash.js') }}"></script>
 
     {% if sidebar_active_tab %}
     <script>
