@@ -31,7 +31,9 @@ htmx.on("htmx:sseBeforeMessage", function(evt) {
   }
 
   if (stdout.includes("Cancelled!")){
-    showPluginPageButton();
+    if (window.pluginName){
+      showPluginPageButton();
+    }
   }
 
   

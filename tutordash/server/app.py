@@ -163,7 +163,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=name,
                 toast="Your plugin was successfully enabled" if enable_plugin else "",
-                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
+                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
@@ -174,6 +174,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
             max_age=constants.ONE_MONTH,
         )
     else:
+        # TODO See tutor.plugins.v1.py.discover_package.unload
         sys.modules.pop(importlib_metadata.entry_points().__getitem__(name).value)
         response.delete_cookie(f"{constants.WARNING_COOKIE_PREFIX}-{name}")
     return response
@@ -208,7 +209,7 @@ async def plugin_upgrade(name: str) -> WerkzeugResponse:
             name=name,
             show_logs=True,
             toast="Your plugin was successfully updated",
-            toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
+            toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
         )
     )
 
@@ -232,7 +233,7 @@ async def config_set(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=plugin_name,
                 toast="You have successfully modified parameters",
-                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
+                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
@@ -256,7 +257,7 @@ async def config_unset(name: str) -> WerkzeugResponse:
                 "plugin",
                 name=plugin_name,
                 toast="You have successfully modified parameters",
-                toast_description=constants.LOCAL_LAUCH_DESCRIPTION,
+                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
