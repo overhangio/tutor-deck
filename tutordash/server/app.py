@@ -217,7 +217,7 @@ async def plugin_upgrade(name: str) -> WerkzeugResponse:
 @app.post("/plugins/update")
 async def plugins_update() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "update"])
-    return redirect(url_for("cli_logs"))
+    return redirect(url_for("plugin_store"))
 
 
 @app.post("/config/<name>/set")
