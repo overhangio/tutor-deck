@@ -483,9 +483,9 @@ main {
 					margin-bottom: 1em;
 					align-items: center;
 					height: 3em;
-					max-width: 60em;
+					max-width: 75em;
 
-					@media (max-width: 1225px) {
+					@media (max-width: 1445px) {
 						flex-direction: column;
 						height: 5em;
 						align-items: start;
