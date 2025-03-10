@@ -1,19 +1,13 @@
-// Track whether we should autoscroll
-let shouldAutoScroll = true;
 const logsElement = document.getElementById('tutor-logs');
 
-// Function to check if we are at the bottom
-function isAtBottom() {
-  const scrollPosition = logsElement.scrollTop + logsElement.clientHeight;
-  // Allow small margin of error (1px)
-  return Math.abs(scrollPosition - logsElement.scrollHeight) <= 1;
-}
+// Track whether we should autoscroll
+let shouldAutoScroll = true;
 
 // When user manually scrolls, update behaviour
 logsElement.addEventListener('scroll', function() {
   // Only update shouldAutoScroll if this is a user-initiated scroll
   if (!isScrollingProgrammatically) {
-  shouldAutoScroll = isAtBottom();
+  shouldAutoScroll = false;
   }
 });
 
@@ -26,8 +20,12 @@ htmx.on("htmx:sseBeforeMessage", function(evt) {
   
   // Parse JSON
   const stdout = JSON.parse(evt.detail.data);
+  // If command has run successfully show the toast message and show the enable/disable bar
   if (stdout.includes("Success!")){
     showToast("info");
+    if (window.pluginName){
+      togglePluginEnableDisableBar(true);
+    }
   }
 
   

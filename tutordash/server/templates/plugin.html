@@ -5,9 +5,7 @@
 {% from '_switch.html' import switch %}
 
 {% block workspace_content %}
-
-{% if is_installed %}
-<div class="status">
+<div class="status" id="plugin-enable-disable-bar">
     <div class="status-text">
         Status
     </div>
@@ -21,7 +19,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 {% if is_enabled and not show_logs %}
 <div class="parameter-info">
@@ -54,5 +51,14 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/scroll_logs.js') }}"></script>
+    <script>
+        window.pluginName = '{{ plugin_name }}';
+        function togglePluginEnableDisableBar(show) {
+            console.log("here")
+            const bar = document.getElementById('plugin-enable-disable-bar');
+            bar.style.display = show===true ? 'flex' : 'none';
+        }
+        togglePluginEnableDisableBar('{% if is_installed %}true{% else %}false{% endif %}' === 'true');
+    </script>
+    <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}
