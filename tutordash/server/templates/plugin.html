@@ -53,12 +53,44 @@
 {% block scripts %}
     <script>
         window.pluginName = '{{ plugin_name }}';
+        window.pluginIsInstalled = '{% if is_installed %}true{% else %}false{% endif %}' === 'true'
         function togglePluginEnableDisableBar(show) {
-            console.log("here")
             const bar = document.getElementById('plugin-enable-disable-bar');
             bar.style.display = show===true ? 'flex' : 'none';
         }
-        togglePluginEnableDisableBar('{% if is_installed %}true{% else %}false{% endif %}' === 'true');
+        togglePluginEnableDisableBar(window.pluginIsInstalled);
+
+        window.show_logs = '{{ show_logs }}' === 'True';
+        window.plugin_upgrade_button = document.getElementById('plugin-upgrade-button')
+        window.plugin_install_button = document.getElementById('plugin-install-button')
+        window.cancel_command_button = document.getElementById('cancel-command-button')
+        function showPluginInstallButton(){
+            window.plugin_install_button.style.display = 'flex';
+            window.plugin_upgrade_button.style.display = 'none'; 
+            window.cancel_command_button.style.display = 'none'; 
+        }
+        function showPluginUpgradeButton(){
+            window.plugin_install_button.style.display = 'none';
+            window.plugin_upgrade_button.style.display = 'flex'; 
+            window.cancel_command_button.style.display = 'none'; 
+        }
+        function showCancelButton(){
+            window.plugin_install_button.style.display = 'none';
+            window.plugin_upgrade_button.style.display = 'none'; 
+            window.cancel_command_button.style.display = 'flex'; 
+        }
+        function showPluginPageButton(){
+            if (window.pluginIsInstalled){
+                showPluginUpgradeButton();
+            } else {
+                showPluginInstallButton();
+            }
+        }
+        if (window.show_logs){
+            showCancelButton();
+        } else {
+            showPluginPageButton();
+        }
     </script>
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

@@ -20,12 +20,18 @@ htmx.on("htmx:sseBeforeMessage", function(evt) {
   
   // Parse JSON
   const stdout = JSON.parse(evt.detail.data);
-  // If command has run successfully show the toast message and show the enable/disable bar
+  // If command has run successfully show the toast message, show the enable/disable bar, update page button
   if (stdout.includes("Success!")){
     showToast("info");
     if (window.pluginName){
+      window.pluginIsInstalled = true;
       togglePluginEnableDisableBar(true);
+      showPluginPageButton();
     }
+  }
+
+  if (stdout.includes("Cancelled!")){
+    showPluginPageButton();
   }
 
   

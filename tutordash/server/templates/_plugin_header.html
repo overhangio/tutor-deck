@@ -12,19 +12,19 @@
     </div>
     <div class="page-button">
         {% block page_button %}
-            {% if show_logs %}
+            <div id="cancel-command-button">
                 <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="modal-button cancel-process-button" type="submit">Cancel</button>
-            {% else %}
-                {% if plugin_name in installed_plugins %}
+            </div>
+            <div id="plugin-upgrade-button">
                 <form action="{{ url_for('plugin_upgrade', name=plugin_name) }}" method="POST">
                     <button type="submit">Upgrade</button>
                 </form>
-                {% else %}
+            </div>
+            <div id="plugin-install-button">
                 <form action="{{ url_for('plugin_install', name=plugin_name) }}" method="POST">
                     <button type="submit">Install</button>
                 </form>
-                {% endif %}
-            {% endif %}
+            </div>
         {% endblock %}
     </div>
 </div>
