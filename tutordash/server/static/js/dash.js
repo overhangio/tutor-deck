@@ -31,6 +31,7 @@ close.forEach((button) => {
 
 
 let closeToastButtons = document.querySelectorAll(".close-toast-button");
+const toast = document.querySelector(".toast");
 
 closeToastButtons.forEach((button) => {
   button.addEventListener("click", () => {
@@ -39,7 +40,6 @@ closeToastButtons.forEach((button) => {
 });
 
 function showToast(type = "success") {
-  const toast = document.querySelector(".toast");
   if (toast !== null) {
     toast.style.display = "flex"; // Show the toast
     setTimeout(() => {

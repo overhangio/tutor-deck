@@ -81,7 +81,7 @@
                     </span>
                 </div>
             </div>
-            {% if toast != "Plugin Installed Successfully" %}
+            {% if toast != "Plugin Installed Successfully" and toast != "Local launch was successfully executed" %}
             <div class="toast-footer">
                 <button type="button" class="modal-button close-toast-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
