@@ -27,12 +27,16 @@ htmx.on("htmx:sseBeforeMessage", function(evt) {
       window.pluginIsInstalled = true;
       togglePluginEnableDisableBar(true);
       showPluginPageButton();
+    } else {
+      ShowLocalLaunchButton();
     }
   }
 
   if (stdout.includes("Cancelled!")){
     if (window.pluginName){
       showPluginPageButton();
+    } else {
+      ShowLocalLaunchButton();
     }
   }
 

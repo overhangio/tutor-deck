@@ -65,19 +65,19 @@
         window.plugin_install_button = document.getElementById('plugin-install-button')
         window.cancel_command_button = document.getElementById('cancel-command-button')
         function showPluginInstallButton(){
-            window.plugin_install_button.style.display = 'flex';
+            window.plugin_install_button.style.display = 'block';
             window.plugin_upgrade_button.style.display = 'none'; 
             window.cancel_command_button.style.display = 'none'; 
         }
         function showPluginUpgradeButton(){
             window.plugin_install_button.style.display = 'none';
-            window.plugin_upgrade_button.style.display = 'flex'; 
+            window.plugin_upgrade_button.style.display = 'block'; 
             window.cancel_command_button.style.display = 'none'; 
         }
         function showCancelButton(){
             window.plugin_install_button.style.display = 'none';
             window.plugin_upgrade_button.style.display = 'none'; 
-            window.cancel_command_button.style.display = 'flex'; 
+            window.cancel_command_button.style.display = 'block'; 
         }
         function showPluginPageButton(){
             if (window.pluginIsInstalled){
