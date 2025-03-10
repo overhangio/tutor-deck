@@ -31,7 +31,6 @@ close.forEach((button) => {
 
 
 let closeToastButtons = document.querySelectorAll(".close-toast-button");
-let toast = document.querySelector(".toast");
 
 closeToastButtons.forEach((button) => {
   button.addEventListener("click", () => {
