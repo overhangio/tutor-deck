@@ -174,8 +174,6 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
             max_age=constants.ONE_MONTH,
         )
     else:
-        # TODO See tutor.plugins.v1.py.discover_package.unload
-        sys.modules.pop(importlib_metadata.entry_points().__getitem__(name).value)
         response.delete_cookie(f"{constants.WARNING_COOKIE_PREFIX}-{name}")
     return response
 
