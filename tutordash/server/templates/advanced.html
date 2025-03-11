@@ -21,11 +21,14 @@ Run your tutor commands from a web terminal.
 {% set sidebar_active_tab = "advanced" %}
 
 {% block workspace_content %}
-<div class="command-container">
-    <form method="post" action="{{ url_for('command') }}">
-        <input type="text" id="command" name="command" placeholder="">
-        <button type="submit">Run Command</button>
-    </form>
+<div class="terminal">
+    <div class="command-input">
+        <form method="post" action="{{ url_for('command') }}">
+            <input type="text" id="command" name="command" placeholder="Type a command..." autocomplete="off">
+            <button type="submit">Run Command</button>
+        </form>
+    </div>
+    <ul class="suggestions" id="suggestions"></ul>
 </div>
 <div class="tutor-logs-container">
     <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
@@ -33,5 +36,43 @@ Run your tutor commands from a web terminal.
 {% endblock %}
 
 {% block scripts %}
+<script>
+    const commandInput = document.getElementById('command');
+    const suggestionsElement = document.getElementById('suggestions');
+
+    commandInput.addEventListener('input', async () => {
+        const command = commandInput.value;
+        
+        const response = await fetch('/suggest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ command })
+        });
+        
+        const suggestions = await response.json();
+        
+        console.log(suggestions);
+
+        // Display suggestions
+        suggestionsElement.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const li = document.createElement('li');
+            li.textContent = suggestion.text;
+            if (suggestion.help) {
+                li.title = suggestion.help;
+            }
+            li.addEventListener('click', () => {
+                // When a suggestion is clicked, update the input
+                commandInput.value = command.substring(0, command.lastIndexOf(' ') + 1) + suggestion.text;
+                commandInput.focus();
+                suggestionsElement.innerHTML = '';
+            });
+            suggestionsElement.appendChild(li);
+        });
+    });
+</script>
 <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}
+

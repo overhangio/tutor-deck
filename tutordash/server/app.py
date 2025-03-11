@@ -6,7 +6,15 @@ import typing as t
 
 import importlib_metadata
 from markdown import markdown
-from quart import Quart, make_response, redirect, render_template, request, url_for
+from quart import (
+    Quart,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
 from tutor.plugins.v1 import discover_package
@@ -368,6 +376,48 @@ async def advanced() -> str:
         show_logs=True,
         **shared_template_context(),
     )
+
+
+# TODO move to tutorclient
+def get_command_suggestions(partial_command: str) -> list[dict]:
+    import click
+    import click_repl
+    from prompt_toolkit.completion import Completer, Completion
+    from prompt_toolkit.document import Document
+    from tutor.commands.cli import cli as cli
+
+    # Create a Click context for completion
+    ctx = click.Context(cli, info_name=cli.name, parent=None)
+
+    # Create a completer for the Click command
+    completer = click_repl.ClickCompleter(cli, ctx)
+
+    # Create a document with the partial command
+    document = Document(partial_command, len(partial_command))
+
+    # Get completions
+    completions = list(completer.get_completions(document, None))
+
+    # Format completions for the frontend
+    suggestions = []
+    for completion in completions:
+        suggestions.append(
+            {
+                "text": completion.text,
+                "display": completion.display,
+                "help": getattr(completion, "help", ""),
+            }
+        )
+
+    return suggestions
+
+
+@app.post("/suggest")
+async def suggest():
+    data = await request.get_json()
+    partial_command = data.get("command", "")
+    suggestions = get_command_suggestions(partial_command)
+    return jsonify(suggestions)
 
 
 @app.post("/command")
