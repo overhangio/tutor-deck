@@ -361,6 +361,24 @@ async def cli_stop() -> None:
     tutorclient.CliPool.stop()
 
 
+@app.get("/advanced")
+async def advanced() -> str:
+    return await render_template(
+        "advanced.html",
+        show_logs=True,
+        **shared_template_context(),
+    )
+
+
+@app.post("/command")
+async def command() -> str:
+    form = await request.form
+    command_string = form.get("command", "")
+    command_args = command_string.split()
+    tutorclient.CliPool.run_parallel(app, command_args)
+    return await make_response(redirect(url_for("advanced")))
+
+
 def shared_template_context() -> dict[str, t.Any]:
     """
     Common context shared between all views that make use of the base template.
