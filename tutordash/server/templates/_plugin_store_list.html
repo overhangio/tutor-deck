@@ -10,11 +10,6 @@
                     By {{ plugin.author }}
                 </div>
             </div>
-            <div class="status">
-                {% if plugin.is_installed %}
-                <img src="{{ url_for('static', filename='/img/download.svg') }}" alt="">
-                {% endif %}
-            </div>
         </div>
         <div class="body">
             <!-- TODO is that actually safe? -->
@@ -22,10 +17,19 @@
         </div>
         <div class="footer">
             <div class="meta">
-
-            </div>
-            <div class="plugin-button">
-                
+                {% if plugin.is_enabled %}
+                <div class="status-enabled">
+                    Enabled
+                </div>
+                {% elif plugin.is_installed %}
+                <div class="status-disabled">
+                    Disabled
+                </div>
+                {% else %}
+                <div class="status-not-installed">
+                    Not Installed
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

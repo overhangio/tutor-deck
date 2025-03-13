@@ -65,6 +65,7 @@ async def plugin_installed() -> str:
 async def plugin_store_list() -> str:
     search_query = request.args.get("search", "")
     installed_plugins = tutorclient.Client.installed_plugins()
+    enabled_plugins = tutorclient.Client.enabled_plugins()
     plugins: list[dict[str, str]] = [
         {
             "name": p.name,
@@ -73,6 +74,7 @@ async def plugin_store_list() -> str:
             "author": p.author.split("<")[0].strip(),
             "description": markdown(p.description.replace("\n", " ")),
             "is_installed": p.name in installed_plugins,
+            "is_enabled": p.name in enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
         if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
