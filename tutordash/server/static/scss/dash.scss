@@ -594,6 +594,32 @@ main {
 					height: 40em;
 				}
 			}
+			.command-input {
+				margin-top: 3em;
+				form {
+					width: 100%;
+					display: flex;
+					input {
+						flex: 1;
+						font-size: 1em;
+						height: 3em;
+						border-radius: 10px;
+						padding-left: 1em;
+						border: 1px solid $gray-2;
+					}
+					button {
+						margin-left: 1em;
+						width: 9em;
+						height: 3em;
+						background-color: $light-blue;
+						border: none;
+						border-radius: 0.5em;
+						color: $gray-1;
+						font-size: 1em;
+						cursor: pointer;
+					}
+				}
+			}
 		}
 	}
 }

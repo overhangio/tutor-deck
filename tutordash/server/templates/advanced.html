@@ -21,15 +21,13 @@ Run your tutor commands from a web terminal.
 {% set sidebar_active_tab = "advanced" %}
 
 {% block workspace_content %}
-<div class="terminal">
-    <div class="command-input">
-        <form method="post" action="{{ url_for('command') }}">
-            <input type="text" id="command" name="command" placeholder="Type a command..." autocomplete="off">
-            <button type="submit">Run Command</button>
-        </form>
-    </div>
-    <ul class="suggestions" id="suggestions"></ul>
+<div class="command-input">
+    <form method="post" action="{{ url_for('command') }}">
+        <input type="text" id="command" name="command" placeholder="Type a command..." autocomplete="off">
+        <button type="submit">Run Command</button>
+    </form>
 </div>
+<ul class="suggestions" id="suggestions"></ul>
 <div class="tutor-logs-container">
     <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
 </div>
