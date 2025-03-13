@@ -1,17 +1,12 @@
 const logsElement = document.getElementById("tutor-logs");
 
-// Track whether we should autoscroll
 let shouldAutoScroll = true;
-
 // When user manually scrolls, update behaviour
 logsElement.addEventListener("scroll", function () {
-	// Only update shouldAutoScroll if this is a user-initiated scroll
 	if (!isScrollingProgrammatically) {
 		shouldAutoScroll = false;
 	}
 });
-
-// Track programmatic scrolling to avoid feedback loops
 let isScrollingProgrammatically = false;
 
 htmx.on("htmx:sseBeforeMessage", function (evt) {
@@ -43,8 +38,8 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	const text = document.createTextNode(stdout);
 	evt.detail.elt.appendChild(text);
 
-	// Scroll to bottom only if shouldAutoScroll is true
 	if (shouldAutoScroll) {
+		// Set flag so event listner knows we are scrolling programatically
 		isScrollingProgrammatically = true;
 		evt.detail.elt.scrollTop = evt.detail.elt.scrollHeight;
 
