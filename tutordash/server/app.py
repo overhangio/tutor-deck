@@ -378,45 +378,11 @@ async def advanced() -> str:
     )
 
 
-# TODO move to tutorclient
-def get_command_suggestions(partial_command: str) -> list[dict]:
-    import click
-    import click_repl
-    from prompt_toolkit.completion import Completer, Completion
-    from prompt_toolkit.document import Document
-    from tutor.commands.cli import cli as cli
-
-    # Create a Click context for completion
-    ctx = click.Context(cli, info_name=cli.name, parent=None)
-
-    # Create a completer for the Click command
-    completer = click_repl.ClickCompleter(cli, ctx)
-
-    # Create a document with the partial command
-    document = Document(partial_command, len(partial_command))
-
-    # Get completions
-    completions = list(completer.get_completions(document, None))
-
-    # Format completions for the frontend
-    suggestions = []
-    for completion in completions:
-        suggestions.append(
-            {
-                "text": completion.text,
-                "display": completion.display,
-                "help": getattr(completion, "help", ""),
-            }
-        )
-
-    return suggestions
-
-
 @app.post("/suggest")
 async def suggest():
     data = await request.get_json()
     partial_command = data.get("command", "")
-    suggestions = get_command_suggestions(partial_command)
+    suggestions = tutorclient.Client.autocomplete(partial_command)
     return jsonify(suggestions)
 
 

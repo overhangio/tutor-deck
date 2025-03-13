@@ -9,11 +9,14 @@ import threading
 import typing as t
 
 import aiofiles
+import click
+import click_repl
 import tutor.commands.cli
 import tutor.config
 import tutor.env
 import tutor.plugins.indexes
 import tutor.utils
+from prompt_toolkit.document import Document
 from quart import Quart
 from tutor import fmt, hooks
 from tutor.exceptions import TutorError
@@ -326,3 +329,21 @@ class Client:
         return {
             key: user_config.get(key, value) for key, value in config_defaults.items()
         }
+
+    @classmethod
+    def autocomplete(cls, partial_command: str) -> list[dict]:
+        cli = tutor.commands.cli.cli
+        ctx = click.Context(cli, info_name=cli.name, parent=None)
+        completer = click_repl.ClickCompleter(cli, ctx)
+        document = Document(partial_command, len(partial_command))
+        completions = list(completer.get_completions(document, None))
+        suggestions = []
+        for completion in completions:
+            suggestions.append(
+                {
+                    "text": completion.text,
+                    "display": completion.display,
+                    "help": getattr(completion, "help", ""),
+                }
+            )
+        return suggestions
