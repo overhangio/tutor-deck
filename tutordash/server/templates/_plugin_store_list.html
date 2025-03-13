@@ -1,10 +1,10 @@
 <div class="plugins-container">
 {% for plugin in plugins %}
-    <div class="plugin">
+    <div class="plugin" hx-get="{{ url_for('plugin', name=plugin.name) }}" hx-swap="none">
         <div class="header">
             <div class="title">
                 <div class="name">
-                <a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a>
+                    {{ plugin.name }}
                 </div>
                 <div class="author">
                     By {{ plugin.author }}

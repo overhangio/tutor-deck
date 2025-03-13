@@ -356,6 +356,10 @@ main {
 						justify-content: space-between;
 						width: 100%;
 						min-width: 15em;
+						cursor: pointer;
+						&:hover {
+							border: 1px solid $blue;
+						}
 
 						.header {
 							display: flex;
@@ -371,14 +375,12 @@ main {
 								justify-content: space-around;
 
 								.name {
-									a {
-										color: $blue;
-										text-decoration: none;
-										font-size: 1.5em;
+									color: $blue;
+									text-decoration: none;
+									font-size: 1.5em;
 
-										&:visited {
-											text-decoration: none;
-										}
+									&:visited {
+										text-decoration: none;
 									}
 								}
 

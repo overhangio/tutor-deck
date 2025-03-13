@@ -8,6 +8,7 @@ import importlib_metadata
 from markdown import markdown
 from quart import (
     Quart,
+    Response,
     jsonify,
     make_response,
     redirect,
@@ -139,7 +140,7 @@ async def plugin(name: str) -> str:
         ),
         "",
     )
-    return await render_template(
+    rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
         is_enabled=is_enabled,
@@ -154,6 +155,9 @@ async def plugin(name: str) -> str:
         user_config=tutorclient.Project.get_user_config(),
         **shared_template_context(),
     )
+    response = Response(rendered_template, status=200, content_type="text/html")
+    response.headers["HX-Redirect"] = url_for("plugin", name=name)
+    return response
 
 
 @app.post("/plugin/<name>/toggle")
