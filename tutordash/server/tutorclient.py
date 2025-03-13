@@ -343,7 +343,6 @@ class Client:
                 {
                     "text": completion.text,
                     "display": completion.display,
-                    "help": getattr(completion, "help", ""),
                 }
             )
         return suggestions

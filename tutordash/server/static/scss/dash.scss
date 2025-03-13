@@ -634,6 +634,34 @@ main {
 					}
 				}
 			}
+			.suggestions {
+				display: flex;
+				flex-direction: column;
+				border: 1px solid $gray-2;
+				border-radius: 10px;
+				width: 20em;
+				position: absolute;
+				top: 190px;
+				z-index: 10;
+				background-color: white;
+				&:empty {
+					border: none;
+				}
+				div {
+					padding: 1em;
+					border-bottom: 1px solid $gray-2;
+					&:last-child {
+						border-bottom: none;
+					}
+					cursor: pointer;
+					&:hover {
+						color: $blue;
+					}
+				}
+				&.hidden {
+					display: none;
+				}
+			}
 		}
 	}
 }

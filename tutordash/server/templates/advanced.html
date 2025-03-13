@@ -27,7 +27,9 @@ Run your tutor commands from a web terminal.
         <button type="submit">Run Command</button>
     </form>
 </div>
-<ul class="suggestions" id="suggestions"></ul>
+
+<div class="suggestions hidden" id="suggestions"></div>
+
 <div class="tutor-logs-container">
     <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
 </div>
@@ -40,35 +42,44 @@ Run your tutor commands from a web terminal.
 
     commandInput.addEventListener('input', async () => {
         const command = commandInput.value;
-        
-        const response = await fetch('/suggest', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ command })
-        });
-        
-        const suggestions = await response.json();
-        
-        console.log(suggestions);
 
-        // Display suggestions
-        suggestionsElement.innerHTML = '';
-        suggestions.forEach(suggestion => {
-            const li = document.createElement('li');
-            li.textContent = suggestion.text;
-            if (suggestion.help) {
-                li.title = suggestion.help;
-            }
-            li.addEventListener('click', () => {
-                // When a suggestion is clicked, update the input
-                commandInput.value = command.substring(0, command.lastIndexOf(' ') + 1) + suggestion.text;
-                commandInput.focus();
-                suggestionsElement.innerHTML = '';
+        if (command !== ""){
+            suggestionsElement.classList.remove('hidden');
+            const response = await fetch('/suggest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command })
             });
-            suggestionsElement.appendChild(li);
-        });
+            
+            const suggestions = await response.json();
+
+            // Display suggestions
+            suggestionsElement.innerHTML = '';
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.textContent = suggestion.text;
+                div.addEventListener('click', () => {
+                    // When a suggestion is clicked, update the input
+                    commandInput.value = command.substring(0, command.lastIndexOf(' ') + 1) + div.textContent;
+                    commandInput.focus();
+                    suggestionsElement.innerHTML = '';
+                });
+                suggestionsElement.appendChild(div);
+            });
+        } else {
+            suggestionsElement.classList.add('hidden');
+        }
+    });
+
+    commandInput.addEventListener('focus', () => {
+        suggestionsElement.classList.remove('hidden');
+    });
+    commandInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            suggestionsElement.classList.add('hidden');
+        }, 200);
     });
 </script>
 <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
