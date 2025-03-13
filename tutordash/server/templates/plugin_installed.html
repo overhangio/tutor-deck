@@ -19,3 +19,22 @@ View all your installed plugins in one place.
 {% block workspace_content %}
 <div id="plugins-list" class="installed-plugins-list" hx-get="{{ search_endpoint }}" hx-trigger="load"></div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // Sets the warning that local launch needs to be executed for plugins to take effect
+    function SetWarning(){
+        const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');
+        const warningMain = document.getElementById('warning-main');
+        warningElements.forEach(function(warningElement) {
+            if (document.cookie.includes(warningElement.id)) {
+                warningElement.style.display = 'flex';  
+                warningMain.style.display = 'flex';
+            }
+        });
+    }
+    document.body.addEventListener('htmx:afterOnLoad', function(event) {
+        SetWarning();
+    });
+</script>
+{% endblock %}
