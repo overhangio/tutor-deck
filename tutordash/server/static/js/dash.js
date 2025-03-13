@@ -1,17 +1,12 @@
 const modal_container = document.getElementById("modal_container");
-let open = document.querySelectorAll(".open-modal-button");
-let close = document.querySelectorAll(".close-modal-button");
+let open_modal_button = document.querySelector(".open-modal-button");
+let close_modal_button = document.querySelector(".close-modal-button");
 
-open.forEach((button) => {
-	button.addEventListener("click", () => {
-		modal_container.classList.add("show");
-	});
+open_modal_button.addEventListener("click", () => {
+	modal_container.classList.add("show");
 });
-
-close.forEach((button) => {
-	button.addEventListener("click", () => {
-		modal_container.classList.remove("show");
-	});
+close_modal_button.addEventListener("click", () => {
+	modal_container.classList.remove("show");
 });
 
 let closeToastButtons = document.querySelectorAll(".close-toast-button");
