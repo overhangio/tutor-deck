@@ -1,0 +1,53 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+Execute Local Launch
+{% endblock %}
+
+{% block page_description %}
+Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.
+{% endblock %}
+
+{% block page_button %}
+<button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="modal-button cancel-process-button" type="submit">Cancel</button>
+<button id="local-launch-button" class="modal-button open-modal-button" type="button">Local Launch</button>
+{% endblock %}
+
+{% block searchbar %}
+{% endblock %}
+
+{% block warning %}
+{% endblock %}
+
+
+{% set sidebar_active_tab = "local-launch" %}
+
+{% block workspace_content %}
+{% if show_logs %}
+    <div class="tutor-logs-container">
+        <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.show_logs = '{{ show_logs }}' === 'True';
+    window.local_launch_button = document.getElementById('local-launch-button')
+    window.cancel_local_launch_button = document.getElementById('cancel-local-launch-button') 
+    function ShowLocalLaunchButton(){
+            window.local_launch_button.style.display = 'block';
+            window.cancel_local_launch_button.style.display = 'none'; 
+        }
+    function ShowCancelLocalLaunchButton(){
+        window.local_launch_button.style.display = 'none';
+        window.cancel_local_launch_button.style.display = 'block'; 
+    }
+    if (show_logs){
+        ShowCancelLocalLaunchButton();
+    } else {
+        ShowLocalLaunchButton();
+    }
+</script>
+<script src="{{ url_for('static', filename='js/logs.js') }}"></script>
+{% endblock %}

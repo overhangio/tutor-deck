@@ -6,17 +6,17 @@
 
 {% block workspace_content %}
 <div class="status" id="plugin-enable-disable-bar">
-    <div class="status-text">
-        Status
-    </div>
-    {{ switch(plugin_name, is_enabled) }}
-    <div class="switch-text">
+    <div class="topbar">
+        <div class="status-text">
+            Status
+        </div>
+        {{ switch(plugin_name, is_enabled) }}
         <div class="title">
             {% if is_enabled %} Enabled {% else %} Disabled {% endif %}
         </div>
-        <div class="description">
-            {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
-        </div>
+    </div>
+    <div class="description">
+        {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
     </div>
 </div>
 
