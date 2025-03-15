@@ -127,12 +127,13 @@ class Cli:
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
-        Async stream content from file.
+        Async stream content from file. The first item is the log file path.
 
         This will handle gracefully file deletion. Note however that if the file is
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
+        yield f"{self.log_path}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
             # be done from a separate thread, where the file object is not available.
