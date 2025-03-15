@@ -1,3 +1,10 @@
+// Most of the websites dynamic functionality depends on the content of the logs
+// This file is responsible for:
+// 1) displaying toast messages
+// 2) toggling install/upgrade/cancel buttons
+// 3) logs scrolling
+// 4) TODO: The contents of the toast should be created here based on the command in the logs instead of in the backend
+
 let shouldAutoScroll = true;
 let isScrollingProgrammatically = false;
 // When user manually scrolls, update behaviour
@@ -26,6 +33,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 			executed_new_command = false;
 		} else {
 			// We are indeed executing a new command so show cancel button and update log file name
+			// The cancel button is differnt for each screen but is activated with the same function name
 			showCancelButton();
 			setCookie("last-log-file", text.nodeValue.trim(), 1);
 		}
@@ -35,7 +43,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 			if (executed_new_command === true) {
 				if (stdout.includes("Success!")) {
 					showToast("info");
-					if (pluginName) {
+					if (typeof pluginName !== "undefined") {
 						// If command has run successfully show the toast message
 						// Successfull command means plugin is either successfully installed or upgraded
 						// In either case we can safely display the enable/disable bar
@@ -48,7 +56,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 					}
 				}
 				if (stdout.includes("Cancelled!")) {
-					if (pluginName) {
+					if (typeof pluginName !== "undefined") {
 						showPluginPageButton(isPluginInstalled);
 					} else {
 						ShowLocalLaunchButton();
@@ -87,5 +95,3 @@ logsElement.addEventListener(
 	},
 	{ passive: true }
 );
-
-// last_command_executed = logsElement.textContent.split("\n")[0].split("$")[1].trim();

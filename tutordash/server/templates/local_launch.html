@@ -32,22 +32,18 @@ Running local launch will allow all changes to plugins to take effect. This coul
 
 {% block scripts %}
 <script>
-    window.show_logs = '{{ show_logs }}' === 'True';
-    window.local_launch_button = document.getElementById('local-launch-button')
-    window.cancel_local_launch_button = document.getElementById('cancel-local-launch-button') 
+    show_logs = '{{ show_logs }}' === 'True';
+    local_launch_button = document.getElementById('local-launch-button')
+    cancel_local_launch_button = document.getElementById('cancel-local-launch-button') 
     function ShowLocalLaunchButton(){
-            window.local_launch_button.style.display = 'block';
-            window.cancel_local_launch_button.style.display = 'none'; 
+            local_launch_button.style.display = 'block';
+            cancel_local_launch_button.style.display = 'none'; 
         }
-    function ShowCancelLocalLaunchButton(){
-        window.local_launch_button.style.display = 'none';
-        window.cancel_local_launch_button.style.display = 'block'; 
+    function showCancelButton(){
+        local_launch_button.style.display = 'none';
+        cancel_local_launch_button.style.display = 'block'; 
     }
-    if (show_logs){
-        ShowCancelLocalLaunchButton();
-    } else {
-        ShowLocalLaunchButton();
-    }
+    ShowLocalLaunchButton();
 </script>
 <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}
