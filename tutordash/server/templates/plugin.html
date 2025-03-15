@@ -52,45 +52,42 @@
 
 {% block scripts %}
     <script>
-        window.pluginName = '{{ plugin_name }}';
-        window.pluginIsInstalled = '{% if is_installed %}true{% else %}false{% endif %}' === 'true'
-        function togglePluginEnableDisableBar(show) {
-            const bar = document.getElementById('plugin-enable-disable-bar');
-            bar.style.display = show===true ? 'flex' : 'none';
-        }
-        togglePluginEnableDisableBar(window.pluginIsInstalled);
+        pluginName = '{{ plugin_name }}';
+        isPluginInstalled = '{{ is_installed }}' === 'True';
+        isPluginEnabled = '{{ is_enabled }}' === 'True';
+        plugin_upgrade_button = document.getElementById('plugin-upgrade-button');
+        plugin_install_button = document.getElementById('plugin-install-button');
+        cancel_command_button = document.getElementById('cancel-command-button');
 
-        window.show_logs = '{{ show_logs }}' === 'True';
-        window.plugin_upgrade_button = document.getElementById('plugin-upgrade-button')
-        window.plugin_install_button = document.getElementById('plugin-install-button')
-        window.cancel_command_button = document.getElementById('cancel-command-button')
         function showPluginInstallButton(){
-            window.plugin_install_button.style.display = 'block';
-            window.plugin_upgrade_button.style.display = 'none'; 
-            window.cancel_command_button.style.display = 'none'; 
+            plugin_install_button.style.display = 'block';
+            plugin_upgrade_button.style.display = 'none'; 
+            cancel_command_button.style.display = 'none'; 
         }
         function showPluginUpgradeButton(){
-            window.plugin_install_button.style.display = 'none';
-            window.plugin_upgrade_button.style.display = 'block'; 
-            window.cancel_command_button.style.display = 'none'; 
+            plugin_install_button.style.display = 'none';
+            plugin_upgrade_button.style.display = 'block'; 
+            cancel_command_button.style.display = 'none'; 
         }
         function showCancelButton(){
-            window.plugin_install_button.style.display = 'none';
-            window.plugin_upgrade_button.style.display = 'none'; 
-            window.cancel_command_button.style.display = 'block'; 
+            plugin_install_button.style.display = 'none';
+            plugin_upgrade_button.style.display = 'none'; 
+            cancel_command_button.style.display = 'block'; 
         }
         function showPluginPageButton(){
-            if (window.pluginIsInstalled){
+            if (isPluginInstalled){
                 showPluginUpgradeButton();
             } else {
                 showPluginInstallButton();
             }
         }
-        if (window.show_logs){
-            showCancelButton();
-        } else {
-            showPluginPageButton();
+        function showPluginEnableDisableBar() {
+            const bar = document.getElementById('plugin-enable-disable-bar');
+            bar.style.display = isPluginInstalled === true ? 'flex' : 'none';
         }
+
+        showPluginEnableDisableBar();
+	    showPluginPageButton();
     </script>
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

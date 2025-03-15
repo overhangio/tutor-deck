@@ -242,7 +242,6 @@ async def config_set_multi() -> WerkzeugResponse:
     for kv in keys_values:
         if "=" in kv:
             cmd.extend(["--set", kv])
-    breakpoint()
     tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
     response = await make_response(
