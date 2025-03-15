@@ -232,12 +232,18 @@ async def plugins_update() -> WerkzeugResponse:
     return redirect(url_for("plugin_store"))
 
 
-@app.post("/config/<name>/set")
-async def config_set(name: str) -> WerkzeugResponse:
+@app.post("/config/set/multi")
+async def config_set_multi() -> WerkzeugResponse:
     form = await request.form
-    value = form.get("value", "")
     plugin_name = form.get("plugin_name")
-    tutorclient.CliPool.run_sequential(["config", "save", "--set", f"{name}={value}"])
+
+    keys_values = form.getlist("keys_values")
+    cmd = ["config", "save"]
+    for kv in keys_values:
+        if "=" in kv:
+            cmd.extend(["--set", kv])
+    breakpoint()
+    tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
     response = await make_response(
         redirect(
