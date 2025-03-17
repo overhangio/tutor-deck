@@ -14,10 +14,12 @@
                     type="button" 
                     hx-post="{{ url_for('config_unset', name=key) }}"
                     hx-vals='{"plugin_name": "{{ plugin_name }}"}'
+                    hx-indicator="#loading-bar-spinner-{{ key }}"
                     hx-push-url="true"
                     {% if key not in user_config %}disabled{% endif %}>
                     unset
                 </button>
+                <img src="{{ url_for('static', filename='/img/Fading balls.gif')}}" alt="" class="htmx-indicator" id="loading-bar-spinner-{{ key }}">
             </div>
         </div>
     {% endfor %}    

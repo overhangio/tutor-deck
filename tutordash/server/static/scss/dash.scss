@@ -12,6 +12,17 @@ $light-blue: #2e90fa;
 $green: #009951;
 $green-1: #edfff7;
 
+.htmx-indicator {
+	opacity: 0;
+	transition: opacity 500ms ease-in;
+}
+.htmx-request .htmx-indicator {
+	opacity: 1;
+}
+.htmx-request.htmx-indicator {
+	opacity: 1;
+}
+
 @mixin command {
 	width: 9em;
 	height: 3em;
@@ -582,6 +593,9 @@ main {
 								@media (max-width: 700px) {
 									width: 80%;
 								}
+							}
+							img {
+								width: 1.5em;
 							}
 						}
 					}
