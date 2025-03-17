@@ -122,8 +122,6 @@ async def plugin_installed_list() -> str:
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
-    toast = request.args.get("toast")
-    toast_description = request.args.get("toast_description")
     is_enabled = name in tutorclient.Client.enabled_plugins()
     is_installed = name in tutorclient.Client.installed_plugins()
     author = next(
@@ -149,8 +147,6 @@ async def plugin(name: str) -> str:
         is_installed=is_installed,
         author_name=author,
         plugin_description=description,
-        toast=toast,
-        toast_description=toast_description,
         show_logs=show_logs,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
@@ -176,8 +172,6 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
             url_for(
                 "plugin",
                 name=name,
-                toast="Your plugin was successfully enabled" if enable_plugin else "",
-                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
@@ -206,8 +200,6 @@ async def plugin_install(name: str) -> WerkzeugResponse:
             "plugin",
             name=name,
             show_logs=True,
-            toast="Plugin Installed Successfully",
-            toast_description="Enable it now to start using its features",
         )
     )
 
@@ -220,8 +212,6 @@ async def plugin_upgrade(name: str) -> WerkzeugResponse:
             "plugin",
             name=name,
             show_logs=True,
-            toast="Your plugin was successfully updated",
-            toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
         )
     )
 
@@ -249,8 +239,6 @@ async def config_set_multi() -> WerkzeugResponse:
             url_for(
                 "plugin",
                 name=plugin_name,
-                toast="You have successfully modified parameters",
-                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
@@ -273,8 +261,6 @@ async def config_unset(name: str) -> WerkzeugResponse:
             url_for(
                 "plugin",
                 name=plugin_name,
-                toast="You have successfully modified parameters",
-                toast_description=constants.LOCAL_LAUNCH_DESCRIPTION,
             )
         )
     )
@@ -310,7 +296,6 @@ async def cli_local_launch() -> WerkzeugResponse:
         redirect(
             url_for(
                 "cli_logs",
-                toast="Local launch was successfully executed",
             )
         )
     )
@@ -323,12 +308,10 @@ async def cli_local_launch() -> WerkzeugResponse:
 @app.get("/cli/logs")
 async def cli_logs() -> str:
     name = request.args.get("name")
-    toast = request.args.get("toast")
     return await render_template(
         "local_launch.html",
         name=name,
         show_logs=True,
-        toast=toast,
         **shared_template_context(),
     )
 

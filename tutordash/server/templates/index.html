@@ -76,32 +76,28 @@
         </div>
     </div>
 
-    {% if toast %}
     <div class="toast-container">
         <div class="toast">
             <div class="toast-content">
                 <div class="title">
                     <img src="{{ url_for('static', filename='/img/Icon.svg' )}}">
-                    <span class="text text-1"> {{ toast }} </span>
+                    <span class="text text-1" id="toast-title"> {{ toast }} </span>
                     <img class="close-toast-button" src="{{ url_for('static', filename='/img/X.svg' )}}">
                 </div>
                 <div class="message">
-                    <span class="text text-2"> 
+                    <span class="text text-2" id="toast-description"> 
                         {{ toast_description }} 
                     </span>
                 </div>
             </div>
-            {% if toast != "Plugin Installed Successfully" and toast != "Local launch was successfully executed" %}
-            <div class="toast-footer">
+            <div class="toast-footer" id="toast-footer">
                 <button type="button" class=" close-toast-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
                     <button class=" run_modal_button" type="submit">Run Local Launch</button>
                 </form>
             </div>
-            {% endif %}
         </div>
     </div>
-    {% endif %}
     
 
     <script src="{{ url_for('static', filename='js/dash.js') }}"></script>
