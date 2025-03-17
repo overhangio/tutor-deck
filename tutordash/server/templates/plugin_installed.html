@@ -9,7 +9,7 @@ View all your installed plugins in one place.
 {% endblock %}
 
 {% block page_button %}
-<button class="modal-button open-modal-button" type="button">Local Launch</button>
+<button class=" open-modal-button" type="button">Local Launch</button>
 {% endblock %}
 
 {% set sidebar_active_tab = "my-plugins" %}
@@ -22,6 +22,12 @@ View all your installed plugins in one place.
 
 {% block scripts %}
 <script>
+    toggle_switch = document.querySelector(".switch")
+    toggle_switch.onclick = function(event) {
+        // If we click on the switch then do what the switch does
+        // abort what the parent was going to do on click
+        event.stopPropagation();
+    }
     // Sets the warning that local launch needs to be executed for plugins to take effect
     function SetWarning(){
         const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');

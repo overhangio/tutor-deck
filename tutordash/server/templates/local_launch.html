@@ -9,8 +9,8 @@ Running local launch will allow all changes to plugins to take effect. This coul
 {% endblock %}
 
 {% block page_button %}
-<button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="modal-button cancel-process-button" type="submit">Cancel</button>
-<button id="local-launch-button" class="modal-button open-modal-button" type="button">Local Launch</button>
+<button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class=" cancel-process-button" type="submit">Cancel</button>
+<button id="local-launch-button" class=" open-modal-button" type="button">Local Launch</button>
 {% endblock %}
 
 {% block searchbar %}

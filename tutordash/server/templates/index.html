@@ -68,9 +68,9 @@
                 <p>Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="modal-button close-modal-button">Not Now</button>
+                <button type="button" class=" close-modal-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
-                    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
+                    <button class=" run_modal_button" type="submit">Run Local Launch</button>
                 </form>
             </div>
         </div>
@@ -93,9 +93,9 @@
             </div>
             {% if toast != "Plugin Installed Successfully" and toast != "Local launch was successfully executed" %}
             <div class="toast-footer">
-                <button type="button" class="modal-button close-toast-button">Not Now</button>
+                <button type="button" class=" close-toast-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
-                    <button class="modal-button run_modal_button" type="submit">Run Local Launch</button>
+                    <button class=" run_modal_button" type="submit">Run Local Launch</button>
                 </form>
             </div>
             {% endif %}
