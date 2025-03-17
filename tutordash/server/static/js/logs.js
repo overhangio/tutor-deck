@@ -1,9 +1,12 @@
 // Most of the websites dynamic functionality depends on the content of the logs
 // This file is responsible for:
 // 1) displaying toast messages
-// 2) toggling install/upgrade/cancel buttons
+// 2) toggling command execution/cancellation buttons
 // 3) logs scrolling
-// 4) TODO: The contents of the toast should be created here based on the command in the logs instead of in the backend
+// 4) TODO: The contents of the toast should be created here based on the command in the logs instead of on the backend
+
+// Each file that uses logs defines its own command execution/cancellation functions with the same names
+// We can safely call these functions and their functionality will be handeled by the script specific js
 
 let shouldAutoScroll = true;
 let isScrollingProgrammatically = false;
@@ -23,7 +26,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	const stdout = JSON.parse(evt.detail.data);
 	const text = document.createTextNode(stdout);
 
-	// First log element contains the name of loggin file
+	// First log element contains the name of logging file
 	if (isFirstLog === true) {
 		isFirstLog = false;
 		let lastLogFile = getCookie("last-log-file");
@@ -33,35 +36,26 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 			executed_new_command = false;
 		} else {
 			// We are indeed executing a new command so show cancel button and update log file name
-			// The cancel button is differnt for each screen but is activated with the same function name
-			showCancelButton();
+			ShowCancelCommandButton();
 			setCookie("last-log-file", text.nodeValue.trim(), 1);
 		}
 	} else {
-		if (!window.location.pathname.includes("advanced")) {
-			// Only show toast if it was a new command
-			if (executed_new_command === true) {
-				if (stdout.includes("Success!")) {
-					showToast("info");
-					if (typeof pluginName !== "undefined") {
-						// If command has run successfully show the toast message
-						// Successfull command means plugin is either successfully installed or upgraded
-						// In either case we can safely display the enable/disable bar
-						// And show the plugin upgrade page button
-						isPluginInstalled = true;
-						showPluginEnableDisableBar();
-						showPluginPageButton();
-					} else {
-						ShowLocalLaunchButton();
-					}
+		// Only show toast if it was a new command
+		if (executed_new_command === true) {
+			// If command has run successfully show the toast message
+			if (stdout.includes("Success!")) {
+				showToast("info");
+				// Check if we are on the plugin page
+				if (typeof pluginName !== "undefined") {
+					// Successfull command means plugin is either successfully installed or upgraded
+					// In either case we can safely display the enable/disable bar
+					isPluginInstalled = true;
+					showPluginEnableDisableBar();
 				}
-				if (stdout.includes("Cancelled!")) {
-					if (typeof pluginName !== "undefined") {
-						showPluginPageButton(isPluginInstalled);
-					} else {
-						ShowLocalLaunchButton();
-					}
-				}
+				ShowRunCommandButton();
+			}
+			if (stdout.includes("Cancelled!")) {
+				ShowRunCommandButton();
 			}
 		}
 		evt.detail.elt.appendChild(text);

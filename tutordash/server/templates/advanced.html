@@ -24,19 +24,28 @@ Search for any tutor command and execute it with a single click.
 <div class="command-input">
     <form method="post" action="{{ url_for('command') }}">
         <input type="text" id="command" name="command" placeholder="Type a command..." autocomplete="off">
-        <button type="submit">Run Command</button>
+        <button type="submit" class="run-command-button">Run Command</button>
+        <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-command-button" type="button">Cancel</button>
     </form>
 </div>
 
 <div class="suggestions hidden" id="suggestions"></div>
-
-<div class="tutor-logs-container">
-    <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
-</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    run_command_button = document.querySelector('.run-command-button')
+    cancel_command_button = document.querySelector('.cancel-command-button') 
+    function ShowRunCommandButton(){
+        run_command_button.style.display = 'block';
+        cancel_command_button.style.display = 'none'; 
+    }
+    function ShowCancelCommandButton(){
+        run_command_button.style.display = 'none';
+        cancel_command_button.style.display = 'block'; 
+    }
+    ShowRunCommandButton();
+
     const commandInput = document.getElementById('command');
     const suggestionsElement = document.getElementById('suggestions');
 
@@ -82,6 +91,7 @@ Search for any tutor command and execute it with a single click.
         }, 200);
     });
 </script>
+
 <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}
 

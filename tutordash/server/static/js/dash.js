@@ -63,6 +63,3 @@ function hideToast() {
 		}, 500);
 	}
 }
-
-// Define logs element
-const logsElement = document.getElementById("tutor-logs");

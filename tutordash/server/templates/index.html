@@ -40,14 +40,20 @@
                 </a>
                 <a href="{{ url_for('advanced') }}" id="advanced">
                     <img id="advanced-logo" src="{{ url_for('static', filename='/img/advanced-mode.svg') }}"/>
-                    <h4>Advanced</h4>
+                    <h4>Advanced Mode</h4>
                 </a>
             </menu>
         </nav>
 
         <section>
             <header>{% block workspace_header %}{% endblock %}</header>
-            <section>{% block workspace_content %}{% endblock %}</section>
+            <section>
+                {% block workspace_content %}
+                {% endblock %}
+                <div class="tutor-logs-container">
+                    <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
+                </div>
+            </section>
             <footer>{% block footer %}{% endblock %}</footer>
         </section>
     </main>
@@ -107,13 +113,15 @@
     </script>
     {% endif %}
 
-    {% block scripts %}{% endblock %}
-
-    {% if not show_logs %}
     <script>
-        logsElement.style.display = 'none';
+        const logsElement = document.getElementById("tutor-logs");
+        show_logs = '{{ show_logs }}' === 'True';
+        if (!show_logs){
+            logsElement.style.display = 'none';
+        }
     </script>
-    {% endif %}
+
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

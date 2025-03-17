@@ -42,10 +42,6 @@
 
 {% endif %}
 
-<div class="tutor-logs-container">
-    <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
-</div>
-
 {% endblock %}
 
 {% block scripts %}
@@ -67,12 +63,12 @@
             plugin_upgrade_button.style.display = 'block'; 
             cancel_command_button.style.display = 'none'; 
         }
-        function showCancelButton(){
+        function ShowCancelCommandButton(){
             plugin_install_button.style.display = 'none';
             plugin_upgrade_button.style.display = 'none'; 
             cancel_command_button.style.display = 'block'; 
         }
-        function showPluginPageButton(){
+        function ShowRunCommandButton(){
             if (isPluginInstalled){
                 showPluginUpgradeButton();
             } else {
@@ -85,7 +81,7 @@
         }
 
         showPluginEnableDisableBar();
-	    showPluginPageButton();
+	    ShowRunCommandButton();
     </script>
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

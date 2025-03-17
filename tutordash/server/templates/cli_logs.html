@@ -9,12 +9,6 @@
 </div>
 {% endblock %}
 
-{% block workspace_content %}
-<div class="tutor-logs-container">
-    <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
-</div>
-{% endblock %}
-
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

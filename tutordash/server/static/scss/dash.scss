@@ -12,6 +12,21 @@ $light-blue: #2e90fa;
 $green: #009951;
 $green-1: #edfff7;
 
+@mixin command {
+	width: 9em;
+	height: 3em;
+	border: none;
+	border-radius: 0.5em;
+	color: $gray-1;
+	font-size: 1em;
+	cursor: pointer;
+	margin-left: 1em;
+	background-color: $light-blue;
+}
+@mixin cancel-command {
+	background-color: $red;
+}
+
 @mixin a-tag {
 	text-decoration: none;
 
@@ -219,18 +234,10 @@ main {
 					}
 
 					button {
-						width: 9em;
-						height: 2.5em;
-						background-color: $light-blue;
-						border: none;
-						border-radius: 0.5em;
-						color: $gray-1;
-						font-size: 1em;
-						cursor: pointer;
+						@include command();
 					}
 					.cancel-process-button {
-						background-color: $red;
-						cursor: pointer;
+						@include cancel-command();
 					}
 				}
 			}
@@ -629,15 +636,10 @@ main {
 						border: 1px solid $gray-2;
 					}
 					button {
-						margin-left: 1em;
-						width: 9em;
-						height: 3em;
-						background-color: $light-blue;
-						border: none;
-						border-radius: 0.5em;
-						color: $gray-1;
-						font-size: 1em;
-						cursor: pointer;
+						@include command();
+					}
+					.cancel-command-button {
+						@include cancel-command();
 					}
 				}
 			}
