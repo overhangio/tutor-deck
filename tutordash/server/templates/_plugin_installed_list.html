@@ -1,7 +1,7 @@
 {% from '_switch.html' import switch %}
 
 {% for plugin in plugins %}
-<div class="installed-plugin">
+<div class="installed-plugin" hx-get="{{ url_for('plugin', name=plugin.name) }}" hx-push-url="true">
     <div class="details">
         <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
         <div class="author">By {{ plugin.author }}</div>

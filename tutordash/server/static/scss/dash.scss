@@ -293,6 +293,10 @@ main {
 					justify-content: space-between;
 					padding: 1em 2em;
 					border-bottom: 1px solid $gray-2;
+					cursor: pointer;
+					&:hover {
+						background-color: $blue-1;
+					}
 					&:last-child {
 						border-bottom: none;
 					}
@@ -592,7 +596,7 @@ main {
 					}
 					button[type="submit"] {
 						width: 9em;
-						height: 3em;
+						height: 2.5em;
 					}
 				}
 			}
