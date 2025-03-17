@@ -227,11 +227,11 @@ async def config_set_multi() -> WerkzeugResponse:
     form = await request.form
     plugin_name = form.get("plugin_name")
 
-    keys_values = form.getlist("keys_values")
     cmd = ["config", "save"]
-    for kv in keys_values:
-        if "=" in kv:
-            cmd.extend(["--set", kv])
+    for key, value in form.items():
+        if key != "plugin_name":
+            cmd.extend(["--set", f"{key}={value}"])
+    breakpoint()
     tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
     response = await make_response(

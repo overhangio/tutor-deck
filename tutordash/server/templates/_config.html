@@ -8,8 +8,8 @@
                     data-key="{{ key }}" {% if value %}checked{% endif %} 
                     onchange="this.value = this.dataset.key + '=' + this.checked"/>
                 {% else %}
-                <input type="text" name="keys_values" id="{{ key }}" value="{{ key }}={{ value }}" 
-                    data-key="{{ key }}" data-initial-value="{{ value }}"
+                <input type="text" name="{{ key }}" id="{{ key }}" value="{{ value }}" 
+                    data-key="{{ key }}" data-initial-value="{{ key }}={{ value }}"
                     oninput="this.value = this.dataset.key + '=' + this.value.substring(this.dataset.key.length + 1)"/>
                 {% endif %}
                 <button 
