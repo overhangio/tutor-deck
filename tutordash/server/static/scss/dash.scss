@@ -23,7 +23,7 @@ $green-1: #edfff7;
 @mixin modal-and-toast-footer {
 	display: flex;
 	justify-content: flex-end;
-	margin-top: 1em;
+	margin-top: 2em;
 	width: 100%;
 
 	button {
@@ -172,6 +172,7 @@ main {
 			display: flex;
 			flex-direction: column;
 			.header-address {
+				font-size: 15px;
 				span {
 					a {
 						@include a-tag();
@@ -196,6 +197,7 @@ main {
 					display: flex;
 					flex-direction: column;
 					justify-content: space-between;
+					margin-top: 20px;
 					.page-title {
 						font-size: 30px;
 						font-weight: 600;
@@ -231,6 +233,11 @@ main {
 						cursor: pointer;
 					}
 				}
+			}
+			#plugin-full-description {
+				border-top: 1px solid $gray-1;
+				margin-top: 1em;
+				padding: 1em 0em;
 			}
 			.search {
 				display: flex;
@@ -504,6 +511,7 @@ main {
 				.description {
 					margin-top: 0.5em;
 					margin-left: 36em;
+					color: $gray-3;
 
 					@media (max-width: 1140px) {
 						margin-left: 23.5em;
@@ -837,7 +845,7 @@ main {
 						margin-right: 1em;
 					}
 					&:last-child {
-						width: 1.25em;
+						width: 1em;
 					}
 				}
 				.close-toast-button {
