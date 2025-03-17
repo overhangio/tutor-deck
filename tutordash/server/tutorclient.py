@@ -106,9 +106,8 @@ class Cli:
         # Override execute function
         with self.patch_objects():
             try:
-                # Add running command to the output logs and call tutor command
+                # Call tutor command
                 # pylint: disable=no-value-for-parameter
-                self.log_to_file(f"$ {self.command}\n")
                 tutor.commands.cli.cli(self.args)
             except TutorError as e:
                 # This happens for incorrect commands and cancellation
@@ -127,13 +126,15 @@ class Cli:
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
-        Async stream content from file. The first item is the log file path.
+        Async stream content from file.
+        The first item is the log file path. Second item is the running command.
 
         This will handle gracefully file deletion. Note however that if the file is
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
         yield f"{self.log_path}\n"
+        yield f"$ {self.command}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
             # be done from a separate thread, where the file object is not available.
@@ -184,31 +185,30 @@ class Cli:
         Mock tutor.utils.execute.
         """
         command_string = shlex.join(command)
-        with open(self.log_path, "ab") as output_file:
-            with subprocess.Popen(
-                command, stdout=output_file, stderr=output_file
-            ) as popen:
-                while popen.returncode is None:
-                    try:
-                        popen.wait(timeout=0.5)
-                    except subprocess.TimeoutExpired as e:
-                        # Check every now and then whether we should stop
-                        if self._stop_flag.is_set():
-                            popen.kill()
-                            popen.wait()
-                            raise TutorError(
-                                f"Stopping child command: {command_string}"
-                            ) from e
-                    except Exception as e:
+        with subprocess.Popen(
+            command, stdout=self.log_file, stderr=self.log_file
+        ) as popen:
+            while popen.returncode is None:
+                try:
+                    popen.wait(timeout=0.5)
+                except subprocess.TimeoutExpired as e:
+                    # Check every now and then whether we should stop
+                    if self._stop_flag.is_set():
                         popen.kill()
                         popen.wait()
-                        raise TutorError(f"Command failed: {command_string}") from e
+                        raise TutorError(
+                            f"Stopping child command: {command_string}"
+                        ) from e
+                except Exception as e:
+                    popen.kill()
+                    popen.wait()
+                    raise TutorError(f"Command failed: {command_string}") from e
 
-                if popen.returncode > 0:
-                    raise TutorError(
-                        f"Command failed with status {popen.returncode}: {command_string}"
-                    )
-                return popen.returncode
+            if popen.returncode > 0:
+                raise TutorError(
+                    f"Command failed with status {popen.returncode}: {command_string}"
+                )
+            return popen.returncode
 
 
 class CliPool:
