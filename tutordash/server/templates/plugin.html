@@ -25,20 +25,20 @@
     <h2>Plugin Parameters</h2>
     <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>
 </div>
+<form action="{{ url_for('config_set_multi') }}" method="POST">
+    <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
+    
+    <h3>Unique settings</h3>
+    {% if plugin_config_unique %}
+    {% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
+    {% endif %}
 
-<h3>Unique settings</h3>
-{% if plugin_config_unique %}
-{% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
-{% else %}
-<p>None defined</p>
-{% endif %}
-
-<h3>Default settings</h3>
-{% if plugin_config_defaults %}
-{% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
-{% else %}
-<p>None defined</p>
-{% endif %}
+    <h3>Default settings</h3>
+    {% if plugin_config_defaults %}
+    {% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
+    {% endif %}
+    <button type="submit">Update All</button>
+</form>
 
 {% endif %}
 
@@ -83,6 +83,6 @@
         showPluginEnableDisableBar();
 	    ShowRunCommandButton();
     </script>
-    
+
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

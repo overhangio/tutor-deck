@@ -532,10 +532,10 @@ main {
 					}
 				}
 			}
-			.config {
-				display: flex;
-				flex-direction: column;
-				form {
+			form {
+				.config {
+					display: flex;
+					flex-direction: column;
 					.item {
 						display: flex;
 						margin-bottom: 1em;
@@ -601,12 +601,13 @@ main {
 							opacity: 0;
 						}
 					}
-					button[type="submit"] {
-						width: 9em;
-						height: 2.5em;
-					}
+				}
+				button[type="submit"] {
+					@include command();
+					margin-left: 0;
 				}
 			}
+
 			.tutor-logs-container {
 				#tutor-logs {
 					width: 100%;

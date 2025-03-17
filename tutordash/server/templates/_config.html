@@ -1,30 +1,26 @@
-<div class="config">
-    <form action="{{ url_for('config_set_multi') }}" method="POST">
-        <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
-        {% for key, value in config.items() %}
-            <div class="item">
-                <div>{{ key }}:</div>
-                <div class="config-forms">
-                    {% if value is boolean %}
-                    <input type="checkbox" name="keys_values" id="{{ key }}" value="{{ key }}={% if value %}true{% else %}false{% endif %}" 
-                        data-key="{{ key }}" {% if value %}checked{% endif %} 
-                        onchange="this.value = this.dataset.key + '=' + this.checked"/>
-                    {% else %}
-                    <input type="text" name="keys_values" id="{{ key }}" value="{{ key }}={{ value }}" 
-                        data-key="{{ key }}" data-initial-value="{{ value }}"
-                        oninput="this.value = this.dataset.key + '=' + this.value.substring(this.dataset.key.length + 1)"/>
-                    {% endif %}
-                    <button 
-                        type="button" 
-                        hx-post="{{ url_for('config_unset', name=key) }}"
-                        hx-vals='{"plugin_name": "{{ plugin_name }}"}'
-                        hx-push-url="true"
-                        {% if key not in user_config %}disabled{% endif %}>
-                        unset
-                    </button>
-                </div>
+<div class="config">   
+    {% for key, value in config.items() %}
+        <div class="item">
+            <div>{{ key }}:</div>
+            <div class="config-forms">
+                {% if value is boolean %}
+                <input type="checkbox" name="keys_values" id="{{ key }}" value="{{ key }}={% if value %}true{% else %}false{% endif %}" 
+                    data-key="{{ key }}" {% if value %}checked{% endif %} 
+                    onchange="this.value = this.dataset.key + '=' + this.checked"/>
+                {% else %}
+                <input type="text" name="keys_values" id="{{ key }}" value="{{ key }}={{ value }}" 
+                    data-key="{{ key }}" data-initial-value="{{ value }}"
+                    oninput="this.value = this.dataset.key + '=' + this.value.substring(this.dataset.key.length + 1)"/>
+                {% endif %}
+                <button 
+                    type="button" 
+                    hx-post="{{ url_for('config_unset', name=key) }}"
+                    hx-vals='{"plugin_name": "{{ plugin_name }}"}'
+                    hx-push-url="true"
+                    {% if key not in user_config %}disabled{% endif %}>
+                    unset
+                </button>
             </div>
-        {% endfor %}
-        <button type="submit">Update All</button>
-    </form>
+        </div>
+    {% endfor %}    
 </div>
