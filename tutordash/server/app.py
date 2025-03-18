@@ -18,7 +18,6 @@ from quart import (
 )
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
-
 from tutor.plugins.v1 import discover_package
 
 from . import constants, tutorclient

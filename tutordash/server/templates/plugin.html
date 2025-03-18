@@ -25,8 +25,8 @@
     <h2>Plugin Parameters</h2>
     <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>
 </div>
-<form action="{{ url_for('config_set_multi') }}" method="POST">
-    <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
+<form id="config-forms-container" action="{{ url_for('config_set_multi') }}" method="POST">
+    <input id="plugin-name" type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
     
     <h3>Unique settings</h3>
     {% if plugin_config_unique %}
@@ -82,6 +82,30 @@
 
         showPluginEnableDisableBar();
 	    ShowRunCommandButton();
+
+        // Add change event to all inputs, selects
+        document.querySelectorAll('#config-forms-container input').forEach(function(element) {
+            element.addEventListener('change', function() {
+                this.classList.add('changed');
+                // Find the associated hidden input
+                const hiddenInput = this.nextElementSibling;
+                if (hiddenInput && hiddenInput.type === 'hidden') {
+                    hiddenInput.classList.add('changed');
+                }
+            });
+        });
+        
+        // Handle form submission
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                // Disable all inputs that don't have the 'changed' class
+                document.querySelectorAll('#config-forms-container input:not(.changed)').forEach(function(element) {
+                    if (element.id != "plugin-name"){
+                        element.disabled = true;
+                    }
+                });
+            });
+        });
     </script>
 
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
