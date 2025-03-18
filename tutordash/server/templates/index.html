@@ -99,16 +99,13 @@
         </div>
     </div>
     
-
     <script src="{{ url_for('static', filename='js/dash.js') }}"></script>
-
     {% if sidebar_active_tab %}
     <script>
         document.getElementById('{{ sidebar_active_tab }}').classList.toggle('sidebar-tab-selected');
         document.getElementById('{{ sidebar_active_tab }}-logo').classList.toggle('sidebar-tab-logo-selected');
     </script>
     {% endif %}
-
     <script>
         const logsElement = document.getElementById("tutor-logs");
         show_logs = '{{ show_logs }}' === 'True';
@@ -116,7 +113,6 @@
             logsElement.style.display = 'none';
         }
     </script>
-
     {% block scripts %}{% endblock %}
 </body>
 

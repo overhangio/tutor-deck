@@ -16,33 +16,6 @@ logsElement.addEventListener("scroll", function () {
 	}
 });
 
-let toast_title = document.getElementById("toast-title");
-let toast_description = document.getElementById("toast-description");
-let toast_footer = document.getElementById("toast-footer");
-function setToastContent(cmd) {
-	if (cmd.startsWith("$ tutor plugins enable")) {
-		toast_title.textContent = "Your plugin was successfully enabled";
-		toast_description.textContent =
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.";
-	} else if (cmd.startsWith("$ tutor plugins upgrade")) {
-		toast_title.textContent = "Your plugin was successfully updated";
-		toast_description.textContent =
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.";
-	} else if (cmd.startsWith("$ tutor plugins install")) {
-		toast_title.textContent = "Plugin Installed Successfully";
-		toast_description.textContent =
-			"Enable it now to start using its features";
-		toast_footer.style.display = "none";
-	} else if (cmd.startsWith("$ tutor config save")) {
-		toast_title.textContent = "You have successfully modified parameters";
-		toast_description.textContent =
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.";
-	} else if (cmd.startsWith("$ tutor local launch")) {
-		toast_title.textContent = "Local launch was successfully executed";
-		toast_footer.style.display = "none";
-	}
-}
-
 let executed_new_command = true;
 let log_count = 0;
 htmx.on("htmx:sseBeforeMessage", function (evt) {
@@ -74,8 +47,9 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	} else {
 		// Only show toast if it was a new command
 		if (executed_new_command === true) {
-			// If command has run successfully show the toast message
+			// If command has run successfully update UI
 			if (stdout.includes("Success!")) {
+				// Do not show the toast if it is empty
 				if (toast_title.textContent.trim() != "") {
 					showToast("info");
 				}

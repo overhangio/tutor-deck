@@ -63,3 +63,49 @@ function hideToast() {
 		}, 500);
 	}
 }
+
+const TOAST_CONFIGS = {
+	"$ tutor plugins enable": {
+		title: "Your plugin was successfully enabled",
+		description:
+			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+		showFooter: true,
+	},
+	"$ tutor plugins upgrade": {
+		title: "Your plugin was successfully updated",
+		description:
+			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+		showFooter: true,
+	},
+	"$ tutor plugins install": {
+		title: "Plugin Installed Successfully",
+		description: "Enable it now to start using its features",
+		showFooter: false,
+	},
+	"$ tutor config save": {
+		title: "You have successfully modified parameters",
+		description:
+			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+		showFooter: true,
+	},
+	"$ tutor local launch": {
+		title: "Local launch was successfully executed",
+		description: "",
+		showFooter: false,
+	},
+};
+
+let toast_title = document.getElementById("toast-title");
+let toast_description = document.getElementById("toast-description");
+let toast_footer = document.getElementById("toast-footer");
+function setToastContent(cmd) {
+	const matchedPrefix = Object.keys(TOAST_CONFIGS).find((prefix) =>
+		cmd.startsWith(prefix)
+	);
+	if (matchedPrefix) {
+		const config = TOAST_CONFIGS[matchedPrefix];
+		toast_title.textContent = config.title;
+		toast_description.textContent = config.description;
+		toast_footer.style.display = config.showFooter ? "flex" : "none";
+	}
+}
