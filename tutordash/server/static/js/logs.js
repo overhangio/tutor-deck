@@ -16,11 +16,10 @@ logsElement.addEventListener("scroll", function () {
 	}
 });
 
+let toast_title = document.getElementById("toast-title");
+let toast_description = document.getElementById("toast-description");
+let toast_footer = document.getElementById("toast-footer");
 function setToastContent(cmd) {
-	let toast_title = document.getElementById("toast-title");
-	let toast_description = document.getElementById("toast-description");
-	let toast_footer = document.getElementById("toast-footer");
-
 	if (cmd.startsWith("$ tutor plugins enable")) {
 		toast_title.textContent = "Your plugin was successfully enabled";
 		toast_description.textContent =
@@ -71,12 +70,15 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		// Second log element is the running command, make toast here
 		cmd = text.nodeValue.trim();
 		setToastContent(cmd);
+		evt.detail.elt.appendChild(text);
 	} else {
 		// Only show toast if it was a new command
 		if (executed_new_command === true) {
 			// If command has run successfully show the toast message
 			if (stdout.includes("Success!")) {
-				showToast("info");
+				if (toast_title.textContent.trim() != "") {
+					showToast("info");
+				}
 				// Check if we are on the plugin page
 				if (typeof pluginName !== "undefined") {
 					// Successfull command means plugin is either successfully installed or upgraded
