@@ -248,6 +248,16 @@ class CliPool:
         if cls.CLI_INSTANCE and cls.THREAD:
             cls.stop_runner_thread(cls.CLI_INSTANCE, cls.THREAD)
 
+    @classmethod
+    def is_thread_alive(cls) -> bool:
+        """
+        Check if the thread is running.
+
+        """
+        if cls.CLI_INSTANCE and cls.THREAD:
+            return cls.THREAD.is_alive()
+        return False
+
     @staticmethod
     def stop_runner_thread(tutor_cli_runner: Cli, thread: threading.Thread) -> None:
         """

@@ -9,6 +9,7 @@ from markdown import markdown
 from quart import (
     Quart,
     Response,
+    abort,
     jsonify,
     make_response,
     redirect,
@@ -275,15 +276,6 @@ async def config_unset(name: str) -> WerkzeugResponse:
     return response
 
 
-# def tutor_cli(command: list[str]) -> WerkzeugResponse:
-#     # Run command asynchronously
-#     # if TutorCli.is_thread_alive():
-#     # TODO return 400 if thread is active
-#     # TODO parse command from JSON request body
-#     tutorclient.CliPool.run_parallel(app, command)
-#     return redirect(url_for("cli_logs"))
-
-
 @app.get("/local/launch")
 async def local_launch_view() -> str:
     return await render_template(
@@ -388,6 +380,8 @@ async def command() -> str:
     form = await request.form
     command_string = form.get("command", "")
     command_args = command_string.split()
+    if tutorclient.CliPool.is_thread_alive():
+        abort(400, description="Command execution already in progress")
     tutorclient.CliPool.run_parallel(app, command_args)
     return await make_response(redirect(url_for("advanced")))
 
