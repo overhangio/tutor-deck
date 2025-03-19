@@ -22,14 +22,9 @@ View all your installed plugins in one place.
 
 {% block scripts %}
 <script>
-    toggle_switch = document.querySelector(".switch")
-    toggle_switch.onclick = function(event) {
-        // If we click on the switch then do what the switch does
-        // abort what the parent was going to do on click
-        event.stopPropagation();
-    }
     // Sets the warning that launch platform needs to be executed for plugins to take effect
     function SetWarning(){
+        console.log("here");
         const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');
         const warningMain = document.getElementById('warning-main');
         warningElements.forEach(function(warningElement) {
@@ -40,6 +35,14 @@ View all your installed plugins in one place.
         });
     }
     document.body.addEventListener('htmx:afterOnLoad', function(event) {
+        let toggle_switches = document.querySelectorAll(".switch");
+        toggle_switches.forEach(toggle_switch => {
+            toggle_switch.onclick = function(event) {
+                // If we click on the switch then do what the switch does
+                // abort what the parent was going to do on click
+                event.stopPropagation();
+            }
+        });
         SetWarning();
     });
 </script>
