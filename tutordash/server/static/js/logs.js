@@ -26,7 +26,6 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 
 	const stdout = JSON.parse(evt.detail.data);
 	const text = document.createTextNode(stdout);
-
 	if (log_count === 1) {
 		// First log element contains the name of logging file
 		let lastLogFile = getCookie("last-log-file");

@@ -48,6 +48,15 @@ closeToastButtons.forEach((button) => {
 });
 function showToast() {
 	if (toast !== null) {
+		let toastTitle = document.getElementById("toast-title").textContent;
+		if (toastTitle === "Launch platform was successfully executed") {
+			document.cookie.split(";").forEach((cookie) => {
+				let [name, value] = cookie.split("=").map((c) => c.trim());
+				if (name.startsWith("warning-cookie")) {
+					eraseCookie(name);
+				}
+			});
+		}
 		toast.style.display = "flex";
 		setTimeout(() => {
 			void toast.offsetHeight;
@@ -89,7 +98,7 @@ const TOAST_CONFIGS = {
 		showFooter: true,
 	},
 	"$ tutor local launch": {
-		title: "launch platform was successfully executed",
+		title: "Launch platform was successfully executed",
 		description: "",
 		showFooter: false,
 	},

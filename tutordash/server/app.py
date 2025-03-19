@@ -294,9 +294,6 @@ async def cli_local_launch() -> WerkzeugResponse:
             )
         )
     )
-    for cookie_name in request.cookies:
-        if cookie_name.startswith(constants.WARNING_COOKIE_PREFIX):
-            response.delete_cookie(cookie_name)
     return response
 
 
