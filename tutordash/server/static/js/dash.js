@@ -68,13 +68,13 @@ const TOAST_CONFIGS = {
 	"$ tutor plugins enable": {
 		title: "Your plugin was successfully enabled",
 		description:
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+			"Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.",
 		showFooter: true,
 	},
 	"$ tutor plugins upgrade": {
 		title: "Your plugin was successfully updated",
 		description:
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+			"Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.",
 		showFooter: true,
 	},
 	"$ tutor plugins install": {
@@ -85,11 +85,11 @@ const TOAST_CONFIGS = {
 	"$ tutor config save": {
 		title: "You have successfully modified parameters",
 		description:
-			"Running local launch will allow all changes to plugins to take effect. This could take a few minutes to complete.",
+			"Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.",
 		showFooter: true,
 	},
 	"$ tutor local launch": {
-		title: "Local launch was successfully executed",
+		title: "launch platform was successfully executed",
 		description: "",
 		showFooter: false,
 	},

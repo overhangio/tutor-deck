@@ -23,7 +23,7 @@
 {% if is_enabled and not show_logs %}
 <div class="parameter-info">
     <h2>Plugin Parameters</h2>
-    <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>
+    <p>This plugin has default parameters. If you make any changes, save them and run launch platform to make the changes effective.</p>
 </div>
 <form id="config-forms-container" action="{{ url_for('config_set_multi') }}" method="POST">
     <input id="plugin-name" type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
