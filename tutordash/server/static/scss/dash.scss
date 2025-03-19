@@ -667,11 +667,14 @@ main {
 				flex-direction: column;
 				border: 1px solid $gray-2;
 				border-radius: 10px;
-				width: 20em;
+				width: fit-content;
+				min-width: 20em;
 				position: absolute;
 				top: 190px;
 				z-index: 10;
 				background-color: white;
+				overflow-y: auto;
+				max-height: 30em;
 				&:empty {
 					border: none;
 				}
