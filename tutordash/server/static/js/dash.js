@@ -1,21 +1,21 @@
 function setCookie(name, value, days) {
-	var expires = "";
+	let expires = "";
 	if (days) {
-		var date = new Date();
+		let date = new Date();
 		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
 		expires = "; expires=" + date.toUTCString();
 	}
-	document.cookie = name + "=" + (value || "") + expires + "; path=/";
+	document.cookie = `${name}=${value || ""}${expires}; path=/`;
 }
 function getCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(";");
-	for (var i = 0; i < ca.length; i++) {
-		var c = ca[i];
-		while (c.charAt(0) == " ") c = c.substring(1, c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-	}
-	return null;
+	let nameEQ = name + "=";
+	return (
+		document.cookie
+			.split(";")
+			.map((cookie) => cookie.trim())
+			.find((cookie) => cookie.startsWith(nameEQ))
+			?.slice(nameEQ.length) || null
+	);
 }
 function eraseCookie(name) {
 	document.cookie =
@@ -23,19 +23,16 @@ function eraseCookie(name) {
 }
 
 // Handle modal
-const modal_container = document.getElementById("modal_container");
-let open_modal_button = document.querySelector(".open-modal-button");
-let close_modal_button = document.querySelector(".close-modal-button");
-if (open_modal_button !== null) {
-	open_modal_button.addEventListener("click", () => {
-		modal_container.classList.add("show");
-	});
-}
-if (close_modal_button !== null) {
-	close_modal_button.addEventListener("click", () => {
-		modal_container.classList.remove("show");
-	});
-}
+const modalContainer = document.getElementById("modal_container");
+const openModalButton = document.querySelector(".open-modal-button");
+const closeModalButton = document.querySelector(".close-modal-button");
+
+openModalButton?.addEventListener("click", () => {
+	modalContainer.classList.add("show");
+});
+closeModalButton?.addEventListener("click", () => {
+	modalContainer.classList.remove("show");
+});
 
 // Handle toast
 const toast = document.querySelector(".toast");
@@ -47,11 +44,10 @@ closeToastButtons.forEach((button) => {
 	});
 });
 function showToast() {
-	if (toast !== null) {
-		let toastTitle = document.getElementById("toast-title").textContent;
+	if (toast) {
 		if (toastTitle === "Launch platform was successfully executed") {
 			document.cookie.split(";").forEach((cookie) => {
-				let [name, value] = cookie.split("=").map((c) => c.trim());
+				let name = cookie.split("=")[0].trim();
 				if (name.startsWith("warning-cookie")) {
 					eraseCookie(name);
 				}
@@ -65,7 +61,7 @@ function showToast() {
 	}
 }
 function hideToast() {
-	if (toast !== null) {
+	if (toast) {
 		toast.classList.remove("active");
 		setTimeout(() => {
 			toast.style.display = "none";
@@ -104,17 +100,17 @@ const TOAST_CONFIGS = {
 	},
 };
 
-let toast_title = document.getElementById("toast-title");
-let toast_description = document.getElementById("toast-description");
-let toast_footer = document.getElementById("toast-footer");
+let toastTitle = document.getElementById("toast-title");
+let toastDescription = document.getElementById("toast-description");
+let toastFooter = document.getElementById("toast-footer");
 function setToastContent(cmd) {
 	const matchedPrefix = Object.keys(TOAST_CONFIGS).find((prefix) =>
 		cmd.startsWith(prefix)
 	);
 	if (matchedPrefix) {
 		const config = TOAST_CONFIGS[matchedPrefix];
-		toast_title.textContent = config.title;
-		toast_description.textContent = config.description;
-		toast_footer.style.display = config.showFooter ? "flex" : "none";
+		toastTitle.textContent = config.title;
+		toastDescription.textContent = config.description;
+		toastFooter.style.display = config.showFooter ? "flex" : "none";
 	}
 }

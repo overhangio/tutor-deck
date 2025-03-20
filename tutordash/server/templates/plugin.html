@@ -49,24 +49,24 @@
         pluginName = '{{ plugin_name }}';
         isPluginInstalled = '{{ is_installed }}' === 'True';
         isPluginEnabled = '{{ is_enabled }}' === 'True';
-        plugin_upgrade_button = document.getElementById('plugin-upgrade-button');
-        plugin_install_button = document.getElementById('plugin-install-button');
-        cancel_command_button = document.getElementById('cancel-command-button');
+        pluginUpgradeButton = document.getElementById('plugin-upgrade-button');
+        pluginInstallButton = document.getElementById('plugin-install-button');
+        cancelCommandButton = document.getElementById('cancel-command-button');
 
         function showPluginInstallButton(){
-            plugin_install_button.style.display = 'block';
-            plugin_upgrade_button.style.display = 'none'; 
-            cancel_command_button.style.display = 'none'; 
+            pluginInstallButton.style.display = 'block';
+            pluginUpgradeButton.style.display = 'none'; 
+            cancelCommandButton.style.display = 'none'; 
         }
         function showPluginUpgradeButton(){
-            plugin_install_button.style.display = 'none';
-            plugin_upgrade_button.style.display = 'block'; 
-            cancel_command_button.style.display = 'none'; 
+            pluginInstallButton.style.display = 'none';
+            pluginUpgradeButton.style.display = 'block'; 
+            cancelCommandButton.style.display = 'none'; 
         }
         function ShowCancelCommandButton(){
-            plugin_install_button.style.display = 'none';
-            plugin_upgrade_button.style.display = 'none'; 
-            cancel_command_button.style.display = 'block'; 
+            pluginInstallButton.style.display = 'none';
+            pluginUpgradeButton.style.display = 'none'; 
+            cancelCommandButton.style.display = 'block'; 
         }
         function ShowRunCommandButton(){
             if (isPluginInstalled){

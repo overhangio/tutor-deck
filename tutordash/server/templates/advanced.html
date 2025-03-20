@@ -34,15 +34,15 @@ Search for any tutor command and execute it with a single click.
 
 {% block scripts %}
 <script>
-    run_command_button = document.querySelector('.run-command-button')
-    cancel_command_button = document.querySelector('.cancel-command-button') 
+    runCommandButton = document.querySelector('.run-command-button')
+    cancelCommandButton = document.querySelector('.cancel-command-button') 
     function ShowRunCommandButton(){
-        run_command_button.style.display = 'block';
-        cancel_command_button.style.display = 'none'; 
+        runCommandButton.style.display = 'block';
+        cancelCommandButton.style.display = 'none'; 
     }
     function ShowCancelCommandButton(){
-        run_command_button.style.display = 'none';
-        cancel_command_button.style.display = 'block'; 
+        runCommandButton.style.display = 'none';
+        cancelCommandButton.style.display = 'block'; 
     }
     ShowRunCommandButton();
 
@@ -52,7 +52,7 @@ Search for any tutor command and execute it with a single click.
     commandInput.addEventListener('input', async () => {
         const command = commandInput.value;
 
-        if (command !== ""){
+        if (command){
             suggestionsElement.classList.remove('hidden');
             const response = await fetch('/suggest', {
                 method: 'POST',

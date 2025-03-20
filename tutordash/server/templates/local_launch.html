@@ -24,15 +24,15 @@ Running launch platform will allow all changes to plugins to take effect. This c
 
 {% block scripts %}
 <script>
-    local_launch_button = document.getElementById('local-launch-button')
-    cancel_local_launch_button = document.getElementById('cancel-local-launch-button') 
+    localLaunchButton = document.getElementById('local-launch-button')
+    cancelLocalLaunchButton = document.getElementById('cancel-local-launch-button') 
     function ShowRunCommandButton(){
-            local_launch_button.style.display = 'block';
-            cancel_local_launch_button.style.display = 'none'; 
+            localLaunchButton.style.display = 'block';
+            cancelLocalLaunchButton.style.display = 'none'; 
         }
     function ShowCancelCommandButton(){
-        local_launch_button.style.display = 'none';
-        cancel_local_launch_button.style.display = 'block'; 
+        localLaunchButton.style.display = 'none';
+        cancelLocalLaunchButton.style.display = 'block'; 
     }
     ShowRunCommandButton();
 </script>

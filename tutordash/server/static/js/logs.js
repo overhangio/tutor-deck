@@ -16,40 +16,40 @@ logsElement.addEventListener("scroll", function () {
 	}
 });
 
-let executed_new_command = true;
-let log_count = 0;
+let executedNewCommand = true;
+let logsCount = 0;
 htmx.on("htmx:sseBeforeMessage", function (evt) {
-	log_count += 1;
+	logsCount += 1;
 
 	// Don't swap content, we want to append
 	evt.preventDefault();
 
 	const stdout = JSON.parse(evt.detail.data);
 	const text = document.createTextNode(stdout);
-	if (log_count === 1) {
+	if (logsCount === 1) {
 		// First log element contains the name of logging file
 		let lastLogFile = getCookie("last-log-file");
 		// If the new log file name is same as the previous log file name that means
 		// we have not executed a new command, they are logs of the last executed command
 		if (lastLogFile === text.nodeValue.trim()) {
-			executed_new_command = false;
+			executedNewCommand = false;
 		} else {
 			// We are indeed executing a new command so show cancel button and update log file name
 			ShowCancelCommandButton();
 			setCookie("last-log-file", text.nodeValue.trim(), 1);
 		}
-	} else if (log_count === 2) {
+	} else if (logsCount === 2) {
 		// Second log element is the running command, make toast here
 		cmd = text.nodeValue.trim();
 		setToastContent(cmd);
 		evt.detail.elt.appendChild(text);
 	} else {
 		// Only show toast if it was a new command
-		if (executed_new_command === true) {
+		if (executedNewCommand === true) {
 			// If command has run successfully update UI
 			if (stdout.includes("Success!")) {
 				// Do not show the toast if it is empty
-				if (toast_title.textContent.trim() != "") {
+				if (toastTitle.textContent.trim() != "") {
 					showToast("info");
 				}
 				// Check if we are on the plugin page

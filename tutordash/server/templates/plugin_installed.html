@@ -34,9 +34,9 @@ View all your installed plugins in one place.
         });
     }
     document.body.addEventListener('htmx:afterOnLoad', function(event) {
-        let toggle_switches = document.querySelectorAll(".switch");
-        toggle_switches.forEach(toggle_switch => {
-            toggle_switch.onclick = function(event) {
+        let toggleSwitches = document.querySelectorAll(".switch");
+        toggleSwitches.forEach(toggleSwitch => {
+            toggleSwitch.onclick = function(event) {
                 // If we click on the switch then do what the switch does
                 // abort what the parent was going to do on click
                 event.stopPropagation();
