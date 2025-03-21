@@ -18,6 +18,7 @@ logsElement.addEventListener("scroll", function () {
 
 let executedNewCommand = true;
 let logsCount = 0;
+let currentLogFile = null;
 htmx.on("htmx:sseBeforeMessage", function (evt) {
 	logsCount += 1;
 
@@ -26,23 +27,25 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 
 	const stdout = JSON.parse(evt.detail.data);
 	const text = document.createTextNode(stdout);
+	console.log(text);
+	// First log element contains the name of logging file
 	if (logsCount === 1) {
-		// First log element contains the name of logging file
+		currentLogFile = text.nodeValue.trim();
+
+		// Happens only when the user sets up tutor dash
 		let lastLogFile = getCookie("last-log-file");
 		if (lastLogFile === null) {
-			setCookie("last-log-file", text.nodeValue.trim(), 365);
-			lastLogFile = getCookie("last-log-file");
+			lastLogFile = currentLogFile;
+			setCookie("last-log-file", lastLogFile, 365);
 		}
+
 		// If the new log file name is same as the previous log file name that means
 		// we have not executed a new command, they are logs of the last executed command
-		if (lastLogFile === text.nodeValue.trim()) {
+		if (lastLogFile === currentLogFile) {
 			executedNewCommand = false;
 		} else {
 			// We are indeed executing a new command so show cancel button and update log file name
-			// There is however an edge case, when the first sets up tutor dash the last-log-file in their cookies does not exist
-			// In that case do not show the cancel button
 			ShowCancelCommandButton();
-			setCookie("last-log-file", text.nodeValue.trim(), 365);
 		}
 	} else if (logsCount === 2) {
 		// Second log element is the running command, make toast here
@@ -54,6 +57,8 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		if (executedNewCommand === true) {
 			// If command has run successfully update UI
 			if (stdout.includes("Success!")) {
+				console.log(currentLogFile);
+				setCookie("last-log-file", currentLogFile, 365);
 				// Do not show the toast if it is empty
 				if (toastTitle.textContent.trim() != "") {
 					showToast("info");
