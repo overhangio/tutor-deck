@@ -12,8 +12,8 @@
                 {% endif %}
                 <button 
                     type="button" 
-                    hx-post="{{ url_for('config_unset', name=key) }}"
-                    hx-vals='{"plugin_name": "{{ plugin_name }}"}'
+                    hx-post="{{ url_for('config_set_multi') }}"
+                    hx-vals='{"plugin_name": "{{ plugin_name }}", "unset": "{{ key }}"}'
                     hx-indicator="#loading-bar-spinner-{{ key }}"
                     hx-push-url="true"
                     {% if key not in user_config %}disabled{% endif %}>

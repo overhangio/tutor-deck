@@ -229,37 +229,19 @@ async def config_set_multi() -> WerkzeugResponse:
     form = await request.form
     plugin_name = form.get("plugin_name")
 
-    cmd = ["config", "save"]
-    for key, value in form.items():
-        if key != "plugin_name":
-            if value.startswith("{{"):
-                # Templated values that start with {{ should be explicitely converted to string
-                # Otherwise there will be a parsing error because it might be considered a dictionary
-                value = f"'{value}'"
-            cmd.extend(["--set", f"{key}={value}"])
-    tutorclient.CliPool.run_sequential(cmd)
-    # TODO error management
-    response = await make_response(
-        redirect(
-            url_for(
-                "plugin",
-                name=plugin_name,
-            )
-        )
-    )
-    response.set_cookie(
-        f"{constants.WARNING_COOKIE_PREFIX}-{plugin_name}",
-        "requires launch",
-        max_age=constants.ONE_MONTH,
-    )
-    return response
-
-
-@app.post("/config/<name>/unset")
-async def config_unset(name: str) -> WerkzeugResponse:
-    tutorclient.CliPool.run_sequential(["config", "save", f"--unset={name}"])
-    form = await request.form
-    plugin_name = form.get("plugin_name")
+    unset = form.get("unset")
+    if unset:
+        tutorclient.CliPool.run_sequential(["config", "save", f"--unset={unset}"])
+    else:
+        cmd = ["config", "save"]
+        for key, value in form.items():
+            if key != "plugin_name":
+                if value.startswith("{{"):
+                    # Templated values that start with {{ should be explicitely converted to string
+                    # Otherwise there will be a parsing error because it might be considered a dictionary
+                    value = f"'{value}'"
+                cmd.extend(["--set", f"{key}={value}"])
+        tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
     response = await make_response(
         redirect(
