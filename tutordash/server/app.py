@@ -10,6 +10,7 @@ from quart import (
     Quart,
     Response,
     abort,
+    g,
     jsonify,
     make_response,
     redirect,
@@ -47,26 +48,31 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     app.run(**app_kwargs)
 
 
+@app.before_request
+async def before_request():
+    # Shared views and template context
+    g.installed_plugins = tutorclient.Client.installed_plugins()
+    g.enabled_plugins = tutorclient.Client.enabled_plugins()
+
+
 @app.get("/")
 async def home() -> str:
-    return await render_template("plugin_installed.html", **shared_template_context())
+    return await render_template("plugin_installed.html")
 
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
-    return await render_template("plugin_store.html", **shared_template_context())
+    return await render_template("plugin_store.html")
 
 
 @app.get("/plugin/installed")
 async def plugin_installed() -> str:
-    return await render_template("plugin_installed.html", **shared_template_context())
+    return await render_template("plugin_installed.html")
 
 
 @app.get("/plugin/store/list")
 async def plugin_store_list() -> str:
     search_query = request.args.get("search", "")
-    installed_plugins = tutorclient.Client.installed_plugins()
-    enabled_plugins = tutorclient.Client.enabled_plugins()
     plugins: list[dict[str, str]] = [
         {
             "name": p.name,
@@ -74,8 +80,8 @@ async def plugin_store_list() -> str:
             "index": p.index,
             "author": p.author.split("<")[0].strip(),
             "description": markdown(p.description.replace("\n", " ")),
-            "is_installed": p.name in installed_plugins,
-            "is_enabled": p.name in enabled_plugins,
+            "is_installed": p.name in g.installed_plugins,
+            "is_enabled": p.name in g.enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
         if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
@@ -89,15 +95,12 @@ async def plugin_store_list() -> str:
         "_plugin_store_list.html",
         plugins=plugins,
         pagination=pagination,
-        **shared_template_context(),
     )
 
 
 @app.get("/plugin/installed/list")
 async def plugin_installed_list() -> str:
     search_query = request.args.get("search", "")
-    installed_plugins = tutorclient.Client.installed_plugins()
-    enabled_plugins = tutorclient.Client.enabled_plugins()
     plugins: list[dict[str, str]] = [
         {
             "name": p.name,
@@ -105,17 +108,16 @@ async def plugin_installed_list() -> str:
             "index": p.index,
             "author": p.author.split("<")[0].strip(),
             "description": markdown(p.description.replace("\n", " ")),
-            "is_enabled": p.name in enabled_plugins,
+            "is_enabled": p.name in g.enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
         if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
-        and p.name in installed_plugins
+        and p.name in g.installed_plugins
     ]
 
     return await render_template(
         "_plugin_installed_list.html",
         plugins=plugins,
-        **shared_template_context(),
     )
 
 
@@ -123,8 +125,6 @@ async def plugin_installed_list() -> str:
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
-    is_enabled = name in tutorclient.Client.enabled_plugins()
-    is_installed = name in tutorclient.Client.installed_plugins()
     author = next(
         (
             p.author.split("<")[0].strip()
@@ -144,15 +144,14 @@ async def plugin(name: str) -> str:
     rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
-        is_enabled=is_enabled,
-        is_installed=is_installed,
+        is_enabled=name in g.enabled_plugins,
+        is_installed=name in g.installed_plugins,
         author_name=author,
         plugin_description=description,
         show_logs=show_logs,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
-        **shared_template_context(),
     )
     response = Response(rendered_template, status=200, content_type="text/html")
     response.headers["HX-Redirect"] = url_for("plugin", name=name)
@@ -280,7 +279,6 @@ async def config_unset(name: str) -> WerkzeugResponse:
 async def local_launch_view() -> str:
     return await render_template(
         "local_launch.html",
-        **shared_template_context(),
     )
 
 
@@ -295,17 +293,6 @@ async def cli_local_launch() -> WerkzeugResponse:
         )
     )
     return response
-
-
-@app.get("/cli/logs")
-async def cli_logs() -> str:
-    name = request.args.get("name")
-    return await render_template(
-        "local_launch.html",
-        name=name,
-        show_logs=True,
-        **shared_template_context(),
-    )
 
 
 @app.get("/cli/logs/stream")
@@ -360,7 +347,6 @@ async def advanced() -> str:
     return await render_template(
         "advanced.html",
         show_logs=True,
-        **shared_template_context(),
     )
 
 
@@ -381,18 +367,6 @@ async def command() -> str:
         abort(400, description="Command execution already in progress")
     tutorclient.CliPool.run_parallel(app, command_args)
     return await make_response(redirect(url_for("advanced")))
-
-
-def shared_template_context() -> dict[str, t.Any]:
-    """
-    Common context shared between all views that make use of the base template.
-
-    TODO isn't there a better way to achieve that? Either template variable or Quart feature.
-    """
-    return {
-        "installed_plugins": tutorclient.Client.installed_plugins(),
-        "enabled_plugins": tutorclient.Client.enabled_plugins(),
-    }
 
 
 def pagination_context(
