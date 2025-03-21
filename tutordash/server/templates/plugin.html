@@ -25,9 +25,7 @@
     <h2>Plugin Parameters</h2>
     <p>This plugin has default parameters. If you make any changes, save them and run launch platform to make the changes effective.</p>
 </div>
-<form id="config-forms-container" action="{{ url_for('config_set_multi') }}" method="POST">
-    <input id="plugin-name" type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
-    
+<form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">    
     <h3>Unique settings</h3>
     {% if plugin_config_unique %}
     {% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
