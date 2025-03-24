@@ -267,14 +267,11 @@ async def local_launch_view() -> str:
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
-    response = await make_response(
-        redirect(
-            url_for(
-                "cli_logs",
-            )
-        )
+    return await render_template(
+        "local_launch.html",
+        show_logs=True,
     )
-    return response
+
 
 
 @app.get("/cli/logs/stream")

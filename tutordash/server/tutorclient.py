@@ -110,8 +110,9 @@ class Cli:
                 # pylint: disable=no-value-for-parameter
                 tutor.commands.cli.cli(self.args)
             except TutorError as e:
-                # This happens for incorrect commands
+                # This happens for incorrect commands and cancellation
                 self.log_to_file(e.args[0])
+                self.log_to_file("\nCancelled!\n")
             except SystemExit:
                 # TODO Is there a better way to notify command completion???
                 self.log_to_file("\nSuccess!")
@@ -122,7 +123,6 @@ class Cli:
         """
         logger.info("Stopping Tutor command: %s...", self.command)
         self._stop_flag.set()
-        self.log_to_file("\nCancelled!\n")
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
