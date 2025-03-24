@@ -1,78 +1,110 @@
-{% extends "plugin_header.html" %}
+{% extends "_plugin_header.html" %}
 
 {% set sidebar_active_tab = "" %}
 
 {% from '_switch.html' import switch %}
 
-{% if is_installed %}
-{% block plugin_description %}
-{% endblock %}
-{% endif %}
-
 {% block workspace_content %}
-
-{% if is_installed %}
-<div class="status">
-    <div class="status-text">
-        Status
-    </div>
-    {{ switch(plugin_name, is_enabled) }}
-    <div class="switch-text">
+<div class="status" id="plugin-enable-disable-bar">
+    <div class="topbar">
+        <div class="status-text">
+            Status
+        </div>
+        {{ switch(plugin_name, is_enabled) }}
         <div class="title">
             {% if is_enabled %} Enabled {% else %} Disabled {% endif %}
         </div>
-        <div class="description">
-            {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
-        </div>
+    </div>
+    <div class="description">
+        {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
     </div>
 </div>
-{% endif %}
 
 {% if is_enabled and not show_logs %}
 <div class="parameter-info">
     <h2>Plugin Parameters</h2>
-    <p>This plugin has default parameters. If you make any changes, save them and run a local launch to make the changes effective.</p>
+    <p>This plugin has default parameters. If you make any changes, save them and run launch platform to make the changes effective.</p>
 </div>
+<form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">    
+    <h3>Unique settings</h3>
+    {% if plugin_config_unique %}
+    {% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
+    {% endif %}
 
-<h3>Unique settings</h3>
-{% if plugin_config_unique %}
-{% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
-{% else %}
-<p>None defined</p>
-{% endif %}
+    <h3>Default settings</h3>
+    {% if plugin_config_defaults %}
+    {% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
+    {% endif %}
+    <button type="submit">Update All</button>
+</form>
 
-<h3>Default settings</h3>
-{% if plugin_config_defaults %}
-{% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
-{% else %}
-<p>None defined</p>
-{% endif %}
-
-{% endif %}
-
-{% if show_logs %}
-    <div class="tutor-logs-container">
-        <pre id="tutor-logs" hx-ext="sse" sse-connect="{{ url_for('cli_logs_stream') }}" sse-swap="logs"></pre>
-    </div>
 {% endif %}
 
 {% endblock %}
 
 {% block scripts %}
-<script>
-    htmx.on("htmx:sseBeforeMessage", function(evt) {
-        // Don't swap content, we want to append
-        evt.preventDefault();
+    <script>
+        pluginName = '{{ plugin_name }}';
+        isPluginInstalled = '{{ is_installed }}' === 'True';
+        isPluginEnabled = '{{ is_enabled }}' === 'True';
+        pluginUpgradeButton = document.getElementById('plugin-upgrade-button');
+        pluginInstallButton = document.getElementById('plugin-install-button');
+        cancelCommandButton = document.getElementById('cancel-command-button');
 
-        // Parse JSON
-        const stdout = JSON.parse(evt.detail.data);
+        function showPluginInstallButton(){
+            pluginInstallButton.style.display = 'block';
+            pluginUpgradeButton.style.display = 'none'; 
+            cancelCommandButton.style.display = 'none'; 
+        }
+        function showPluginUpgradeButton(){
+            pluginInstallButton.style.display = 'none';
+            pluginUpgradeButton.style.display = 'block'; 
+            cancelCommandButton.style.display = 'none'; 
+        }
+        function ShowCancelCommandButton(){
+            pluginInstallButton.style.display = 'none';
+            pluginUpgradeButton.style.display = 'none'; 
+            cancelCommandButton.style.display = 'block'; 
+        }
+        function ShowRunCommandButton(){
+            if (isPluginInstalled){
+                showPluginUpgradeButton();
+            } else {
+                showPluginInstallButton();
+            }
+        }
+        function showPluginEnableDisableBar() {
+            const bar = document.getElementById('plugin-enable-disable-bar');
+            bar.style.display = isPluginInstalled === true ? 'flex' : 'none';
+        }
 
-        // Note that HTML is automatically escaped
-        const text = document.createTextNode(stdout);
-        evt.detail.elt.appendChild(text);
+        showPluginEnableDisableBar();
+	    ShowRunCommandButton();
 
-        // Scroll to bottom
-        evt.detail.elt.scrollTop = evt.detail.elt.scrollHeight;
-    });
-</script>
+        // Add change event to all inputs, selects
+        document.querySelectorAll('#config-forms-container input').forEach(function(element) {
+            element.addEventListener('change', function() {
+                this.classList.add('changed');
+                // Find the associated hidden input
+                const hiddenInput = this.nextElementSibling;
+                if (hiddenInput && hiddenInput.type === 'hidden') {
+                    hiddenInput.classList.add('changed');
+                }
+            });
+        });
+        
+        // Handle form submission
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                // Disable all inputs that don't have the 'changed' class
+                document.querySelectorAll('#config-forms-container input:not(.changed)').forEach(function(element) {
+                    if (element.id != "plugin-name"){
+                        element.disabled = true;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}

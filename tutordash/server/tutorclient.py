@@ -9,16 +9,18 @@ import threading
 import typing as t
 
 import aiofiles
-from quart import Quart
-
-import tutor.env
-from tutor.exceptions import TutorError
-from tutor import fmt, hooks
-from tutor.types import Config
+import click
+import click_repl
 import tutor.commands.cli
 import tutor.config
-import tutor.utils
+import tutor.env
 import tutor.plugins.indexes
+import tutor.utils
+from prompt_toolkit.document import Document
+from quart import Quart
+from tutor import fmt, hooks
+from tutor.exceptions import TutorError
+from tutor.types import Config
 
 from . import constants
 
@@ -108,10 +110,12 @@ class Cli:
                 # pylint: disable=no-value-for-parameter
                 tutor.commands.cli.cli(self.args)
             except TutorError as e:
-                # This happens for incorrect commands
+                # This happens for incorrect commands and cancellation
                 self.log_to_file(e.args[0])
+                self.log_to_file("\nCancelled!\n")
             except SystemExit:
-                pass
+                # TODO Is there a better way to notify command completion???
+                self.log_to_file("\nSuccess!")
 
     def stop(self) -> None:
         """
@@ -122,12 +126,14 @@ class Cli:
 
     async def iter_logs(self) -> t.AsyncGenerator[str, None]:
         """
-        Async stream content from file. Output is prefixed by the running command.
+        Async stream content from file.
+        The first item is the log file path. Second item is the running command.
 
         This will handle gracefully file deletion. Note however that if the file is
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
+        yield f"{self.log_path}\n"
         yield f"$ {self.command}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
@@ -242,6 +248,16 @@ class CliPool:
         if cls.CLI_INSTANCE and cls.THREAD:
             cls.stop_runner_thread(cls.CLI_INSTANCE, cls.THREAD)
 
+    @classmethod
+    def is_thread_alive(cls) -> bool:
+        """
+        Check if the thread is running.
+
+        """
+        if cls.CLI_INSTANCE and cls.THREAD:
+            return cls.THREAD.is_alive()
+        return False
+
     @staticmethod
     def stop_runner_thread(tutor_cli_runner: Cli, thread: threading.Thread) -> None:
         """
@@ -294,6 +310,14 @@ class Client:
         return list(hooks.Filters.PLUGINS_LOADED.iterate())
 
     @classmethod
+    def plugins_matching_pattern(cls, pattern: str) -> list[str]:
+        return [
+            plugin._data["name"]
+            for plugin in cls.plugins_in_store()
+            if plugin.match(pattern)
+        ]
+
+    @classmethod
     def plugin_config_unique(cls, name: str) -> Config:
         plugin_config = hooks.Filters.CONFIG_UNIQUE.iterate_from_context(
             hooks.Contexts.app(name).name
@@ -317,3 +341,20 @@ class Client:
         return {
             key: user_config.get(key, value) for key, value in config_defaults.items()
         }
+
+    @classmethod
+    def autocomplete(cls, partial_command: str) -> list[dict]:
+        cli = tutor.commands.cli.cli
+        ctx = click.Context(cli, info_name=cli.name, parent=None)
+        completer = click_repl.ClickCompleter(cli, ctx)
+        document = Document(partial_command, len(partial_command))
+        completions = list(completer.get_completions(document, None))
+        suggestions = []
+        for completion in completions:
+            suggestions.append(
+                {
+                    "text": completion.text,
+                    "display": completion.display,
+                }
+            )
+        return suggestions

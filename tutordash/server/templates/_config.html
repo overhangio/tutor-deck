@@ -1,28 +1,26 @@
-<div class="config">
+<div class="config">   
     {% for key, value in config.items() %}
-    <div class="item">
-        <div>{{ key }}:</div>
-        <div class="config-forms">
-            <form
-                action="{{ url_for('config_set', name=key, next=url_for('plugin', name=plugin_name)) }}"
-                method="POST"
-                oninput="this.querySelector('button[type=submit]').disabled = false">
-                <input type="hidden" name="plugin_name" value="{{ plugin_name }}" size="50"/>
+        <div class="item">
+            <div>{{ key }}:</div>
+            <div class="config-forms">
                 {% if value is boolean %}
-                <input type="checkbox" name="value" {% if value %}checked{% endif %} />
+                <input type="checkbox" name="{{ key }}" id="{{ key }}" value="{% if value %}true{% else %}false{% endif %}" {% if value %}checked{% endif %} onclick="this.value = this.checked ? 'true' : 'false'"/>
+                <!-- If checkbox is unchecked send false -->
+                <input type="hidden" name="{{ key }}" value="false">
                 {% else %}
-                <input type="text" name="value" value="{{ value }}" size="50"/>
+                <input type="text" name="{{ key }}" id="{{ key }}" value="{{ value }}" />
                 {% endif %}
-                {# TODO how to display lists? #}
-                <button type="submit" disabled>update</button>
-            </form>
-
-            {% if key in user_config %}
-            <form action="{{ url_for('config_unset', name=key, next=url_for('plugin', name=plugin_name)) }}" method="POST">
-                <button type="submit">unset</button>
-            </form>
-            {% endif %}
+                <button 
+                    type="button" 
+                    hx-post="{{ url_for('config_update', name=plugin_name) }}"
+                    hx-vals='{"plugin_name": "{{ plugin_name }}", "unset": "{{ key }}"}'
+                    hx-indicator="#loading-bar-spinner-{{ key }}"
+                    hx-push-url="true"
+                    {% if key not in user_config %}disabled{% endif %}>
+                    unset
+                </button>
+                <img src="{{ url_for('static', filename='/img/Fading_balls.gif')}}" alt="" class="htmx-indicator" id="loading-bar-spinner-{{ key }}">
+            </div>
         </div>
-    </div>
-    {% endfor %}
+    {% endfor %}    
 </div>

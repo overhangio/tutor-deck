@@ -1,27 +1,30 @@
 import asyncio
-import importlib_metadata
 import json
 import logging
 import sys
 import typing as t
 
+import importlib_metadata
 from markdown import markdown
 from quart import (
     Quart,
+    Response,
+    abort,
+    g,
+    jsonify,
     make_response,
+    redirect,
     render_template,
     request,
-    redirect,
     url_for,
 )
 from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
-from tutor.plugins import indexes
 from tutor.plugins.v1 import discover_package
 
-from . import constants
-from . import tutorclient
+from tutordash.server.utils import current_page_plugins, pagination_context
 
+from . import constants, tutorclient
 
 app = Quart(
     __name__,
@@ -29,8 +32,6 @@ app = Quart(
     static_folder="static",
 )
 
-ONE_MONTH = 60*60*24*30
-WARNING_COOKIE_PREFIX = "warning-cookie"
 
 def run(root: str, **app_kwargs: t.Any) -> None:
     """
@@ -49,93 +50,76 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     app.run(**app_kwargs)
 
 
+@app.before_request
+async def before_request():
+    # Shared views and template context
+    g.installed_plugins = tutorclient.Client.installed_plugins()
+    g.enabled_plugins = tutorclient.Client.enabled_plugins()
+
+
 @app.get("/")
 async def home() -> str:
-    return await render_template("index.html", **shared_template_context())
+    return await render_template("plugin_installed.html")
 
-def searched_plugins(pattern: str) -> list[str]:
-    return [plugin._data["name"] for plugin in indexes.iter_cache_entries() if plugin.match(pattern)]
 
 @app.get("/plugin/store")
 async def plugin_store() -> str:
-    return await render_template(
-        "plugin_store.html",
-        **shared_template_context(),
-    )
+    return await render_template("plugin_store.html")
+
+
+@app.get("/plugin/installed")
+async def plugin_installed() -> str:
+    return await render_template("plugin_installed.html")
+
 
 @app.get("/plugin/store/list")
 async def plugin_store_list() -> str:
-    installed_plugins = tutorclient.Client.installed_plugins()
+    search_query = request.args.get("search", "")
     plugins: list[dict[str, str]] = [
         {
             "name": p.name,
             "url": p.url,
             "index": p.index,
-            "author": p.author.split('<')[0].strip(),
+            "author": p.author.split("<")[0].strip(),
             "description": markdown(p.description.replace("\n", " ")),
-            "is_installed": p.name in installed_plugins,
+            "is_installed": p.name in g.installed_plugins,
+            "is_enabled": p.name in g.enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
+        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
     ]
-    plugins = [plugin for plugin in plugins if plugin["name"] in searched_plugins(request.args.get("search"))]
 
-    page = request.args.get("page", default=1, type=int)
-    per_page = 9
-    total_pages = (len(plugins) + per_page - 1) // per_page
-    if page < 1:
-        page = 1
-    elif page > total_pages:
-        page = total_pages
-    start = (page - 1) * per_page
-    end = start + per_page
-    plugins = plugins[start:end]
+    current_page = int(request.args.get("page", "1"))
+    plugins = current_page_plugins(plugins, current_page)
+    pagination = pagination_context(plugins, current_page)
 
     return await render_template(
         "_plugin_store_list.html",
         plugins=plugins,
-        page_count=total_pages,
-        current_page=page,
-        **shared_template_context(),
+        pagination=pagination,
     )
 
-@app.get("/plugin/installed")
-async def installed_plugins() -> str:
-    return await render_template(
-        "installed_plugins.html",
-        **shared_template_context(),
-    )
 
 @app.get("/plugin/installed/list")
-async def installed_plugins_list() -> str:
-    indexes
-    installed_plugins = tutorclient.Client.installed_plugins()
-    enabled_plugins = tutorclient.Client.enabled_plugins()
-    store_plugins: dict[str, dict[str, str]] = {
-        p.name: {
-            "url": p.url,
-            "index": p.index,
-            "author": p.author.split('<')[0].strip(),
-            "description": markdown(p.description.replace("\n", " ")),
-        }
-        for p in tutorclient.Client.plugins_in_store()
-    }
+async def plugin_installed_list() -> str:
+    search_query = request.args.get("search", "")
     plugins: list[dict[str, str]] = [
         {
-            "name": plugin_name,
-            "url": store_plugins[plugin_name]["url"] if plugin_name in store_plugins else "",
-            "index": store_plugins[plugin_name]["index"] if plugin_name in store_plugins else "",
-            "author": store_plugins[plugin_name]["author"].split('<')[0].strip() if plugin_name in store_plugins else "",
-            "description": markdown(store_plugins[plugin_name]["description"]) if plugin_name in store_plugins else "",
-            "is_enabled": plugin_name in enabled_plugins,
+            "name": p.name,
+            "url": p.url,
+            "index": p.index,
+            "author": p.author.split("<")[0].strip(),
+            "description": markdown(p.description.replace("\n", " ")),
+            "is_enabled": p.name in g.enabled_plugins,
         }
-        for plugin_name in installed_plugins
+        for p in tutorclient.Client.plugins_in_store()
+        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
+        and p.name in g.installed_plugins
     ]
-    plugins = [plugin for plugin in plugins if plugin["name"] in searched_plugins(request.args.get("search"))]
 
     return await render_template(
-        "_installed_plugins_list.html",
+        "_plugin_installed_list.html",
         plugins=plugins,
-        **shared_template_context(),
     )
 
 
@@ -143,23 +127,37 @@ async def installed_plugins_list() -> str:
 async def plugin(name: str) -> str:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
-    is_enabled = name in tutorclient.Client.enabled_plugins()
-    is_installed = name in tutorclient.Client.installed_plugins()
-    author = next((p.author.split('<')[0].strip() for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
-    description = next((markdown(p.description) for p in tutorclient.Client.plugins_in_store() if p.name == name), "")
-    return await render_template(
+    author = next(
+        (
+            p.author.split("<")[0].strip()
+            for p in tutorclient.Client.plugins_in_store()
+            if p.name == name
+        ),
+        "",
+    )
+    description = next(
+        (
+            markdown(p.description)
+            for p in tutorclient.Client.plugins_in_store()
+            if p.name == name
+        ),
+        "",
+    )
+    rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
-        is_enabled=is_enabled,
-        is_installed=is_installed,
+        is_enabled=name in g.enabled_plugins,
+        is_installed=name in g.installed_plugins,
         author_name=author,
         plugin_description=description,
+        show_logs=show_logs,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
-        show_logs=show_logs,
-        **shared_template_context(),
     )
+    response = Response(rendered_template, status=200, content_type="text/html")
+    response.headers["HX-Redirect"] = url_for("plugin", name=name)
+    return response
 
 
 @app.post("/plugin/<name>/toggle")
@@ -170,12 +168,23 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     command = ["plugins", "enable" if enable_plugin else "disable", name]
     tutorclient.CliPool.run_sequential(command)
     # TODO error management
-    response = await make_response(redirect(url_for("plugin", name=name)))
+
+    response = await make_response(
+        redirect(
+            url_for(
+                "plugin",
+                name=name,
+            )
+        )
+    )
     if enable_plugin:
-        response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{name}", "requires launch", max_age=ONE_MONTH)
+        response.set_cookie(
+            f"{constants.WARNING_COOKIE_PREFIX}-{name}",
+            "requires launch",
+            max_age=constants.ONE_MONTH,
+        )
     else:
-        sys.modules.pop(importlib_metadata.entry_points().__getitem__(name).value)
-        response.delete_cookie(f"{WARNING_COOKIE_PREFIX}-{name}")
+        response.delete_cookie(f"{constants.WARNING_COOKIE_PREFIX}-{name}")
     return response
 
 
@@ -186,62 +195,83 @@ async def plugin_install(name: str) -> WerkzeugResponse:
         while tutorclient.CliPool.THREAD and tutorclient.CliPool.THREAD.is_alive():
             await asyncio.sleep(0.1)
         discover_package(importlib_metadata.entry_points().__getitem__(name))
+
     asyncio.create_task(bg_install_and_reload())
-    return redirect(url_for("plugin", name=name, show_logs=True))
+    return redirect(
+        url_for(
+            "plugin",
+            name=name,
+            show_logs=True,
+        )
+    )
 
 
 @app.post("/plugin/<name>/upgrade")
 async def plugin_upgrade(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "upgrade", name])
-    return redirect(url_for("plugin", name=name, show_logs=True))
+    return redirect(
+        url_for(
+            "plugin",
+            name=name,
+            show_logs=True,
+        )
+    )
+
 
 @app.post("/plugins/update")
 async def plugins_update() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "update"])
-    return redirect(url_for("cli_logs"))
+    return redirect(url_for("plugin_store"))
 
-@app.post("/config/<name>/set")
-async def config_set(name: str) -> WerkzeugResponse:
+
+@app.post("/config/<name>/update")
+async def config_update(name: str) -> WerkzeugResponse:
     form = await request.form
-    value = form.get("value", "")
-    plugin_name = form.get("plugin_name")
-    tutorclient.CliPool.run_sequential(["config", "save", "--set", f"{name}={value}"])
+
+    unset = form.get("unset")
+    if unset:
+        tutorclient.CliPool.run_sequential(["config", "save", f"--unset={unset}"])
+    else:
+        cmd = ["config", "save"]
+        for key, value in form.items():
+            if value.startswith("{{"):
+                # Templated values that start with {{ should be explicitely converted to string
+                # Otherwise there will be a parsing error because it might be considered a dictionary
+                value = f"'{value}'"
+            cmd.extend(["--set", f"{key}={value}"])
+        tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
-    response = await make_response(redirect(request.args.get("next", "/")))
-    response.set_cookie(f"{WARNING_COOKIE_PREFIX}-{plugin_name}", "requires launch", max_age=ONE_MONTH)
+    response = await make_response(
+        redirect(
+            url_for(
+                "plugin",
+                name=name,
+            )
+        )
+    )
+    response.set_cookie(
+        f"{constants.WARNING_COOKIE_PREFIX}-{name}",
+        "requires launch",
+        max_age=constants.ONE_MONTH,
+    )
     return response
 
 
-@app.post("/config/<name>/unset")
-async def config_unset(name: str) -> WerkzeugResponse:
-    tutorclient.CliPool.run_sequential(["config", "save", f"--unset={name}"])
-    # TODO error management
-    return redirect(request.args.get("next", "/"))
-
-
-# def tutor_cli(command: list[str]) -> WerkzeugResponse:
-#     # Run command asynchronously
-#     # if TutorCli.is_thread_alive():
-#     # TODO return 400 if thread is active
-#     # TODO parse command from JSON request body
-#     tutorclient.CliPool.run_parallel(app, command)
-#     return redirect(url_for("cli_logs"))
+@app.get("/local/launch")
+async def local_launch_view() -> str:
+    return await render_template(
+        "local_launch.html",
+    )
 
 
 @app.post("/cli/local/launch")
 async def cli_local_launch() -> WerkzeugResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
-    response = await make_response(redirect(url_for("cli_logs")))
-    for cookie_name in request.cookies:
-        if cookie_name.startswith(WARNING_COOKIE_PREFIX):
-            response.delete_cookie(cookie_name)
-    return response
+    return await render_template(
+        "local_launch.html",
+        show_logs=True,
+    )
 
-
-@app.get("/cli/logs")
-async def cli_logs() -> str:
-    name = request.args.get("name")
-    return await render_template("cli_logs.html", name=name, **shared_template_context())
 
 
 @app.get("/cli/logs/stream")
@@ -287,18 +317,32 @@ async def cli_logs_stream() -> ResponseTypes:
 
 
 @app.post("/cli/stop")
-async def cli_stop() -> WerkzeugResponse:
+async def cli_stop() -> None:
     tutorclient.CliPool.stop()
-    return redirect(url_for("cli_logs"))
 
 
-def shared_template_context() -> dict[str, t.Any]:
-    """
-    Common context shared between all views that make use of the base template.
+@app.get("/advanced")
+async def advanced() -> str:
+    return await render_template(
+        "advanced.html",
+        show_logs=True,
+    )
 
-    TODO isn't there a better way to achieve that? Either template variable or Quart feature.
-    """
-    return {
-        "installed_plugins": tutorclient.Client.installed_plugins(),
-        "enabled_plugins": tutorclient.Client.enabled_plugins(),
-    }
+
+@app.post("/suggest")
+async def suggest():
+    data = await request.get_json()
+    partial_command = data.get("command", "")
+    suggestions = tutorclient.Client.autocomplete(partial_command)
+    return jsonify(suggestions)
+
+
+@app.post("/command")
+async def command() -> str:
+    form = await request.form
+    command_string = form.get("command", "")
+    command_args = command_string.split()
+    if tutorclient.CliPool.is_thread_alive():
+        abort(400, description="Command execution already in progress")
+    tutorclient.CliPool.run_parallel(app, command_args)
+    return await make_response(redirect(url_for("advanced")))

@@ -1,0 +1,40 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+Execute Launch Platform
+{% endblock %}
+
+{% block page_description %}
+Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.
+{% endblock %}
+
+{% block page_button %}
+<button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class=" cancel-process-button" type="submit">Cancel</button>
+<button id="local-launch-button" class=" open-modal-button" type="button">Launch Platform</button>
+{% endblock %}
+
+{% block searchbar %}
+{% endblock %}
+
+{% block warning %}
+{% endblock %}
+
+
+{% set sidebar_active_tab = "local-launch" %}
+
+{% block scripts %}
+<script>
+    localLaunchButton = document.getElementById('local-launch-button')
+    cancelLocalLaunchButton = document.getElementById('cancel-local-launch-button') 
+    function ShowRunCommandButton(){
+            localLaunchButton.style.display = 'block';
+            cancelLocalLaunchButton.style.display = 'none'; 
+        }
+    function ShowCancelCommandButton(){
+        localLaunchButton.style.display = 'none';
+        cancelLocalLaunchButton.style.display = 'block'; 
+    }
+    ShowRunCommandButton();
+</script>
+<script src="{{ url_for('static', filename='js/logs.js') }}"></script>
+{% endblock %}

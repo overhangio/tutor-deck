@@ -1,7 +1,7 @@
 {% macro switch(plugin_name, is_enabled) %}
 <div class="switch">
     <div class="form-switch">
-        <label class="switch">
+        <label class="switch" title="{% if is_enabled  %} Disable {% else %} Enable {% endif %}">
             <form method="POST" action="{{ url_for('plugin_toggle', name=plugin_name) }}">
                 <input type="checkbox" name="checked" onchange="this.form.submit()" {% if is_enabled %} checked {% endif %} />
                 <span class="slider round"></span>

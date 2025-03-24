@@ -1,4 +1,4 @@
-{% extends "base_header.html" %}
+{% extends "_base_header.html" %}
 
 {% block page_title %}
 Plugin Marketplace
@@ -10,7 +10,7 @@ View and install available plugins.
 
 {% block page_button %}
 <form action="{{ url_for('plugins_update') }}" method="POST">
-    <button class="modal-button" type="submit">Refresh</button>
+    <button class="" type="submit">Refresh</button>
 </form>
 {% endblock %}
 
@@ -19,7 +19,7 @@ View and install available plugins.
 {% set search_endpoint = url_for('plugin_store_list') %}
 
 {% block workspace_content %}
-<div id="plugins-list" class="store-plugins" hx-get="{{ url_for('plugin_store_list')}}" hx-trigger="load"></div>
+<div id="plugins-list" class="store-plugins" hx-get="{{ search_endpoint }}" hx-trigger="load"></div>
 {% endblock %}
 
 

@@ -1,0 +1,48 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+My Plugins
+{% endblock %}
+
+{% block page_description %}
+View all your installed plugins in one place.
+{% endblock %}
+
+{% block page_button %}
+<button class=" open-modal-button" type="button">Launch Platform</button>
+{% endblock %}
+
+{% set sidebar_active_tab = "my-plugins" %}
+
+{% set search_endpoint = url_for('plugin_installed_list') %}
+
+{% block workspace_content %}
+<div id="plugins-list" class="installed-plugins-list" hx-get="{{ search_endpoint }}" hx-trigger="load"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Sets the warning that launch platform needs to be executed for plugins to take effect
+    function SetWarning(){
+        const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');
+        const warningMain = document.getElementById('warning-main');
+        warningElements.forEach(function(warningElement) {
+            if (document.cookie.includes(warningElement.id)) {
+                warningElement.style.display = 'flex';  
+                warningMain.style.display = 'flex';
+            }
+        });
+    }
+    document.body.addEventListener('htmx:afterOnLoad', function(event) {
+        let toggleSwitches = document.querySelectorAll(".switch");
+        toggleSwitches.forEach(toggleSwitch => {
+            toggleSwitch.onclick = function(event) {
+                // If we click on the switch then do what the switch does
+                // abort what the parent was going to do on click
+                event.stopPropagation();
+            }
+        });
+        SetWarning();
+    });
+</script>
+{% endblock %}

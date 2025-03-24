@@ -54,6 +54,8 @@ setup(
             "quart",
             "aiofiles",
             "types-aiofiles",
+            "click",
+            "click_repl",
         ]
     },
     entry_points={"tutor.plugin.v1": ["dash = tutordash.plugin"]},

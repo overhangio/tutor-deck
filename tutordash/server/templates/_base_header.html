@@ -10,6 +10,7 @@
         {% block page_button %}{% endblock %}
     </div>
 </div>
+{% block searchbar %}
 <div class="search">
     <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
     <input 
@@ -20,11 +21,13 @@
         placeholder="Search..." 
         hx-get="{{ search_endpoint }}"
         hx-trigger="input changed delay:300ms, search"
-        hx-target="#plugins-list"
-        hx-indicator="#search-indicator">
+        hx-target="#plugins-list">
 </div>
+{% endblock %}
+{% block warning %}
 <div id="warning-main">
     <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
-    <span>Changes have been made to some plugins that will only take effect after a local launch.</span>
+    <span>Changes have been made to some plugins that will only take effect after running launch platform.</span>
 </div>
+{% endblock %}
 {% endblock %}

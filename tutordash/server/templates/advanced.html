@@ -1,0 +1,97 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+Advanced Mode
+{% endblock %}
+
+{% block page_description %}
+Search for any tutor command and execute it with a single click.
+{% endblock %}
+
+{% block page_button %}
+{% endblock %}
+
+{% block searchbar %}
+{% endblock %}
+
+{% block warning %}
+{% endblock %}
+
+
+{% set sidebar_active_tab = "advanced" %}
+
+{% block workspace_content %}
+<div class="command-input">
+    <form method="post" action="{{ url_for('command') }}">
+        <input type="text" id="command" name="command" placeholder="Type a command..." autocomplete="off">
+        <button type="submit" class="run-command-button">Run Command</button>
+        <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-command-button" type="button">Cancel</button>
+    </form>
+</div>
+
+<div class="suggestions hidden" id="suggestions"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    runCommandButton = document.querySelector('.run-command-button')
+    cancelCommandButton = document.querySelector('.cancel-command-button') 
+    function ShowRunCommandButton(){
+        runCommandButton.style.display = 'block';
+        cancelCommandButton.style.display = 'none'; 
+    }
+    function ShowCancelCommandButton(){
+        runCommandButton.style.display = 'none';
+        cancelCommandButton.style.display = 'block'; 
+    }
+    ShowRunCommandButton();
+
+    const commandInput = document.getElementById('command');
+    const suggestionsElement = document.getElementById('suggestions');
+
+    commandInput.addEventListener('input', async () => {
+        const command = commandInput.value;
+
+        if (command){
+            suggestionsElement.classList.remove('hidden');
+            const response = await fetch('/suggest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command })
+            });
+            
+            const suggestions = await response.json();
+
+            // Display suggestions
+            suggestionsElement.innerHTML = '';
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.textContent = suggestion.text;
+                div.addEventListener('click', () => {
+                    // When a suggestion is clicked, update the input
+                    commandInput.value = command.substring(0, command.lastIndexOf(' ') + 1) + div.textContent;
+                    commandInput.focus();
+                    suggestionsElement.innerHTML = '';
+                });
+                suggestionsElement.appendChild(div);
+            });
+        } else {
+            suggestionsElement.classList.add('hidden');
+        }
+    });
+
+    commandInput.addEventListener('focus', () => {
+        suggestionsElement.classList.remove('hidden');
+    });
+    commandInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            suggestionsElement.classList.add('hidden');
+        }, 200);
+    });
+</script>
+
+<script src="{{ url_for('static', filename='js/logs.js') }}"></script>
+{% endblock %}
+

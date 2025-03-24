@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+
+{% block workspace_header %}
+<div class="header-address">
+    <span><a href="{{ url_for('plugin_store') }}">Plugin Marketplace</a></span>
+    <span>/ {{ plugin_name }}</span>
+</div>
+<div class="info">
+    <div class="info-container">
+        <div class="page-title">{{ plugin_name }}</div>
+        <div class="page-description">By {{ author_name }}</div>
+    </div>
+    <div class="page-button">
+        {% block page_button %}
+            <div id="cancel-command-button">
+                <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-process-button" type="button">Cancel</button>
+            </div>
+            <div id="plugin-upgrade-button">
+                <form action="{{ url_for('plugin_upgrade', name=plugin_name) }}" method="POST">
+                    <button type="submit">Upgrade</button>
+                </form>
+            </div>
+            <div id="plugin-install-button">
+                <form action="{{ url_for('plugin_install', name=plugin_name) }}" method="POST">
+                    <button type="submit">Install</button>
+                </form>
+            </div>
+        {% endblock %}
+    </div>
+</div>
+
+<div id="plugin-full-description">
+    {{ plugin_description | safe }}
+</div>
+
+{% endblock %}
