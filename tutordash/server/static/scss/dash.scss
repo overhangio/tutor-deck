@@ -724,10 +724,10 @@ main {
 		background-color: #fff;
 		border-radius: 2em;
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-		padding: 30px 50px;
+		padding: 20px 30px;
 		width: fit-content;
 		height: fit-content;
-		max-width: 30em;
+		max-width: 35em;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
@@ -755,15 +755,19 @@ main {
 			h3 {
 				color: $black;
 				margin-bottom: 0px;
+				font-size: 18px;
 			}
 
 			p {
 				color: $gray-4;
+				font-size: 14px;
 			}
 		}
 
 		.modal-footer {
 			@include modal-and-toast-footer();
+			margin-top: 1em;
+			font-size: 14px;
 		}
 	}
 }
