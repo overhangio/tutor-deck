@@ -1,16 +1,16 @@
 {% extends "_base_header.html" %}
 
 {% block page_title %}
-Execute Launch Platform
+Restart Platform
 {% endblock %}
 
 {% block page_description %}
-Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.
+For the changes to take effect, the platform needs to restart. This could take a few minutes to complete.
 {% endblock %}
 
 {% block page_button %}
 <button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class=" cancel-process-button" type="submit">Cancel</button>
-<button id="local-launch-button" class=" open-modal-button" type="button">Launch Platform</button>
+<button id="local-launch-button" class=" open-modal-button" type="button">Restart Platform</button>
 {% endblock %}
 
 {% block searchbar %}
