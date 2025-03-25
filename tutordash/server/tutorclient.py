@@ -343,7 +343,7 @@ class Client:
         }
 
     @classmethod
-    def autocomplete(cls, partial_command: str) -> list[dict]:
+    def autocomplete(cls, partial_command: str) -> list[dict[str, str]]:
         cli = tutor.commands.cli.cli
         ctx = click.Context(cli, info_name=cli.name, parent=None)
         completer = click_repl.ClickCompleter(cli, ctx)
