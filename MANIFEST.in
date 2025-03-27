@@ -1,2 +1,0 @@
-recursive-include tutordash/server/static *
-recursive-include tutordash/server/templates *
