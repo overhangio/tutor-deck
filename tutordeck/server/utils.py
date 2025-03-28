@@ -1,6 +1,6 @@
 import typing as t
 
-from tutordash.server import constants
+from tutordeck.server import constants
 
 
 def pagination_context(

@@ -22,7 +22,7 @@ from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
 from tutor.plugins.v1 import discover_package
 
-from tutordash.server.utils import current_page_plugins, pagination_context
+from tutordeck.server.utils import current_page_plugins, pagination_context
 
 from . import constants, tutorclient
 
