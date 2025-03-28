@@ -51,7 +51,7 @@ def run(root: str, **app_kwargs: t.Any) -> None:
 
 
 @app.before_request
-async def before_request():
+async def before_request() -> None:
     # Shared views and template context
     g.installed_plugins = tutorclient.Client.installed_plugins()
     g.enabled_plugins = tutorclient.Client.enabled_plugins()
@@ -75,7 +75,7 @@ async def plugin_installed() -> str:
 @app.get("/plugin/store/list")
 async def plugin_store_list() -> str:
     search_query = request.args.get("search", "")
-    plugins: list[dict[str, str]] = [
+    plugins: list[dict[str, t.Any]] = [
         {
             "name": p.name,
             "url": p.url,
@@ -103,7 +103,7 @@ async def plugin_store_list() -> str:
 @app.get("/plugin/installed/list")
 async def plugin_installed_list() -> str:
     search_query = request.args.get("search", "")
-    plugins: list[dict[str, str]] = [
+    plugins: list[dict[str, t.Any]] = [
         {
             "name": p.name,
             "url": p.url,
@@ -124,7 +124,7 @@ async def plugin_installed_list() -> str:
 
 
 @app.get("/plugin/<name>")
-async def plugin(name: str) -> str:
+async def plugin(name: str) -> Response:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
     author = next(
@@ -161,7 +161,7 @@ async def plugin(name: str) -> str:
 
 
 @app.post("/plugin/<name>/toggle")
-async def plugin_toggle(name: str) -> WerkzeugResponse:
+async def plugin_toggle(name: str) -> Response:
     # TODO check plugin exists
     form = await request.form
     enable_plugin = form.get("checked") == "on"
@@ -169,13 +169,16 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
     tutorclient.CliPool.run_sequential(command)
     # TODO error management
 
-    response = await make_response(
-        redirect(
-            url_for(
-                "plugin",
-                name=name,
+    response = t.cast(
+        Response,
+        await make_response(
+            redirect(
+                url_for(
+                    "plugin",
+                    name=name,
+                )
             )
-        )
+        ),
     )
     if enable_plugin:
         response.set_cookie(
@@ -190,7 +193,7 @@ async def plugin_toggle(name: str) -> WerkzeugResponse:
 
 @app.post("/plugin/<name>/install")
 async def plugin_install(name: str) -> WerkzeugResponse:
-    async def bg_install_and_reload():
+    async def bg_install_and_reload() -> None:
         tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
         while tutorclient.CliPool.THREAD and tutorclient.CliPool.THREAD.is_alive():
             await asyncio.sleep(0.1)
@@ -225,7 +228,7 @@ async def plugins_update() -> WerkzeugResponse:
 
 
 @app.post("/config/<name>/update")
-async def config_update(name: str) -> WerkzeugResponse:
+async def config_update(name: str) -> Response:
     form = await request.form
 
     unset = form.get("unset")
@@ -241,13 +244,16 @@ async def config_update(name: str) -> WerkzeugResponse:
             cmd.extend(["--set", f"{key}={value}"])
         tutorclient.CliPool.run_sequential(cmd)
     # TODO error management
-    response = await make_response(
-        redirect(
-            url_for(
-                "plugin",
-                name=name,
+    response = t.cast(
+        Response,
+        await make_response(
+            redirect(
+                url_for(
+                    "plugin",
+                    name=name,
+                )
             )
-        )
+        ),
     )
     response.set_cookie(
         f"{constants.WARNING_COOKIE_PREFIX}-{name}",
@@ -265,13 +271,12 @@ async def local_launch_view() -> str:
 
 
 @app.post("/cli/local/launch")
-async def cli_local_launch() -> WerkzeugResponse:
+async def cli_local_launch() -> str:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
     return await render_template(
         "local_launch.html",
         show_logs=True,
     )
-
 
 
 @app.get("/cli/logs/stream")
@@ -317,8 +322,9 @@ async def cli_logs_stream() -> ResponseTypes:
 
 
 @app.post("/cli/stop")
-async def cli_stop() -> None:
+async def cli_stop() -> Response:
     tutorclient.CliPool.stop()
+    return Response(status=200)
 
 
 @app.get("/advanced")
@@ -330,7 +336,7 @@ async def advanced() -> str:
 
 
 @app.post("/suggest")
-async def suggest():
+async def suggest() -> Response:
     data = await request.get_json()
     partial_command = data.get("command", "")
     suggestions = tutorclient.Client.autocomplete(partial_command)
@@ -338,11 +344,11 @@ async def suggest():
 
 
 @app.post("/command")
-async def command() -> str:
+async def command() -> WerkzeugResponse:
     form = await request.form
     command_string = form.get("command", "")
     command_args = command_string.split()
     if tutorclient.CliPool.is_thread_alive():
         abort(400, description="Command execution already in progress")
     tutorclient.CliPool.run_parallel(app, command_args)
-    return await make_response(redirect(url_for("advanced")))
+    return redirect(url_for("advanced"))
