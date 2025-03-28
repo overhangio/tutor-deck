@@ -1,0 +1,8 @@
+variables:
+    TUTOR_PLUGIN: dash
+    TUTOR_PYPI_PACKAGE: tutor-dash
+    GITHUB_REPO: overhangio/tutor-dash
+
+include:
+    - project: "community/tutor-ci"
+      file: "plugin-gitlab-ci.yml"
