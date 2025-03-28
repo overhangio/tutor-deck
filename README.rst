@@ -1,4 +1,4 @@
-dash plugin for `Tutor <https://docs.tutor.edly.io>`__
+deck plugin for `Tutor <https://docs.tutor.edly.io>`__
 ######################################################
 
 Awesome administration dashboard and plugin marketplace for Tutor
@@ -9,7 +9,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install git+https://github.com/overhangio/tutor-dash
+    pip install git+https://github.com/overhangio/tutor-deck
 
 .. TODO how to package css files?
 
@@ -18,7 +18,7 @@ Usage
 
 .. code-block:: bash
 
-    tutor plugins enable dash
+    tutor plugins enable deck
 
 Development
 ***********

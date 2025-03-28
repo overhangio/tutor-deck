@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
 .PHONY: docs
-SRC_DIRS = ./tutordash
+SRC_DIRS = ./tutordeck
 BLACK_OPTS = --exclude templates ${SRC_DIRS}
 
 runserver: ## Run a development server
-	tutor dash run --dev
+	tutor deck run --dev
 
 scss: ## Compile SCSS files to CSS
-	sass ${SASS_OPTS} tutordash/server/static/scss/:tutordash/server/static/css/ 
+	sass ${SASS_OPTS} tutordeck/server/static/scss/:tutordeck/server/static/css/ 
 
 scss-watch: ## Compile SCSS files to CSS and watch for changes
 	$(MAKE) scss SASS_OPTS="--watch"

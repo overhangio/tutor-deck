@@ -73,7 +73,7 @@ class Cli:
         """
         self.args = args
         self.log_file = tempfile.NamedTemporaryFile(
-            "ab", prefix="tutor-dash-", suffix=".log"
+            "ab", prefix="tutor-deck-", suffix=".log"
         )
         self._stop_flag = threading.Event()
 
