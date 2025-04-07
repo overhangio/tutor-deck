@@ -1,8 +1,8 @@
 variables:
-    TUTOR_PLUGIN: deck
-    TUTOR_PYPI_PACKAGE: tutor-deck
-    GITHUB_REPO: overhangio/tutor-deck
+  TUTOR_PLUGIN: deck
+  TUTOR_PYPI_PACKAGE: tutor-deck
+  GITHUB_REPO: overhangio/tutor-deck
 
 include:
-    - project: "community/tutor-ci"
-      file: "plugin-gitlab-ci.yml"
+  - project: "community/tutor-ci"
+    file: "plugin-gitlab-ci.yml"
