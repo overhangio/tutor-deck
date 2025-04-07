@@ -27,7 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "tutor>=19.0.0,<20.0.0",
+  "tutor>=19.0.1,<20.0.0",
   "quart",
   "aiofiles",
   "markdown",
@@ -39,7 +39,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-  "tutor[dev]>=19.0.0,<20.0.0", 
+  "tutor[dev]>=19.0.1,<20.0.0", 
   "types-aiofiles",
   "types-Markdown",
   "pylint", 
@@ -66,7 +66,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 # Disable strict naming, otherwise twine is not able to detect name/version
 strict-naming = false
-include = [ "/tutordeck"]
+include = [ "/tutordeck", ".hatch_build.py"]
 exclude = ["tests*"]
 
 [tool.hatch.build.targets.wheel]
