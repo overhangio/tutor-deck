@@ -23,7 +23,7 @@ def deck() -> None:
     pass
 
 
-@deck.command(name="run")
+@deck.command(name="runserver")
 @click.option("--host", default="127.0.0.1", show_default=True)
 @click.option("-p", "--port", default=3274, type=int, show_default=True)
 @click.option(
@@ -31,7 +31,7 @@ def deck() -> None:
     help="Enable development mode, with auto-reload and debug templates.",
 )
 @click.pass_obj
-def deck_run(obj: Context, host: str, port: int, dev: bool) -> None:
+def deck_runserver(obj: Context, host: str, port: int, dev: bool) -> None:
     """
     Run the deck server.
     """
