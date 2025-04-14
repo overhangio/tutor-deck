@@ -124,28 +124,28 @@ main {
 		flex-direction: column;
 		height: 100%;
 		header {
+			padding-left: 2em;
 			flex: 0 0 5.5em;
 			border-bottom: 1px solid $gray-2;
 			display: flex;
 			align-items: center;
 			@media (max-width: 900px) {
+				padding-left: 0;
 				justify-content: center;
 			}
 
-			img {
-				margin-left: 1.25em;
-				width: 2em;
-				height: auto;
-				@media (max-width: 900px) {
-					margin: 0;
-				}
-			}
-			h2 {
+			p {
+				font-size: 1.75em;
+				font-weight: bold;
 				color: $red;
-				margin-left: 0.5em;
 
-				@media (max-width: 900px) {
-					display: none;
+				&:last-child{
+					font-weight: normal;
+				}
+				span{
+					@media (max-width: 900px) {
+						display: none;
+					}
 				}
 			}
 		}
@@ -154,6 +154,10 @@ main {
 
 			@media (max-width: 900px) {
 				padding-inline-start: 0;
+			}
+			p {
+				color: $gray-4;
+				padding: 0 2em
 			}
 			a {
 				@include a-tag();
@@ -187,6 +191,11 @@ main {
 			}
 			.sidebar-tab-selected {
 				color: $blue;
+			}
+			&:last-child{
+				margin-block-start: 0;
+				padding-top: 16px;
+				border-top: 1px solid $gray-2;
 			}
 		}
 	}
