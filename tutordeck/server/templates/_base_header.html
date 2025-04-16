@@ -7,21 +7,26 @@
         <div class="page-description">{% block page_description %}{% endblock %}</div>
     </div>
     <div class="page-button">
-        {% block page_button %}{% endblock %}
+        {% block page_button_top %}{% endblock %}
     </div>
 </div>
 {% block searchbar %}
-<div class="search">
-    <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
-    <input 
-        id="search-input"
-        type="text" 
-        class="form-control search-input"
-        name="search" 
-        placeholder="Search..." 
-        hx-get="{{ search_endpoint }}"
-        hx-trigger="input changed delay:300ms, search"
-        hx-target="#plugins-list">
+<div class="search-and-button">
+    <div class="search">
+        <img src="{{ url_for('static', filename='/img/search.svg') }}"/>
+        <input 
+            id="search-input"
+            type="text" 
+            class="form-control search-input"
+            name="search" 
+            placeholder="Search..." 
+            hx-get="{{ search_endpoint }}"
+            hx-trigger="input changed delay:300ms, search"
+            hx-target="#plugins-list">
+    </div>
+    <div class="page-button">
+        {% block page_button %}{% endblock %}
+    </div>
 </div>
 {% endblock %}
 {% block warning %}

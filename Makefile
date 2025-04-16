@@ -4,7 +4,7 @@ SRC_DIRS = ./tutordeck
 BLACK_OPTS = --exclude templates ${SRC_DIRS}
 
 runserver: ## Run a development server
-	tutor deck run --dev
+	tutor deck runserver --dev
 
 scss: ## Compile SCSS files to CSS
 	sass ${SASS_OPTS} tutordeck/server/static/scss/:tutordeck/server/static/css/ 
