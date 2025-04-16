@@ -1,34 +1,32 @@
-deck plugin for `Tutor <https://docs.tutor.edly.io>`__
-######################################################
+`Tutor <https://docs.tutor.edly.io>`__ Deck
+###########################################
 
-Awesome administration dashboard and plugin marketplace for Tutor
+This is a plugin for `Tutor`_ that provides an administration dashboard and integrates `Plugin Marketplace`_ in an Open edX platform.
+
+
+.. _Tutor: https://docs.tutor.edly.io
+.. _Plugin Marketplace: https://edly.io/tutor/plugins-and-themes/
 
 
 Installation
 ************
 
-.. code-block:: bash
+   tutor plugins update
+   tutor plugins install deck
+   tutor plugins enable deck
 
-    pip install git+https://github.com/overhangio/tutor-deck
+Run Tutor Deck with::
 
-.. TODO how to package css files?
+   tutor deck runserver
 
-Usage
-*****
-
-.. code-block:: bash
-
-    tutor plugins enable deck
+And access the interface at http://127.0.0.1:3274
 
 Development
 ***********
 
-Install locally::
+Install requirements::
 
     pip install -e .[dev]
-
-Install npm requirements::
-
     npm clean-install
 
 Compile SCSS files::
@@ -40,7 +38,54 @@ Run a development server::
 
     make runserver
 
+Usage
+*****
+
+Discover and install plugins from plugin marketplace:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/marketplace.png
+   :alt: Marketplace Image
+
+Browse your installed plugins:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/installed.png
+   :alt: Installed Image
+
+Enable/Disable plugin:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/android.png
+   :alt: Android Image
+
+Change plugin parameters:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/android_settings.png
+   :alt: Android Settings Image
+
+Use Developer mode for all tutor CLI commands:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/developer.png
+   :alt: Developer Image
+
+Restart platform via GUI to apply changes:
+
+.. image:: https://github.com/overhangio/tutor-deck/images/apply.png
+   :alt: Apply Image
+
+Troubleshooting
+***************
+
+This Tutor plugin is maintained by Muhammad Labeeb from `Edly`_.
+Community support is available from the official `Open edX forum`_.
+Do you need help with this plugin? See the `troubleshooting`_
+section from the Tutor documentation.
+
+.. _Edly: https://edly.io/
+.. _Open edX forum: https://discuss.openedx.org
+.. _troubleshooting: https://docs.tutor.edly.io/troubleshooting.html
+
 License
 *******
 
-This software is licensed under the terms of the AGPLv3.
+This work is licensed under the terms of the `GNU Affero General Public License (AGPL)`_.
+
+.. _GNU Affero General Public License (AGPL): https://github.com/overhangio/tutor/blob/release/LICENSE.txt
