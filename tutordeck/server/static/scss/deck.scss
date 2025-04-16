@@ -134,7 +134,6 @@ main {
 		flex-direction: column;
 		height: 100%;
 		header {
-			padding-left: 2em;
 			flex: 0 0 5.5em;
 			border-bottom: 1px solid $gray-1;
 			display: flex;
@@ -145,7 +144,7 @@ main {
 				justify-content: center;
 			}
 			#web-logo {
-				width: 10em;
+				width: 13em;
 				margin-top: 2em;
 				margin-bottom: 2em;
 				@media (max-width: 900px) {
