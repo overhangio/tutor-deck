@@ -20,6 +20,11 @@ instructions, because git commits are used to generate release notes:
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-19.0.2'></a>
+## v19.0.2 (2025-04-16)
+
+- [Bugfix] Prevent images in plugin description from overflowing. (by @mlabeeb03)
+
 <a id='changelog-19.0.1'></a>
 ## v19.0.1 (2025-04-16)
 
