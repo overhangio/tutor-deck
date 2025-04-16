@@ -3,6 +3,10 @@ variables:
   TUTOR_PYPI_PACKAGE: tutor-deck
   GITHUB_REPO: overhangio/tutor-deck
 
+build-css:
+  script:
+    - make scss
+
 include:
   - project: "community/tutor-ci"
     file: "plugin-gitlab-ci.yml"
