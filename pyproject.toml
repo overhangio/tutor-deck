@@ -69,5 +69,9 @@ strict-naming = false
 include = [ "/tutordeck", ".hatch_build.py"]
 exclude = ["tests*"]
 
+[tool.hatch.build.targets.sdist.hooks.custom]
+# Build static assets prior to running sdist
+path = ".hatch_build.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["tutordeck"]
