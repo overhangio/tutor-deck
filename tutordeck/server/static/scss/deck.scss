@@ -290,6 +290,12 @@ main {
 			#plugin-full-description {
 				border-top: 1px solid $gray-1;
 				padding: 1em 0em;
+
+				p {
+					img {
+						width: 100%;
+					}
+				}
 			}
 			.search-and-button {
 				display: flex;

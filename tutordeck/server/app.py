@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 import sys
 import typing as t
 
@@ -109,7 +110,9 @@ async def plugin_installed_list() -> str:
             "url": p.url,
             "index": p.index,
             "author": p.author.split("<")[0].strip(),
-            "description": markdown(p.description.replace("\n", " ")),
+            "description": re.sub(
+                r"<img[^>]*>", "", markdown(p.description.replace("\n", " "))
+            ),
             "is_enabled": p.name in g.enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()

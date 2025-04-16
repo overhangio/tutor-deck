@@ -1,0 +1,1 @@
+- [Bugfix] Prevent images in plugin description from overflowing. (by @mlabeeb03)
