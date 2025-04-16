@@ -11,6 +11,8 @@ This is a plugin for `Tutor`_ that provides an administration dashboard and inte
 Installation
 ************
 
+::
+
    tutor plugins update
    tutor plugins install deck
    tutor plugins enable deck
@@ -43,32 +45,32 @@ Usage
 
 Discover and install plugins from plugin marketplace:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/marketplace.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/marketplace.png
    :alt: Marketplace Image
 
 Browse your installed plugins:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/installed.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/installed.png
    :alt: Installed Image
 
 Enable/Disable plugin:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/android.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/android.png
    :alt: Android Image
 
 Change plugin parameters:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/android_settings.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/android_settings.png
    :alt: Android Settings Image
 
 Use Developer mode for all tutor CLI commands:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/developer.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/developer.png
    :alt: Developer Image
 
 Restart platform via GUI to apply changes:
 
-.. image:: https://github.com/overhangio/tutor-deck/images/apply.png
+.. image:: https://github.com/overhangio/tutor-deck/raw/release/images/apply.png
    :alt: Apply Image
 
 Troubleshooting
