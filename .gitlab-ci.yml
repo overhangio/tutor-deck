@@ -6,6 +6,7 @@ variables:
 build-css:
   script:
     - make scss
+  stage: build
 
 include:
   - project: "community/tutor-ci"
