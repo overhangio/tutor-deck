@@ -5,12 +5,12 @@ Apply changes
 {% endblock %}
 
 {% block page_description %}
-Running launch platform will allow all changes to plugins to take effect. This could take a few minutes to complete.
+This will run Launch Platform to apply all plugin changes. This may take a few minutes to complete.
 {% endblock %}
 
 {% block page_button_top %}
 <button id="cancel-local-launch-button" hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class=" cancel-process-button" type="submit">Cancel</button>
-<button id="local-launch-button" class=" open-modal-button" type="button">Launch Platform</button>
+<button id="local-launch-button" class=" open-modal-button" type="button">Apply Changes</button>
 {% endblock %}
 
 {% block searchbar %}

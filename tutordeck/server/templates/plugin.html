@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="description">
-        {% if not is_enabled %} Enable the plugin to edit parameters. {% endif %}
+        {% if not is_enabled %} Enable the plugin to edit settings. {% endif %}
     </div>
 </div>
 
@@ -24,10 +24,6 @@
 <div>
     <h2>Plugin Settings</h2>
     <p>You can adjust the plugin's behavior by changing these settings. Changes will only go live after you apply them.</p>
-</div>
-<div class="parameter-info">
-    <h2>Plugin Parameters</h2>
-    <p>This plugin has default parameters. If you make any changes, save them and run launch platform to make the changes effective.</p>
 </div>
 <form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">    
     <h3>Unique settings</h3>
