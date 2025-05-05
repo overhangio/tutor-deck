@@ -23,9 +23,10 @@
 {% if is_enabled and not show_logs %}
 <div>
     <h2>Plugin Settings</h2>
-    <p>You can adjust the plugin's behavior by changing these settings. Changes will only go live after you apply them.</p>
+    <p>You can adjust the plugin's behavior by changing these settings. Changes will only go live after you apply them.
+    </p>
 </div>
-<form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">    
+<form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">
     <h3>Unique settings</h3>
     {% if plugin_config_unique %}
     {% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
@@ -43,66 +44,72 @@
 {% endblock %}
 
 {% block scripts %}
-    <script>
-        pluginName = '{{ plugin_name }}';
-        isPluginInstalled = '{{ is_installed }}' === 'True';
-        isPluginEnabled = '{{ is_enabled }}' === 'True';
-        pluginUpgradeButton = document.getElementById('plugin-upgrade-button');
-        pluginInstallButton = document.getElementById('plugin-install-button');
-        cancelCommandButton = document.getElementById('cancel-command-button');
+<script>
+    pluginName = '{{ plugin_name }}';
+    isPluginInstalled = '{{ is_installed }}' === 'True';
+    isPluginEnabled = '{{ is_enabled }}' === 'True';
+    sequentialCommandExecuted = '{{ seq_command_executed }}' === 'True';
+    pluginUpgradeButton = document.getElementById('plugin-upgrade-button');
+    pluginInstallButton = document.getElementById('plugin-install-button');
+    cancelCommandButton = document.getElementById('cancel-command-button');
 
-        function showPluginInstallButton(){
-            pluginInstallButton.style.display = 'block';
-            pluginUpgradeButton.style.display = 'none'; 
-            cancelCommandButton.style.display = 'none'; 
+    function showPluginInstallButton() {
+        pluginInstallButton.style.display = 'block';
+        pluginUpgradeButton.style.display = 'none';
+        cancelCommandButton.style.display = 'none';
+    }
+    function showPluginUpgradeButton() {
+        pluginInstallButton.style.display = 'none';
+        pluginUpgradeButton.style.display = 'block';
+        cancelCommandButton.style.display = 'none';
+    }
+    function ShowCancelCommandButton() {
+        pluginInstallButton.style.display = 'none';
+        pluginUpgradeButton.style.display = 'none';
+        cancelCommandButton.style.display = 'block';
+    }
+    function ShowRunCommandButton() {
+        if (isPluginInstalled) {
+            showPluginUpgradeButton();
+        } else {
+            showPluginInstallButton();
         }
-        function showPluginUpgradeButton(){
-            pluginInstallButton.style.display = 'none';
-            pluginUpgradeButton.style.display = 'block'; 
-            cancelCommandButton.style.display = 'none'; 
-        }
-        function ShowCancelCommandButton(){
-            pluginInstallButton.style.display = 'none';
-            pluginUpgradeButton.style.display = 'none'; 
-            cancelCommandButton.style.display = 'block'; 
-        }
-        function ShowRunCommandButton(){
-            if (isPluginInstalled){
-                showPluginUpgradeButton();
-            } else {
-                showPluginInstallButton();
+    }
+    function showPluginEnableDisableBar() {
+        const bar = document.getElementById('plugin-enable-disable-bar');
+        bar.style.display = isPluginInstalled === true ? 'flex' : 'none';
+    }
+    async function checkIfPluginInstalled(pluginName) {
+        const response = await fetch(`/plugin/${pluginName}/is-installed`);
+        const data = await response.json();
+        return data.installed;
+    }
+
+    showPluginEnableDisableBar();
+    ShowRunCommandButton();
+
+    // Add change event to all inputs, selects
+    document.querySelectorAll('#config-forms-container input').forEach(function (element) {
+        element.addEventListener('change', function () {
+            this.classList.add('changed');
+            // Find the associated hidden input
+            const hiddenInput = this.nextElementSibling;
+            if (hiddenInput && hiddenInput.type === 'hidden') {
+                hiddenInput.classList.add('changed');
             }
-        }
-        function showPluginEnableDisableBar() {
-            const bar = document.getElementById('plugin-enable-disable-bar');
-            bar.style.display = isPluginInstalled === true ? 'flex' : 'none';
-        }
+        });
+    });
 
-        showPluginEnableDisableBar();
-	    ShowRunCommandButton();
-
-        // Add change event to all inputs, selects
-        document.querySelectorAll('#config-forms-container input').forEach(function(element) {
-            element.addEventListener('change', function() {
-                this.classList.add('changed');
-                // Find the associated hidden input
-                const hiddenInput = this.nextElementSibling;
-                if (hiddenInput && hiddenInput.type === 'hidden') {
-                    hiddenInput.classList.add('changed');
+    // Handle form submission
+    document.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            // Disable all inputs that don't have the 'changed' class
+            document.querySelectorAll('#config-forms-container input:not(.changed)').forEach(function (element) {
+                if (element.id != "plugin-name") {
+                    element.disabled = true;
                 }
             });
         });
-        
-        // Handle form submission
-        document.querySelectorAll('form').forEach(function(form) {
-            form.addEventListener('submit', function(e) {
-                // Disable all inputs that don't have the 'changed' class
-                document.querySelectorAll('#config-forms-container input:not(.changed)').forEach(function(element) {
-                    if (element.id != "plugin-name"){
-                        element.disabled = true;
-                    }
-                });
-            });
-        });
-    </script>
+    });
+</script>
 {% endblock %}
