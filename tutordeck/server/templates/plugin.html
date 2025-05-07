@@ -53,27 +53,20 @@
     pluginInstallButton = document.getElementById('plugin-install-button');
     cancelCommandButton = document.getElementById('cancel-command-button');
 
-    function showPluginInstallButton() {
-        pluginInstallButton.style.display = 'block';
-        pluginUpgradeButton.style.display = 'none';
-        cancelCommandButton.style.display = 'none';
-    }
-    function showPluginUpgradeButton() {
-        pluginInstallButton.style.display = 'none';
-        pluginUpgradeButton.style.display = 'block';
-        cancelCommandButton.style.display = 'none';
-    }
-    function ShowCancelCommandButton() {
-        pluginInstallButton.style.display = 'none';
-        pluginUpgradeButton.style.display = 'none';
-        cancelCommandButton.style.display = 'block';
+    const toggleButtons = ({install = false, upgrade = false, cancel = false} = {}) => {
+        pluginInstallButton.style.display = install ? 'block' : 'none';
+        pluginUpgradeButton.style.display = upgrade ? 'block' : 'none';
+        cancelCommandButton.style.display = cancel ? 'block' : 'none';
     }
     function ShowRunCommandButton() {
         if (isPluginInstalled) {
-            showPluginUpgradeButton();
+            toggleButtons({upgrade: true});
         } else {
-            showPluginInstallButton();
+            toggleButtons({install: true});
         }
+    }
+    function ShowCancelCommandButton() {
+        toggleButtons({cancel: true});
     }
     function showPluginEnableDisableBar() {
         const bar = document.getElementById('plugin-enable-disable-bar');
