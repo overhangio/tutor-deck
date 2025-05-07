@@ -77,7 +77,7 @@
     }
     function showPluginEnableDisableBar() {
         const bar = document.getElementById('plugin-enable-disable-bar');
-        bar.style.display = isPluginInstalled === true ? 'flex' : 'none';
+        bar.style.display = isPluginInstalled ? 'flex' : 'none';
     }
     async function checkIfPluginInstalled(pluginName) {
         const response = await fetch(`/plugin/${pluginName}/is-installed`);
