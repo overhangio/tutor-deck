@@ -30,7 +30,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	}
 
 	const parallelCommandCompleted =
-		executedNewCommand === true && data.thread_alive === false;
+		executedNewCommand && !data.thread_alive;
 
 	const onPluginPage = typeof pluginName !== "undefined";
 	// Note that sequential commands are only executed on the plugins page
