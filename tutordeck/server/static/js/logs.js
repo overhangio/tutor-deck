@@ -24,7 +24,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	const command = data.command;
 
 	// This means a parallel command just started its execution
-	if (executedNewCommand === false && data.thread_alive === true) {
+	if (!executedNewCommand && data.thread_alive) {
 		ShowCancelCommandButton();
 		executedNewCommand = true;
 	}
