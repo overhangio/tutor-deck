@@ -44,7 +44,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		// Only show the toast if it was set in the `setToastContent` function and if the command ran successfully
 		if (data.stdout.includes("Success!")) {
 			setToastContent(command);
-			if (toastTitle.textContent.trim() != "") {
+			if (toastTitle.textContent.trim()) {
 				showToast("info");
 			}
 		}
