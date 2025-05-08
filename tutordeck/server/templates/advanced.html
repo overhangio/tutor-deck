@@ -36,13 +36,15 @@ Search for any tutor command and execute it with a single click.
 <script>
     runCommandButton = document.querySelector('.run-command-button')
     cancelCommandButton = document.querySelector('.cancel-command-button') 
+    const toggleButtons = ({run = false, cancel = false} = {}) => {
+        runCommandButton.style.display = run ? 'block' : 'none';
+        cancelCommandButton.style.display = cancel ? 'block' : 'none';
+    }
     function ShowRunCommandButton(){
-        runCommandButton.style.display = 'block';
-        cancelCommandButton.style.display = 'none'; 
+        toggleButtons({run: true});
     }
     function ShowCancelCommandButton(){
-        runCommandButton.style.display = 'none';
-        cancelCommandButton.style.display = 'block'; 
+        toggleButtons({cancel: true});
     }
     ShowRunCommandButton();
 

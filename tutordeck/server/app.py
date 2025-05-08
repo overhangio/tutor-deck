@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import re
 import sys
 import typing as t
 
@@ -128,6 +127,7 @@ async def plugin_installed_list() -> str:
 async def plugin(name: str) -> Response:
     # TODO check that plugin exists
     show_logs = request.args.get("show_logs")
+    seq_command_executed = request.args.get("seq_command_executed")
     author = next(
         (
             p.author.split("<")[0].strip()
@@ -152,13 +152,21 @@ async def plugin(name: str) -> Response:
         author_name=author,
         plugin_description=description,
         show_logs=show_logs,
+        seq_command_executed=seq_command_executed,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
     )
     response = Response(rendered_template, status=200, content_type="text/html")
-    response.headers["HX-Redirect"] = url_for("plugin", name=name)
+    response.headers["HX-Redirect"] = url_for(
+        "plugin", name=name, seq_command_executed=seq_command_executed
+    )
     return response
+
+
+@app.get("/plugin/<name>/is-installed")
+def plugin_installed_status(name: str) -> Response:
+    return jsonify({"installed": name in g.installed_plugins})
 
 
 @app.post("/plugin/<name>/toggle")
@@ -177,6 +185,7 @@ async def plugin_toggle(name: str) -> Response:
                 url_for(
                     "plugin",
                     name=name,
+                    seq_command_executed=True,
                 )
             )
         ),
@@ -252,6 +261,7 @@ async def config_update(name: str) -> Response:
                 url_for(
                     "plugin",
                     name=name,
+                    seq_command_executed=True,
                 )
             )
         ),
@@ -305,8 +315,15 @@ async def cli_logs_stream() -> ResponseTypes:
         while True:
             # TODO this is again causing the stream to never stop...
             async for data in tutorclient.CliPool.iter_logs():
-                json_data = json.dumps(data)
-                event = f"data: {json_data}\nevent: logs\n\n"
+                event = f"""data: {
+                    json.dumps(
+                        {
+                            "stdout": data,
+                            "command": tutorclient.CliPool.current_command(),
+                            "thread_alive": tutorclient.CliPool.is_thread_alive(),
+                        }
+                    )
+                }\nevent: logs\n\n"""
                 yield event.encode()
             await asyncio.sleep(constants.SHORT_SLEEP_SECONDS)
 

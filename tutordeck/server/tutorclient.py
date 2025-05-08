@@ -133,7 +133,6 @@ class Cli:
         truncated, all contents added to the beginning until the current position will be
         missed.
         """
-        yield f"{self.log_path}\n"
         yield f"$ {self.command}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
@@ -249,6 +248,15 @@ class CliPool:
             cls.stop_runner_thread(cls.CLI_INSTANCE, cls.THREAD)
 
     @classmethod
+    def current_command(cls) -> str:
+        """
+        Return the current or last command that was executed.
+        """
+        if cls.CLI_INSTANCE is None:
+            raise RuntimeError("CLI_INSTANCE is not initialized.")
+        return cls.CLI_INSTANCE.command
+
+    @classmethod
     def is_thread_alive(cls) -> bool:
         """
         Check if the thread is running.
@@ -294,7 +302,6 @@ class CliPool:
 
 
 class Client:
-
     @classmethod
     def plugins_in_store(cls) -> list[tutor.plugins.indexes.IndexEntry]:
         if not os.path.exists(tutor.plugins.indexes.Indexes.CACHE_PATH):
