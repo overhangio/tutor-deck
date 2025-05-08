@@ -34,6 +34,8 @@ Search for any tutor command and execute it with a single click.
 
 {% block scripts %}
 <script>
+    onDeveloperPage = true;
+    logsElement.style.display = "block";
     runCommandButton = document.querySelector('.run-command-button')
     cancelCommandButton = document.querySelector('.cancel-command-button') 
     const toggleButtons = ({run = false, cancel = false} = {}) => {

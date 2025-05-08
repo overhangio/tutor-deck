@@ -23,6 +23,11 @@ $green-1: #edfff7;
 	opacity: 1;
 }
 
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 @mixin command {
 	width: 9em;
 	height: 3em;
@@ -351,6 +356,26 @@ main {
 				color: $gray-4;
 				padding: 0.5em 1em;
 				margin-bottom: 2em;
+				span {
+					margin-left: 1em;
+				}
+
+				img {
+					width: 2em;
+				}
+			}
+			#warning-command-running {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				display: none;
+				border: 1px solid $gray-2;
+				border-radius: 0.5em;
+				align-items: center;
+				font-size: 1.25em;
+				color: $gray-4;
+				padding: 0.5em 1em;
+				margin-top: 1em;
 				span {
 					margin-left: 1em;
 				}
@@ -689,6 +714,7 @@ main {
 
 			.tutor-logs-container {
 				#tutor-logs {
+					display: none;
 					width: 100%;
 					background-color: black;
 					color: white;

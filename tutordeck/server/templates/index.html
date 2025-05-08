@@ -49,7 +49,13 @@
         </nav>
 
         <section>
-            <header>{% block workspace_header %}{% endblock %}</header>
+            <header>
+                <div id="warning-command-running">
+                    <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="">
+                    <span>Command execution in progress. <a href="{{ url_for('advanced') }}">Click here</a> to view details.</span>
+                </div>
+                {% block workspace_header %}{% endblock %}
+            </header>
             <section>
                 {% block workspace_content %}
                 {% endblock %}
@@ -111,10 +117,6 @@
     {% endif %}
     <script>
         const logsElement = document.getElementById("tutor-logs");
-        show_logs = '{{ show_logs }}' === 'True';
-        if (!show_logs){
-            logsElement.style.display = 'none';
-        }
     </script>
     {% block scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='js/logs.js') }}"></script>

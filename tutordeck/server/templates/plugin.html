@@ -53,6 +53,8 @@
     pluginInstallButton = document.getElementById('plugin-install-button');
     cancelCommandButton = document.getElementById('cancel-command-button');
 
+    relevantCommands = ["tutor plugins install", "tutor plugins upgrade"];
+
     const toggleButtons = ({install = false, upgrade = false, cancel = false} = {}) => {
         pluginInstallButton.style.display = install ? 'block' : 'none';
         pluginUpgradeButton.style.display = upgrade ? 'block' : 'none';
