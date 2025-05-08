@@ -113,3 +113,40 @@ function setToastContent(cmd) {
 		toastFooter.style.display = config.showFooter ? "flex" : "none";
 	}
 }
+
+// Each page defines its own relevant commands, we use them to check
+// if the currently running commands belong the currently opened page or not
+let relevantCommands = [];
+let onDeveloperPage = false;
+function onRelevantPage(command) {
+	if (onDeveloperPage) {
+		// Developer page is relevant to all commands
+		return true;
+	}
+	return relevantCommands.some((prefix) => command.startsWith(prefix));
+}
+
+function activateInputs() {
+	document.querySelectorAll("button").forEach((button) => {
+		button.disabled = false;
+	});
+	document.querySelectorAll("input").forEach((input) => {
+		input.disabled = false;
+	});
+	document.querySelectorAll(".form-switch").forEach((formSwitch) => {
+		formSwitch.style.opacity = 1;
+	});
+	document.getElementById("warning-command-running").style.display = "none";
+}
+function deactivateInputs() {
+	document.querySelectorAll("button").forEach((button) => {
+		button.disabled = true;
+	});
+	document.querySelectorAll("input").forEach((input) => {
+		input.disabled = true;
+	});
+	document.querySelectorAll(".form-switch").forEach((formSwitch) => {
+		formSwitch.style.opacity = 0.5;
+	});
+	document.getElementById("warning-command-running").style.display = "flex";
+}
