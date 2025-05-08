@@ -9,7 +9,6 @@ from markdown import markdown
 from quart import (
     Quart,
     Response,
-    abort,
     g,
     jsonify,
     make_response,
@@ -126,7 +125,6 @@ async def plugin_installed_list() -> str:
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> Response:
     # TODO check that plugin exists
-    show_logs = request.args.get("show_logs")
     seq_command_executed = request.args.get("seq_command_executed")
     author = next(
         (
@@ -151,7 +149,6 @@ async def plugin(name: str) -> Response:
         is_installed=name in g.installed_plugins,
         author_name=author,
         plugin_description=description,
-        show_logs=show_logs,
         seq_command_executed=seq_command_executed,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
@@ -214,7 +211,6 @@ async def plugin_install(name: str) -> WerkzeugResponse:
         url_for(
             "plugin",
             name=name,
-            show_logs=True,
         )
     )
 
@@ -226,14 +222,13 @@ async def plugin_upgrade(name: str) -> WerkzeugResponse:
         url_for(
             "plugin",
             name=name,
-            show_logs=True,
         )
     )
 
 
 @app.post("/plugins/update")
 async def plugins_update() -> WerkzeugResponse:
-    tutorclient.CliPool.run_parallel(app, ["plugins", "update"])
+    tutorclient.CliPool.run_sequential(["plugins", "update"])
     return redirect(url_for("plugin_store"))
 
 
@@ -286,7 +281,6 @@ async def cli_local_launch() -> str:
     tutorclient.CliPool.run_parallel(app, ["local", "launch", "--non-interactive"])
     return await render_template(
         "local_launch.html",
-        show_logs=True,
     )
 
 
@@ -349,7 +343,6 @@ async def cli_stop() -> Response:
 async def advanced() -> str:
     return await render_template(
         "advanced.html",
-        show_logs=True,
     )
 
 
@@ -366,7 +359,5 @@ async def command() -> WerkzeugResponse:
     form = await request.form
     command_string = form.get("command", "")
     command_args = command_string.split()
-    if tutorclient.CliPool.is_thread_alive():
-        abort(400, description="Command execution already in progress")
     tutorclient.CliPool.run_parallel(app, command_args)
     return redirect(url_for("advanced"))

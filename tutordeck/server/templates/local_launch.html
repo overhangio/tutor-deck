@@ -24,6 +24,7 @@ This will run Launch Platform to apply all plugin changes. This may take a few m
 
 {% block scripts %}
 <script>
+    relevantCommands = ["tutor local launch --non-interactive"];
     localLaunchButton = document.getElementById('local-launch-button')
     cancelLocalLaunchButton = document.getElementById('cancel-local-launch-button') 
     const toggleButtons = ({run = false, cancel = false} = {}) => {
