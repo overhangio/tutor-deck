@@ -198,8 +198,8 @@ main {
 					width: 1.25em;
 				}
 				.sidebar-tab-logo-selected {
-					filter: invert(39%) sepia(98%) saturate(3884%) hue-rotate(205deg)
-						brightness(95%) contrast(96%);
+					filter: invert(39%) sepia(98%) saturate(3884%)
+						hue-rotate(205deg) brightness(95%) contrast(96%);
 				}
 				h4 {
 					margin-left: 1em;
@@ -489,8 +489,9 @@ main {
 								border: none;
 								img {
 									width: 2em;
-									filter: invert(32%) sepia(70%) saturate(4565%)
-										hue-rotate(143deg) brightness(99%) contrast(102%);
+									filter: invert(32%) sepia(70%)
+										saturate(4565%) hue-rotate(143deg)
+										brightness(99%) contrast(102%);
 								}
 							}
 						}
@@ -731,7 +732,7 @@ main {
 				width: fit-content;
 				min-width: 20em;
 				position: absolute;
-				top: 218px;
+				top: 200px;
 				z-index: 10;
 				background-color: white;
 				overflow-y: auto;

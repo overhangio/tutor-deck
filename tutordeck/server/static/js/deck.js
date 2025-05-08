@@ -70,36 +70,35 @@ function hideToast() {
 }
 
 const TOAST_CONFIGS = {
-	"$ tutor plugins enable": {
+	"tutor plugins enable": {
 		title: "Your plugin was successfully enabled",
 		description:
 			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
 		showFooter: true,
 	},
-	"$ tutor plugins upgrade": {
+	"tutor plugins upgrade": {
 		title: "Your plugin was successfully updated",
 		description:
 			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
 		showFooter: true,
 	},
-	"$ tutor plugins install": {
+	"tutor plugins install": {
 		title: "Plugin Installed Successfully",
 		description: "Enable it now to start using its features",
 		showFooter: false,
 	},
-	"$ tutor config save": {
+	"tutor config save": {
 		title: "You have successfully modified parameters",
 		description:
 			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
 		showFooter: true,
 	},
-	"$ tutor local launch": {
+	"tutor local launch": {
 		title: "Launch platform was successfully executed",
 		description: "",
 		showFooter: false,
 	},
 };
-
 let toastTitle = document.getElementById("toast-title");
 let toastDescription = document.getElementById("toast-description");
 let toastFooter = document.getElementById("toast-footer");

@@ -26,13 +26,15 @@ This will run Launch Platform to apply all plugin changes. This may take a few m
 <script>
     localLaunchButton = document.getElementById('local-launch-button')
     cancelLocalLaunchButton = document.getElementById('cancel-local-launch-button') 
+    const toggleButtons = ({run = false, cancel = false} = {}) => {
+        localLaunchButton.style.display = run ? 'block' : 'none';
+        cancelLocalLaunchButton.style.display = cancel ? 'block' : 'none';
+    }
     function ShowRunCommandButton(){
-            localLaunchButton.style.display = 'block';
-            cancelLocalLaunchButton.style.display = 'none'; 
-        }
+        toggleButtons({run: true});
+    }
     function ShowCancelCommandButton(){
-        localLaunchButton.style.display = 'none';
-        cancelLocalLaunchButton.style.display = 'block'; 
+        toggleButtons({cancel: true})
     }
     ShowRunCommandButton();
 </script>
