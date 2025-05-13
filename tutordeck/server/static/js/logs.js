@@ -23,14 +23,21 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	const data = JSON.parse(evt.detail.data);
 	const command = data.command;
 
-	// This means a parallel command just started its execution
-	if (!executedNewCommand && data.thread_alive) {
-		ShowCancelCommandButton();
+	// This means a parallel command is executing
+	if (data.thread_alive) {
+		// Check if we are on the same page on which the actual command was executed
+		// Each page defines its relevant commands which are sent to `onRelevantPage` function to check if we are on the relevant page
+		if (onRelevantPage(command)) {
+			ShowCancelCommandButton();
+			logsElement.style.display = "block";
+		} else {
+			// If we are not on relevant page we don't show the cancel button and disable all inputs
+			deactivateInputs();
+		}
 		executedNewCommand = true;
 	}
 
-	const parallelCommandCompleted =
-		executedNewCommand && !data.thread_alive;
+	const parallelCommandCompleted = executedNewCommand && !data.thread_alive;
 
 	const onPluginPage = typeof pluginName !== "undefined";
 	// Note that sequential commands are only executed on the plugins page
@@ -40,6 +47,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		parallelCommandCompleted ||
 		(onPluginPage && sequentialCommandExecuted)
 	) {
+		activateInputs();
 		// There are certain commands for which we do not show the toast message
 		// Only show the toast if it was set in the `setToastContent` function and if the command ran successfully
 		if (data.stdout.includes("Success!")) {
