@@ -372,8 +372,9 @@ async def process_config_update_request() -> None:
         cmd = ["config", "save"]
         for key, value in form.items():
             if value.startswith("{{"):
-                # Templated values that start with {{ should be explicitely converted to string
-                # Otherwise there will be a parsing error because it might be considered a dictionary
+                # Templated values that start with {{ should be explicitely
+                # converted to string otherwise there will be a parsing
+                # error because it might be considered a dictionary
                 value = f"'{value}'"
             cmd.extend(["--set", f"{key}={value}"])
         tutorclient.CliPool.run_sequential(cmd)
