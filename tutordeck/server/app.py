@@ -125,24 +125,13 @@ async def plugin_installed_list() -> str:
 
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> Response:
-    # TODO check that plugin exists
+    index_entry = tutorclient.Client.plugin_in_store(name)
+    if not index_entry:
+        return Response("Plugin not found", status=404)
+
     seq_command_executed = request.args.get("seq_command_executed")
-    author = next(
-        (
-            p.author.split("<")[0].strip()
-            for p in tutorclient.Client.plugins_in_store()
-            if p.name == name
-        ),
-        "",
-    )
-    description = next(
-        (
-            markdown(p.description)
-            for p in tutorclient.Client.plugins_in_store()
-            if p.name == name
-        ),
-        "",
-    )
+    author = index_entry.author.split("<")[0].strip()
+    description = markdown(index_entry.description)
     rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
