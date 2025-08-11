@@ -25,6 +25,7 @@ from tutordeck.server.utils import current_page_plugins, pagination_context
 
 from . import constants, tutorclient
 
+
 app = Quart(
     __name__,
     static_url_path="/static",
@@ -154,6 +155,8 @@ async def plugin(name: str) -> Response:
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
     )
+
+    # Redirect to plugin page
     response = Response(rendered_template, status=200, content_type="text/html")
     response.headers["HX-Redirect"] = url_for(
         "plugin", name=name, seq_command_executed=seq_command_executed
@@ -171,8 +174,9 @@ async def plugin_toggle(name: str) -> Response:
     # TODO check plugin exists
     form = await request.form
     enable_plugin = form.get("checked") == "on"
-    command = ["plugins", "enable" if enable_plugin else "disable", name]
-    tutorclient.CliPool.run_sequential(command)
+    tutorclient.CliPool.run_sequential(
+        ["plugins", "enable" if enable_plugin else "disable", name]
+    )
     # TODO error management
 
     response = t.cast(
