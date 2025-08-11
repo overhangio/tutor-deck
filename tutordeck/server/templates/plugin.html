@@ -26,15 +26,19 @@
     <p>You can adjust the plugin's behavior by changing these settings. Changes will only go live after you apply them.
     </p>
 </div>
-<form id="config-forms-container" action="{{ url_for('config_update', name=plugin_name) }}" method="POST">
+<form id="config-forms-container" action="{{ url_for('plugin_config_update', name=plugin_name) }}" method="POST">
     <h3>Unique settings</h3>
     {% if plugin_config_unique %}
     {% with config=plugin_config_unique %}{% include "_config.html" %}{% endwith %}
+    {% else %}
+    <p>N/A</p>
     {% endif %}
 
     <h3>Default settings</h3>
     {% if plugin_config_defaults %}
     {% with config=plugin_config_defaults %}{% include "_config.html" %}{% endwith %}
+    {% else %}
+    <p>N/A</p>
     {% endif %}
     <button type="submit">Update All</button>
 </form>
