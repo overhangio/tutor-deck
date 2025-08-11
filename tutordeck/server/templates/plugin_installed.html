@@ -22,17 +22,6 @@ View all your installed plugins in one place.
 
 {% block scripts %}
 <script>
-    // Sets the warning that launch platform needs to be executed for plugins to take effect
-    function SetWarning(){
-        const warningElements = document.querySelectorAll('[id^="warning-cookie-"]');
-        const warningMain = document.getElementById('warning-main');
-        warningElements.forEach(function(warningElement) {
-            if (document.cookie.includes(warningElement.id)) {
-                warningElement.style.display = 'flex';  
-                warningMain.style.display = 'flex';
-            }
-        });
-    }
     document.body.addEventListener('htmx:afterOnLoad', function(event) {
         let toggleSwitches = document.querySelectorAll(".switch");
         toggleSwitches.forEach(toggleSwitch => {
@@ -42,7 +31,6 @@ View all your installed plugins in one place.
                 event.stopPropagation();
             }
         });
-        SetWarning();
     });
 </script>
 {% endblock %}

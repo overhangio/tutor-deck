@@ -1,26 +1,20 @@
-function setCookie(name, value, days) {
-	let expires = "";
-	if (days) {
-		let date = new Date();
-		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-		expires = "; expires=" + date.toUTCString();
+// Handle plugins requiring launch based on the values in the corresponding cookie
+const pluginsRequireLaunchCookieName = "plugins-require-launch";
+async function displayPluginsRequireLaunchWarning() {
+	const cookie = await cookieStore.get(pluginsRequireLaunchCookieName);
+	if (cookie && cookie.value) {
+		const cookieValue = cookie.value.slice(1, -1); // remove quotes
+		cookieValue.split('+').map(s => s.trim()).forEach(plugin => {
+			document.querySelectorAll(`[data-plugin="${plugin}"] .warning-launch-required`).forEach(element => {
+				element.classList.add("visible");
+				document.getElementById('warning-launch-required-main').classList.add("visible");
+			});
+		});
 	}
-	document.cookie = `${name}=${value || ""}${expires}; path=/`;
 }
-function getCookie(name) {
-	let nameEQ = name + "=";
-	return (
-		document.cookie
-			.split(";")
-			.map((cookie) => cookie.trim())
-			.find((cookie) => cookie.startsWith(nameEQ))
-			?.slice(nameEQ.length) || null
-	);
-}
-function eraseCookie(name) {
-	document.cookie =
-		name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-}
+document.body.addEventListener('htmx:afterOnLoad', function(event) {
+	displayPluginsRequireLaunchWarning();
+});
 
 // Handle modal
 const modalContainer = document.getElementById("modal_container");
@@ -43,15 +37,11 @@ closeToastButtons.forEach((button) => {
 		hideToast(toast);
 	});
 });
-function showToast() {
+function showLaunchSuccessfulToast() {
+	// TODO this is very brittle because it relies on static variables and string values.
 	if (toast) {
 		if (toastTitle === "Launch platform was successfully executed") {
-			document.cookie.split(";").forEach((cookie) => {
-				let name = cookie.split("=")[0].trim();
-				if (name.startsWith("warning-cookie")) {
-					eraseCookie(name);
-				}
-			});
+			cookieStore.delete(pluginsRequireLaunchCookieName);
 		}
 		toast.style.display = "flex";
 		setTimeout(() => {

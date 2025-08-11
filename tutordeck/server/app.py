@@ -181,13 +181,9 @@ async def plugin_toggle(name: str) -> Response:
         ),
     )
     if enable_plugin:
-        response.set_cookie(
-            f"{constants.WARNING_COOKIE_PREFIX}-{name}",
-            "requires launch",
-            max_age=constants.ONE_MONTH,
-        )
+        update_plugins_requiring_launch(response, add=name)
     else:
-        response.delete_cookie(f"{constants.WARNING_COOKIE_PREFIX}-{name}")
+        update_plugins_requiring_launch(response, remove=name)
     return response
 
 
@@ -354,3 +350,41 @@ async def command() -> WerkzeugResponse:
     command_args = command_string.split()
     tutorclient.CliPool.run_parallel(app, command_args)
     return redirect(url_for("advanced"))
+
+
+def update_plugins_requiring_launch(
+    response: Response, add: str | None = None, remove: str | None = None
+) -> None:
+    """
+    Store the list of plugins for which a recent set of changes require running "local launch".
+
+    This list is stored as a "+"-separated string in a cookie. Note that flask will automatically put the content in quotes.
+    """
+    # Note that comma, colon and semi-colon are not supported in cookie values
+    separator = "+"
+
+    # Get current plugins
+    names = set(
+        [
+            cookie
+            for cookie in request.cookies.get(
+                constants.PLUGINS_REQUIRE_LAUNCH_COOKIE_NAME, ""
+            ).split(separator)
+            if cookie
+        ]
+    )
+
+    # Add new plugins
+    if add:
+        names.add(add)
+
+    # Remove plugins
+    if remove:
+        names.discard(remove)
+
+    # Update the response
+    response.set_cookie(
+        constants.PLUGINS_REQUIRE_LAUNCH_COOKIE_NAME,
+        separator.join(sorted(names)),
+        max_age=60 * 60 * 24 * 30,  # 1 month
+    )

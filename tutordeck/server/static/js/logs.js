@@ -51,10 +51,11 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		activateInputs();
 		// There are certain commands for which we do not show the toast message
 		// Only show the toast if it was set in the `setToastContent` function and if the command ran successfully
+		// TODO this is brittle because it relies on a hard-coded "Success!" string that is sent from the backend.
 		if (data.stdout.includes("Success!")) {
 			setToastContent(command);
 			if (toastTitle.textContent.trim()) {
-				showToast("info");
+				showLaunchSuccessfulToast();
 			}
 		}
 		if (onPluginPage) {

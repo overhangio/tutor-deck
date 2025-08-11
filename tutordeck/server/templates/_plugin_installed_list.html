@@ -1,13 +1,13 @@
 {% from '_switch.html' import switch %}
 
 {% for plugin in plugins %}
-<div class="installed-plugin" hx-get="{{ url_for('plugin', name=plugin.name) }}" hx-push-url="true">
+<div class="installed-plugin" hx-get="{{ url_for('plugin', name=plugin.name) }}" hx-push-url="true" data-plugin="{{ plugin.name }}">
     <div class="details">
         <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
         <div class="author">By {{ plugin.author }}</div>
         <div class="description">{{ plugin.description|safe }}</div>
     </div>
-    <div class="warning" hx-preserve="true" id="warning-cookie-{{plugin.name}}">
+    <div class="warning-launch-required" hx-preserve="true">
         <img src="{{ url_for('static', filename='img/Featured icon.svg')}}" alt="" title="Run launch platform for changes to this plugin to take effect">
     </div>
 
