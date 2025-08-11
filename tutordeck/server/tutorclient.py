@@ -101,7 +101,7 @@ class Cli:
 
         Output will be captured in the log file.
         """
-        logger.info("Running command: tutor %s (logs: %s)", self.command, self.log_path)
+        logger.info("Running command: %s (logs: %s)", self.command, self.log_path)
 
         # Override execute function
         with self.patch_objects():
