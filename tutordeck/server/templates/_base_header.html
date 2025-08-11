@@ -14,12 +14,12 @@
 <div class="search-and-button">
     <div class="search">
         <img src="{{ url_for('static', filename='img/search.svg') }}"/>
-        <input 
+        <input
             id="search-input"
-            type="text" 
+            type="text"
             class="form-control search-input"
-            name="search" 
-            placeholder="Search..." 
+            name="search"
+            placeholder="Search..."
             hx-get="{{ search_endpoint }}"
             hx-trigger="input changed delay:300ms, search"
             hx-target="#plugins-list">
@@ -30,7 +30,7 @@
 </div>
 {% endblock %}
 {% block warning %}
-<div id="warning-main">
+<div id="warning-launch-required-main">
     <img src="{{ url_for('static', filename='img/Featured icon.svg')}}" alt="">
     <span>Changes have been made to some plugins that will only take effect after running launch platform.</span>
 </div>

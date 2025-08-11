@@ -343,8 +343,11 @@ main {
 					}
 				}
 			}
-			#warning-main {
+			#warning-launch-required-main {
 				display: none;
+				&.visible {
+					display: flex;
+				}
 				border: 1px solid $gray-2;
 				border-radius: 0.5em;
 				align-items: center;
@@ -445,8 +448,11 @@ main {
 							}
 						}
 					}
-					.warning {
+					.warning-launch-required {
 						display: none;
+						&.visible {
+							display: flex;
+						}
 						margin-right: 2em;
 						img {
 							width: 2.5em;
