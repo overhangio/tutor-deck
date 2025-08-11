@@ -8,7 +8,7 @@
         <div class="description">{{ plugin.description|safe }}</div>
     </div>
     <div class="warning" hx-preserve="true" id="warning-cookie-{{plugin.name}}">
-        <img src="{{ url_for('static', filename='/img/Featured icon.svg')}}" alt="" title="Run launch platform for changes to this plugin to take effect">
+        <img src="{{ url_for('static', filename='img/Featured icon.svg')}}" alt="" title="Run launch platform for changes to this plugin to take effect">
     </div>
 
     {{ switch(plugin.name, plugin.is_enabled)}}

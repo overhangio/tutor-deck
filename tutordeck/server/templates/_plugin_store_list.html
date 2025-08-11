@@ -42,7 +42,7 @@
         {% if pagination.previous_page %}
         <a hx-get="{{ url_for('plugin_store_list', page=pagination.previous_page)}}" hx-target="#plugins-list">
             <div class="pagination-button">
-                <img src="{{ url_for('static', filename='/img/arrow-left.svg')}}" alt="">
+                <img src="{{ url_for('static', filename='img/arrow-left.svg')}}" alt="">
             </div>
         </a>
         {% endif %}
@@ -56,7 +56,7 @@
         {% if pagination.next_page %}
         <a hx-get="{{ url_for('plugin_store_list', page=pagination.next_page)}}" hx-target="#plugins-list">
             <div class="pagination-button">
-                <img src="{{ url_for('static', filename='/img/arrow-right.svg')}}" alt="">
+                <img src="{{ url_for('static', filename='img/arrow-right.svg')}}" alt="">
             </div>
         </a>
         {% endif %}
