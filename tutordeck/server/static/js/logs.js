@@ -39,6 +39,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 
 	const parallelCommandCompleted = executedNewCommand && !data.thread_alive;
 
+	// TODO this is a very brittle way of checking that we are on a plugin page... Let's not use static variables. Same for sequentialCommandExecuted.
 	const onPluginPage = typeof pluginName !== "undefined";
 	// Note that sequential commands are only executed on the plugins page
 	// Refreshing the page will run this block again
