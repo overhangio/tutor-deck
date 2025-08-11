@@ -303,6 +303,13 @@ class CliPool:
 
 class Client:
     @classmethod
+    def plugin_in_store(cls, name: str) -> tutor.plugins.indexes.IndexEntry | None:
+        for plugin in cls.plugins_in_store():
+            if plugin.name == name:
+                return plugin
+        return None
+
+    @classmethod
     def plugins_in_store(cls) -> list[tutor.plugins.indexes.IndexEntry]:
         if not os.path.exists(tutor.plugins.indexes.Indexes.CACHE_PATH):
             CliPool.run_sequential(["plugins", "update"])
