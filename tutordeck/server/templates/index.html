@@ -107,12 +107,11 @@
             </div>
         </div>
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/deck.js') }}"></script>
     {% if sidebar_active_tab %}
     <script>
         document.getElementById('{{ sidebar_active_tab }}').classList.toggle('sidebar-tab-selected');
-        document.getElementById('{{ sidebar_active_tab }}-logo').classList.toggle('sidebar-tab-logo-selected');
     </script>
     {% endif %}
     <script>
