@@ -70,16 +70,16 @@
     <div class="modal-container" id="modal_container">
         <div class="modal-content">
             <div class="modal-header">
-                <img src="{{ url_for('static', filename='img/Featured icon.svg') }}" alt=""> 
+                <img src="{{ url_for('static', filename='img/Featured icon.svg') }}" alt="">
             </div>
             <div class="modal-body">
                 <h3>Apply Changes to Your Platform?</h3>
                 <p>This will run Launch Platform to apply all recent plugin changes. The process may take a few minutes to complete.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class=" close-modal-button">Not Now</button>
+                <button type="button" class="close-modal-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
-                    <button class=" run_modal_button" type="submit">Apply Changes</button>
+                    <button type="submit">Apply Changes</button>
                 </form>
             </div>
         </div>
@@ -94,15 +94,15 @@
                     <img class="close-toast-button" src="{{ url_for('static', filename='img/X.svg' )}}">
                 </div>
                 <div class="message">
-                    <span class="text text-2" id="toast-description"> 
-                        {{ toast_description }} 
+                    <span class="text text-2" id="toast-description">
+                        {{ toast_description }}
                     </span>
                 </div>
             </div>
             <div class="toast-footer" id="toast-footer">
-                <button type="button" class=" close-toast-button">Not Now</button>
+                <button type="button" class="close-toast-button">Not Now</button>
                 <form method="POST" action="{{ url_for('cli_local_launch')}}">
-                    <button class=" run_modal_button" type="submit">Apply Changes</button>
+                    <button type="submit">Apply Changes</button>
                 </form>
             </div>
         </div>
