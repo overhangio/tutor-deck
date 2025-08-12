@@ -17,8 +17,8 @@ from quart import (
     request,
     url_for,
 )
-from quart.helpers import WerkzeugResponse
 from quart.typing import ResponseTypes
+from werkzeug.sansio.response import Response as BaseResponse
 from tutor.plugins.v1 import discover_package
 
 from tutordeck.server.utils import current_page_plugins, pagination_context
@@ -80,7 +80,7 @@ async def plugin_store_list() -> str:
             "name": p.name,
             "url": p.url,
             "index": p.index,
-            "author": p.author.split("<")[0].strip(),
+            "author": tutorclient.Client.get_plugin_author(p),
             "description": p.short_description,
             "is_installed": p.name in g.installed_plugins,
             "is_enabled": p.name in g.enabled_plugins,
@@ -102,13 +102,16 @@ async def plugin_store_list() -> str:
 
 @app.get("/plugin/installed/list")
 async def plugin_installed_list() -> str:
+    # TODO IMPORTANT this displays only the plugins that are in the store. When a plugin
+    # is installed locally but not in the store, we must display it here anyway.
+    # TODO this is duplicated code from plugin_store_list
     search_query = request.args.get("search", "")
     plugins: list[dict[str, t.Any]] = [
         {
             "name": p.name,
             "url": p.url,
             "index": p.index,
-            "author": p.author.split("<")[0].strip(),
+            "author": tutorclient.Client.get_plugin_author(p),
             "description": p.short_description,
             "is_enabled": p.name in g.enabled_plugins,
         }
@@ -129,15 +132,16 @@ async def plugin(name: str) -> Response:
     if not index_entry:
         return Response("Plugin not found", status=404)
 
+    # TODO this seq_command_executed argument is confusing and causing issues, for
+    # instance with the "unset" button. We need to get rid of it.
     seq_command_executed = request.args.get("seq_command_executed")
-    author = index_entry.author.split("<")[0].strip()
     description = markdown(index_entry.description)
     rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
         is_enabled=name in g.enabled_plugins,
         is_installed=name in g.installed_plugins,
-        author_name=author,
+        author_name=tutorclient.Client.get_plugin_author(index_entry),
         plugin_description=description,
         seq_command_executed=seq_command_executed,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
@@ -146,6 +150,7 @@ async def plugin(name: str) -> Response:
     )
 
     # Redirect to plugin page
+    # TODO this is useful only after a POST to plugin/<name>/update. I don't think these two things should be handled in the same place.
     response = Response(rendered_template, status=200, content_type="text/html")
     response.headers["HX-Redirect"] = url_for(
         "plugin", name=name, seq_command_executed=seq_command_executed
@@ -188,11 +193,12 @@ async def plugin_toggle(name: str) -> Response:
 
 
 @app.post("/plugin/<name>/install")
-async def plugin_install(name: str) -> WerkzeugResponse:
+async def plugin_install(name: str) -> BaseResponse:
     async def bg_install_and_reload() -> None:
         tutorclient.CliPool.run_parallel(app, ["plugins", "install", name])
         while tutorclient.CliPool.THREAD and tutorclient.CliPool.THREAD.is_alive():
             await asyncio.sleep(0.1)
+        # TODO this is hackish. How can we improve?
         discover_package(importlib_metadata.entry_points().__getitem__(name))
 
     asyncio.create_task(bg_install_and_reload())
@@ -205,7 +211,7 @@ async def plugin_install(name: str) -> WerkzeugResponse:
 
 
 @app.post("/plugin/<name>/upgrade")
-async def plugin_upgrade(name: str) -> WerkzeugResponse:
+async def plugin_upgrade(name: str) -> BaseResponse:
     tutorclient.CliPool.run_parallel(app, ["plugins", "upgrade", name])
     return redirect(
         url_for(
@@ -344,7 +350,7 @@ async def suggest() -> Response:
 
 
 @app.post("/command")
-async def command() -> WerkzeugResponse:
+async def command() -> BaseResponse:
     form = await request.form
     command_string = form.get("command", "")
     command_args = command_string.split()

@@ -46,7 +46,7 @@
             </div>
         </a>
         {% endif %}
-        {% for page_number in range(1, pagination.total_pages + 1) %} 
+        {% for page_number in range(1, pagination.total_pages + 1) %}
         <a hx-get="{{ url_for('plugin_store_list', page=page_number)}}" hx-target="#plugins-list">
             <div class="pagination-button">
                 {{ page_number }}
