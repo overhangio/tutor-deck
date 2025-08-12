@@ -114,7 +114,8 @@ class Cli:
                 self.log_to_file(e.args[0])
                 self.log_to_file("\nCancelled!\n")
             except SystemExit:
-                # TODO Is there a better way to notify command completion???
+                # TODO Is there a better way to notify command completion??? The
+                # frontend relies on this hard-coded string to detect launch completion.
                 self.log_to_file("\nSuccess!")
 
     def stop(self) -> None:
@@ -326,9 +327,7 @@ class Client:
     @classmethod
     def plugins_matching_pattern(cls, pattern: str) -> list[str]:
         return [
-            plugin._data["name"]
-            for plugin in cls.plugins_in_store()
-            if plugin.match(pattern)
+            plugin.name for plugin in cls.plugins_in_store() if plugin.match(pattern)
         ]
 
     @classmethod
@@ -357,18 +356,24 @@ class Client:
         }
 
     @classmethod
+    def get_plugin_author(cls, index_entry: tutor.plugins.indexes.IndexEntry) -> str:
+        return index_entry.author.split("<")[0].strip()
+
+    @classmethod
     def autocomplete(cls, partial_command: str) -> list[dict[str, str]]:
+        """
+        Handle CLI command completion via click_repl.ClickCompleter
+        https://github.com/click-contrib/click-repl/blob/master/click_repl/_completer.py
+        """
         cli = tutor.commands.cli.cli
         ctx = click.Context(cli, info_name=cli.name, parent=None)
         completer = click_repl.ClickCompleter(cli, ctx)
         document = Document(partial_command, len(partial_command))
         completions = list(completer.get_completions(document, None))
-        suggestions = []
-        for completion in completions:
-            suggestions.append(
-                {
-                    "text": completion.text,
-                    "display": completion.display,
-                }
-            )
-        return suggestions
+        return [
+            {
+                "text": completion.text,
+                "display": completion.display,
+            }
+            for completion in completions
+        ]

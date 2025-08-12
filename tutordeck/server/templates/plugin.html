@@ -40,7 +40,7 @@
     {% else %}
     <p>N/A</p>
     {% endif %}
-    <button type="submit">Update All</button>
+    <button type="submit">Save changes</button>
 </form>
 
 {% endif %}
@@ -79,6 +79,7 @@
         bar.style.display = isPluginInstalled ? 'flex' : 'none';
     }
     async function checkIfPluginInstalled(pluginName) {
+        // TODO let's avoid hard-coded urls
         const response = await fetch(`/plugin/${pluginName}/is-installed`);
         const data = await response.json();
         return data.installed;
