@@ -73,6 +73,11 @@ Restart platform via GUI to apply changes:
 .. image:: https://github.com/overhangio/tutor-deck/raw/release/images/apply.png
    :alt: Apply Image
 
+You may add HTTP basic authentication by defining the following Tutor settings::
+
+   tutor config save --set DECK_AUTH_USERNAME=myusername \
+      --set DECK_AUTH_PASSWORD=s3cr3tpassw0rd
+
 Troubleshooting
 ***************
 

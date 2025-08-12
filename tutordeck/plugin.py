@@ -14,6 +14,8 @@ from .server import app
 hooks.Filters.CONFIG_DEFAULTS.add_items(
     [
         ("DECK_VERSION", __version__),
+        ("DECK_AUTH_USERNAME", None),
+        ("DECK_AUTH_PASSWORD", None),
     ]
 )
 

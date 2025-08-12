@@ -46,12 +46,66 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     tutorclient.logger.addHandler(handler)
     tutorclient.logger.setLevel(logging.INFO)
 
+    # Configure authentication
+    HttpAuthCredentials.load_credentials()
+
     # TODO app.run() should be called only in development
     app.run(**app_kwargs)
 
 
+class HttpAuthCredentials:
+    USERNAME: str = ""
+    PASSWORD: str = ""
+
+    @classmethod
+    def load_credentials(cls) -> None:
+        """
+        Note that credentials will not be automatically reloaded on configuration change.
+
+        TODO reload credentials automatically when needed.
+        """
+        config = tutorclient.Project.get_config()
+        cls.USERNAME = t.cast(str, config.get("DECK_AUTH_USERNAME", ""))
+        cls.PASSWORD = t.cast(str, config.get("DECK_AUTH_PASSWORD", ""))
+
+    @classmethod
+    def is_auth_success(cls) -> bool:
+        """
+        Returns True if the current request has the right HTTP basic auth credentials.
+        """
+        if not cls.USERNAME or not cls.PASSWORD:
+            # No credential required
+            return True
+
+        if not request.authorization:
+            # No credential was provided
+            return False
+
+        # Check provided credentials
+        username = request.authorization.parameters.get("username")
+        password = request.authorization.parameters.get("password")
+        return username == cls.USERNAME and password == cls.PASSWORD
+
+
+@app.before_request
+def http_basic_auth() -> None | tuple[str, int, dict[str, str]]:
+    """
+    Check authentication headers if necessary.
+    """
+    if not HttpAuthCredentials.is_auth_success():
+        # https://quart.palletsprojects.com/en/latest/reference/response_values/#tuple-str-int-dict-str-str
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#authentication_schemes
+        return "", 401, {"WWW-Authenticate": "basic"}
+
+    return None
+
+
 @app.before_request
 async def before_request() -> None:
+    """
+    Store installed and enabled plugins as global attributes.
+    """
     # Shared views and template context
     g.installed_plugins = tutorclient.Client.installed_plugins()
     g.enabled_plugins = tutorclient.Client.enabled_plugins()
@@ -222,7 +276,7 @@ async def plugin_upgrade(name: str) -> BaseResponse:
 
 
 @app.post("/plugins/update")
-async def plugins_update() -> WerkzeugResponse:
+async def plugins_update() -> BaseResponse:
     tutorclient.CliPool.run_sequential(["plugins", "update"])
     return redirect(url_for("plugin_store"))
 
