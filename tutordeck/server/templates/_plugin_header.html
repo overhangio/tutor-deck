@@ -2,13 +2,14 @@
 
 {% block workspace_header %}
 <div class="header-address">
+    {# TODO why display the breadcrumbs? And why link to the marketplace, when people could have come here from the list of installed plugins? #}
     <span><a href="{{ url_for('plugin_store') }}">Plugin Marketplace</a></span>
     <span>/ {{ plugin_name }}</span>
 </div>
 <div class="info">
     <div class="info-container">
         <div class="page-title">{{ plugin_name }}</div>
-        <div class="page-description">By {{ author_name }}</div>
+        {% if author_name %}<div class="page-description">By {{ author_name }}</div>{% endif %}
     </div>
     <div class="page-button">
         {% block page_button %}
@@ -29,8 +30,10 @@
     </div>
 </div>
 
+{% if plugin_description %}
 <div id="plugin-full-description">
     {{ plugin_description | safe }}
 </div>
+{% endif %}
 
 {% endblock %}
