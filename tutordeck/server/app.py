@@ -203,23 +203,48 @@ async def plugin_store_list() -> str:
 
 @app.get("/plugin/installed/list")
 async def plugin_installed_list() -> str:
-    # TODO IMPORTANT this displays only the plugins that are in the store. When a plugin
-    # is installed locally but not in the store, we must display it here anyway.
-    # TODO this is duplicated code from plugin_store_list
-    search_query = request.args.get("search", "")
-    plugins: list[dict[str, t.Any]] = [
-        {
-            "name": p.name,
-            "url": p.url,
-            "index": p.index,
-            "author": tutorclient.Client.get_plugin_author(p),
-            "description": p.short_description,
-            "is_enabled": p.name in g.enabled_plugins,
-        }
+    """
+    Search for installed plugins that match a certain query.
+
+    Notes:
+    - this returns not just the plugins that are in the store. When a plugin
+      is installed locally but not in the store, we must display it here anyway.
+    - in most cases the search argument is empty.
+    - the match method is slightly different than store search. We match just on name.
+      That's because some installed plugins don't have any description.
+    """
+    search_query = request.args.get("search", "").lower()
+
+    # Search for plugins
+    # Note that in most cases the search argument is empty.
+    # Note also that this is slightly different than store search. That's because some
+    # installed plugins may not be present in the store.
+    plugins_found = []
+    for name in g.installed_plugins:
+        # Simple pattern matching
+        if search_query in name.lower() or not search_query:
+            plugins_found.append(name)
+
+    # Match with plugins in store
+    store_plugins = {
+        p.name: p
         for p in tutorclient.Client.plugins_in_store()
-        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
-        and p.name in g.installed_plugins
-    ]
+        if p.name in plugins_found
+    }
+
+    # Collect results
+    plugins: list[dict[str, t.Any]] = []
+    for name in plugins_found:
+        result = {
+            "name": name,
+            "author": "",
+            "description": "",
+            "is_enabled": name in g.enabled_plugins,
+        }
+        if store_plugin := store_plugins.get(name):
+            result["description"] = store_plugin.short_description
+            result["author"] = tutorclient.Client.get_plugin_author(store_plugin)
+        plugins.append(result)
 
     return await render_template(
         "_plugin_installed_list.html",
@@ -230,19 +255,23 @@ async def plugin_installed_list() -> str:
 @app.get("/plugin/<name>")
 async def plugin(name: str) -> Response:
     index_entry = tutorclient.Client.plugin_in_store(name)
-    if not index_entry:
+
+    # Plugin must either be installed or available in the store
+    if not index_entry and name not in g.installed_plugins:
         return Response("Plugin not found", status=404)
 
     # TODO this seq_command_executed argument is confusing and causing issues, for
     # instance with the "unset" button. We need to get rid of it.
     seq_command_executed = request.args.get("seq_command_executed")
-    description = markdown(index_entry.description)
+    description = markdown(index_entry.description) if index_entry else ""
     rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
         is_enabled=name in g.enabled_plugins,
         is_installed=name in g.installed_plugins,
-        author_name=tutorclient.Client.get_plugin_author(index_entry),
+        author_name=(
+            tutorclient.Client.get_plugin_author(index_entry) if index_entry else ""
+        ),
         plugin_description=description,
         seq_command_executed=seq_command_executed,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
