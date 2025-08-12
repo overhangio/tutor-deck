@@ -26,6 +26,10 @@
                 <a href="{{ url_for('home') }}"><img id="mobile-logo" src="{{ url_for('static', filename='img/Mobile Logo.svg') }}"/></a>
             </header>
             <menu>
+                <a href="{{ url_for('configuration') }}" id="configuration">
+                    <img src="{{ url_for('static', filename='img/gear.svg') }}"/>
+                    <h4>Configuration</h4>
+                </a>
                 <a href="{{ url_for('plugin_store') }}" id="plugin-marketplace">
                     <img src="{{ url_for('static', filename='img/shopping-bag.svg') }}"/>
                     <h4>Plugin Marketplace</h4>
