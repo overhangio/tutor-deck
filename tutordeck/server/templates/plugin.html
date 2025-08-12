@@ -87,29 +87,6 @@
 
     showPluginEnableDisableBar();
     ShowRunCommandButton();
-
-    // Add change event to all inputs, selects
-    document.querySelectorAll('#config-forms-container input').forEach((element) => {
-        element.addEventListener('change', () => {
-            element.classList.add('changed');
-            // Find the associated hidden input
-            const hiddenInput = element.nextElementSibling;
-            if (hiddenInput && hiddenInput.type === 'hidden') {
-                hiddenInput.classList.add('changed');
-            }
-        })
-    });
-
-    // Handle form submission
-    document.querySelectorAll('form').forEach((form) => {
-        form.addEventListener('submit', (e) => {
-            // Disable all inputs that don't have the 'changed' class
-            document.querySelectorAll('#config-forms-container input:not(.changed)').forEach((element) => {
-            if (element.id != "plugin-name") {
-                element.disabled = true;
-            }
-            });
-        });
-    });
 </script>
+<script src="{{ url_for('static', filename='js/config.js') }}"></script>
 {% endblock %}

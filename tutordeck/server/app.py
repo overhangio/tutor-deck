@@ -112,8 +112,55 @@ async def before_request() -> None:
 
 
 @app.get("/")
-async def home() -> str:
-    return await render_template("plugin_installed.html")
+async def home() -> BaseResponse:
+    """
+    Home redirects to the list of installed plugins
+    """
+    return redirect(url_for("plugin_installed"))
+
+
+@app.get("/configuration")
+async def configuration() -> str:
+    config = tutorclient.Project.get_config()
+
+    # Load base config with essential settings
+    base_settings = [
+        "LMS_HOST",
+        "CMS_HOST",
+        "LANGUAGE_CODE",
+        "ENABLE_HTTPS",
+    ]
+    base_config = {key: config.pop(key) for key in base_settings}
+
+    # User-saved configuration
+    user_config = tutorclient.Project.get_user_config()
+
+    return await render_template(
+        "configuration.html",
+        base_config=base_config,
+        user_config=user_config,
+        config=dict(sorted(config.items())),
+    )
+
+
+@app.post("/configuration")
+async def configuration_update() -> BaseResponse:
+    """
+    Update configuration settings.
+
+    TODO display "need to run launch".
+    """
+    await process_config_update_request()
+
+    # Handle non-ajax call
+    next_url = request.args.get("next", "")
+    if next_url:
+        return redirect(next_url)
+
+    # Handle ajax call
+    response = Response("", status=200, content_type="text/html")
+    response.headers["HX-Redirect"] = url_for("configuration")
+    return response
 
 
 @app.get("/plugin/store")
@@ -281,23 +328,9 @@ async def plugins_update() -> BaseResponse:
     return redirect(url_for("plugin_store"))
 
 
-@app.post("/config/<name>/update")
-async def config_update(name: str) -> Response:
-    form = await request.form
-
-    unset = form.get("unset")
-    if unset:
-        tutorclient.CliPool.run_sequential(["config", "save", f"--unset={unset}"])
-    else:
-        cmd = ["config", "save"]
-        for key, value in form.items():
-            if value.startswith("{{"):
-                # Templated values that start with {{ should be explicitely converted to string
-                # Otherwise there will be a parsing error because it might be considered a dictionary
-                value = f"'{value}'"
-            cmd.extend(["--set", f"{key}={value}"])
-        tutorclient.CliPool.run_sequential(cmd)
-    # TODO error management
+@app.post("/plugin/<name>/config/update")
+async def plugin_config_update(name: str) -> Response:
+    await process_config_update_request()
     response = t.cast(
         Response,
         await make_response(
@@ -310,12 +343,29 @@ async def config_update(name: str) -> Response:
             )
         ),
     )
-    response.set_cookie(
-        f"{constants.WARNING_COOKIE_PREFIX}-{name}",
-        "requires launch",
-        max_age=constants.ONE_MONTH,
-    )
+    update_plugins_requiring_launch(response, add=name)
     return response
+
+
+async def process_config_update_request() -> None:
+    """
+    Set/Unset config key/values based on request form.
+
+    TODO how to handle configuration changes? For instance: reloading
+    """
+    form = await request.form
+    if unset := form.get("unset"):
+        tutorclient.CliPool.run_sequential(["config", "save", f"--unset={unset}"])
+    else:
+        cmd = ["config", "save"]
+        for key, value in form.items():
+            if value.startswith("{{"):
+                # Templated values that start with {{ should be explicitely converted to string
+                # Otherwise there will be a parsing error because it might be considered a dictionary
+                value = f"'{value}'"
+            cmd.extend(["--set", f"{key}={value}"])
+        tutorclient.CliPool.run_sequential(cmd)
+    # TODO error management
 
 
 @app.get("/local/launch")

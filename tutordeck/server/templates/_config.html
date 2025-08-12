@@ -10,17 +10,31 @@
                 {% else %}
                 <input type="text" name="{{ key }}" id="{{ key }}" value="{{ value }}" />
                 {% endif %}
-                <button 
-                    type="button" 
-                    hx-post="{{ url_for('config_update', name=plugin_name) }}"
+                {% if plugin_name %}
+                {# Plugin configuration #}
+                <button
+                    type="button"
+                    hx-post="{{ url_for('plugin_config_update', name=plugin_name) }}"
                     hx-vals='{"plugin_name": "{{ plugin_name }}", "unset": "{{ key }}"}'
                     hx-indicator="#loading-bar-spinner-{{ key }}"
                     hx-push-url="true"
                     {% if key not in user_config %}disabled{% endif %}>
                     unset
                 </button>
-                <img src="{{ url_for('static', filename='/img/Fading_balls.gif')}}" alt="" class="htmx-indicator" id="loading-bar-spinner-{{ key }}">
+                {% else %}
+                {# Global configuration #}
+                <button
+                    type="button"
+                    hx-post="{{ url_for('configuration_update') }}"
+                    hx-vals='{"unset": "{{ key }}"}'
+                    hx-indicator="#loading-bar-spinner-{{ key }}"
+                    hx-push-url="true"
+                    {% if key not in user_config %}disabled{% endif %}>
+                    unset
+                </button>
+                {% endif %}
+                <img src="{{ url_for('static', filename='img/Fading_balls.gif')}}" alt="" class="htmx-indicator" id="loading-bar-spinner-{{ key }}">
             </div>
         </div>
-    {% endfor %}    
+    {% endfor %}
 </div>
