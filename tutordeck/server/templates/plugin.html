@@ -52,12 +52,11 @@
     pluginName = '{{ plugin_name }}';
     isPluginInstalled = '{{ is_installed }}' === 'True';
     isPluginEnabled = '{{ is_enabled }}' === 'True';
-    sequentialCommandExecuted = '{{ seq_command_executed }}' === 'True';
     pluginUpgradeButton = document.getElementById('plugin-upgrade-button');
     pluginInstallButton = document.getElementById('plugin-install-button');
     cancelCommandButton = document.getElementById('cancel-command-button');
 
-    relevantCommands = ["tutor plugins install", "tutor plugins upgrade"];
+    tutorCommandsToWatch = ["tutor plugins install", "tutor plugins upgrade"];
 
     const toggleButtons = ({install = false, upgrade = false, cancel = false} = {}) => {
         pluginInstallButton.style.display = install ? 'block' : 'none';
