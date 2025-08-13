@@ -304,7 +304,7 @@ class CliPool:
 
 class Client:
     @classmethod
-    def plugin_in_store(cls, name: str) -> tutor.plugins.indexes.IndexEntry | None:
+    def plugin_in_store(cls, name: str) -> t.Optional[tutor.plugins.indexes.IndexEntry]:
         for plugin in cls.plugins_in_store():
             if plugin.name == name:
                 return plugin

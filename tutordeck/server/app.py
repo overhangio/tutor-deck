@@ -88,7 +88,7 @@ class HttpAuthCredentials:
 
 
 @app.before_request
-def http_basic_auth() -> None | tuple[str, int, dict[str, str]]:
+def http_basic_auth() -> t.Optional[tuple[str, int, dict[str, str]]]:
     """
     Check authentication headers if necessary.
     """
@@ -492,7 +492,7 @@ async def command() -> BaseResponse:
 
 
 def update_plugins_requiring_launch(
-    response: Response, add: str | None = None, remove: str | None = None
+    response: Response, add: t.Optional[str] = None, remove: t.Optional[str] = None
 ) -> None:
     """
     Store the list of plugins for which a recent set of changes require running "local launch".
