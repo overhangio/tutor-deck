@@ -60,9 +60,9 @@ class HttpAuthCredentials:
     @classmethod
     def load_credentials(cls) -> None:
         """
-        Note that credentials will not be automatically reloaded on configuration change.
+        Load config and fetch credentials.
 
-        TODO reload credentials automatically when needed.
+        This method should be called every time the configuration is updated.
         """
         config = tutorclient.Project.get_config()
         cls.USERNAME = t.cast(str, config.get("DECK_AUTH_USERNAME", ""))
@@ -148,7 +148,7 @@ async def configuration_update() -> BaseResponse:
     """
     Update configuration settings.
 
-    TODO display "need to run launch".
+    TODO IMPORTANT display "need to run launch".
     """
     await process_config_update_request()
 
@@ -379,9 +379,10 @@ async def plugin_config_update(name: str) -> Response:
 async def process_config_update_request() -> None:
     """
     Set/Unset config key/values based on request form.
-
-    TODO how to handle configuration changes? For instance: reloading
     """
+
+    # Run save command
+    # TODO error management
     form = await request.form
     if unset := form.get("unset"):
         tutorclient.CliPool.run_sequential(["config", "save", f"--unset={unset}"])
@@ -394,7 +395,11 @@ async def process_config_update_request() -> None:
                 value = f"'{value}'"
             cmd.extend(["--set", f"{key}={value}"])
         tutorclient.CliPool.run_sequential(cmd)
-    # TODO error management
+
+    # Make sure that the configuration is reloaded where needed.
+    # Note that this is not very robust. For instance, if the server is running multiple
+    # workers, the configuration will only be reloaded for one of them.
+    HttpAuthCredentials.load_credentials()
 
 
 @app.get("/local/launch")
