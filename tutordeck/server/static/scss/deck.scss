@@ -364,10 +364,8 @@ main {
 				}
 			}
 			#warning-command-running {
-				display: flex;
 				justify-content: center;
 				align-items: center;
-				display: none;
 				border: 1px solid $gray-2;
 				border-radius: 0.5em;
 				align-items: center;
@@ -1007,5 +1005,15 @@ main {
 				opacity: 1;
 			}
 		}
+	}
+}
+
+// Show/Hide/Disable elements when commands are running or are complete
+.show-on-command-running {
+	display: none;
+}
+.command-running {
+	.show-on-command-running {
+		display: flex;
 	}
 }

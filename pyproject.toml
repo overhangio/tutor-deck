@@ -39,10 +39,10 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-  "tutor[dev]>=20.0.0,<21.0.0", 
+  "tutor[dev]>=20.0.0,<21.0.0",
   "types-aiofiles",
   "types-Markdown",
-  "pylint", 
+  "pylint",
   "black",
 ]
 

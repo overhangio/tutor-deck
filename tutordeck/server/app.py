@@ -152,14 +152,16 @@ async def configuration_update() -> BaseResponse:
     """
     await process_config_update_request()
 
-    # Handle non-ajax call
-    next_url = request.args.get("next", "")
-    if next_url:
-        return redirect(next_url)
+    response: BaseResponse
+    if next_url := request.args.get("next", ""):
+        # Handle non-ajax call
+        response = redirect(next_url)
+    else:
+        # Handle ajax call
+        response = Response("", status=200, content_type="text/html")
+        response.headers["HX-Redirect"] = url_for("configuration")
 
-    # Handle ajax call
-    response = Response("", status=200, content_type="text/html")
-    response.headers["HX-Redirect"] = url_for("configuration")
+    notify_run_sequential(response)
     return response
 
 
@@ -260,9 +262,6 @@ async def plugin(name: str) -> Response:
     if not index_entry and name not in g.installed_plugins:
         return Response("Plugin not found", status=404)
 
-    # TODO this seq_command_executed argument is confusing and causing issues, for
-    # instance with the "unset" button. We need to get rid of it.
-    seq_command_executed = request.args.get("seq_command_executed")
     description = markdown(index_entry.description) if index_entry else ""
     rendered_template = await render_template(
         "plugin.html",
@@ -273,18 +272,15 @@ async def plugin(name: str) -> Response:
             tutorclient.Client.get_plugin_author(index_entry) if index_entry else ""
         ),
         plugin_description=description,
-        seq_command_executed=seq_command_executed,
         plugin_config_unique=tutorclient.Client.plugin_config_unique(name),
         plugin_config_defaults=tutorclient.Client.plugin_config_defaults(name),
         user_config=tutorclient.Project.get_user_config(),
     )
 
     # Redirect to plugin page
-    # TODO this is useful only after a POST to plugin/<name>/update. I don't think these two things should be handled in the same place.
     response = Response(rendered_template, status=200, content_type="text/html")
-    response.headers["HX-Redirect"] = url_for(
-        "plugin", name=name, seq_command_executed=seq_command_executed
-    )
+
+    response.headers["HX-Redirect"] = url_for("plugin", name=name)
     return response
 
 
@@ -305,16 +301,9 @@ async def plugin_toggle(name: str) -> Response:
 
     response = t.cast(
         Response,
-        await make_response(
-            redirect(
-                url_for(
-                    "plugin",
-                    name=name,
-                    seq_command_executed=True,
-                )
-            )
-        ),
+        await make_response(redirect(url_for("plugin", name=name))),
     )
+    notify_run_sequential(response)
     if enable_plugin:
         update_plugins_requiring_launch(response, add=name)
     else:
@@ -362,17 +351,10 @@ async def plugin_config_update(name: str) -> Response:
     await process_config_update_request()
     response = t.cast(
         Response,
-        await make_response(
-            redirect(
-                url_for(
-                    "plugin",
-                    name=name,
-                    seq_command_executed=True,
-                )
-            )
-        ),
+        await make_response(redirect(url_for("plugin", name=name))),
     )
     update_plugins_requiring_launch(response, add=name)
+    notify_run_sequential(response)
     return response
 
 
@@ -496,6 +478,13 @@ async def command() -> BaseResponse:
     return redirect(url_for("advanced"))
 
 
+def notify_run_sequential(response: BaseResponse) -> None:
+    """
+    Notify the frontend that a sequential command was run.
+    """
+    set_cookie(response, constants.COMMAND_EXECUTED_COOKIE_NAME, "1")
+
+
 def update_plugins_requiring_launch(
     response: Response, add: t.Optional[str] = None, remove: t.Optional[str] = None
 ) -> None:
@@ -527,8 +516,15 @@ def update_plugins_requiring_launch(
         names.discard(remove)
 
     # Update the response
-    response.set_cookie(
+    set_cookie(
+        response,
         constants.PLUGINS_REQUIRE_LAUNCH_COOKIE_NAME,
         separator.join(sorted(names)),
-        max_age=60 * 60 * 24 * 30,  # 1 month
     )
+
+
+def set_cookie(response: BaseResponse, name: str, value: str) -> None:
+    """
+    Set a cookie with a consistent expiry time.
+    """
+    response.set_cookie(name, value, max_age=60 * 60 * 24 * 30)  # 1 month

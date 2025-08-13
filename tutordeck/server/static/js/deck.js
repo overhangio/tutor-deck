@@ -1,9 +1,27 @@
+// Cookie utilities
+// We can't use the cookieStore because we might want to access tutor deck in http mode,
+// where it is not available.
+function getCookie(name) {
+	let nameEQ = name + "=";
+	return (
+		document.cookie
+			.split(";")
+			.map((cookie) => cookie.trim())
+			.find((cookie) => cookie.startsWith(nameEQ))
+			?.slice(nameEQ.length) || null
+	);
+}
+function eraseCookie(name) {
+	document.cookie =
+		name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+}
+
 // Handle plugins requiring launch based on the values in the corresponding cookie
 const pluginsRequireLaunchCookieName = "plugins-require-launch";
-async function displayPluginsRequireLaunchWarning() {
-	const cookie = await cookieStore.get(pluginsRequireLaunchCookieName);
-	if (cookie && cookie.value) {
-		const cookieValue = cookie.value.slice(1, -1); // remove quotes
+function displayPluginsRequireLaunchWarning() {
+	const cookie = getCookie(pluginsRequireLaunchCookieName);
+	if (cookie) {
+		const cookieValue = cookie.slice(1, -1); // remove quotes
 		cookieValue.split('+').map(s => s.trim()).forEach(plugin => {
 			document.querySelectorAll(`[data-plugin="${plugin}"] .warning-launch-required`).forEach(element => {
 				element.classList.add("visible");
@@ -41,7 +59,7 @@ function showLaunchSuccessfulToast() {
 	// TODO this is very brittle because it relies on static variables and string values.
 	if (toast) {
 		if (toastTitle === "Launch platform was successfully executed") {
-			cookieStore.delete(pluginsRequireLaunchCookieName);
+			eraseCookie(pluginsRequireLaunchCookieName);
 		}
 		toast.style.display = "flex";
 		setTimeout(() => {
@@ -59,34 +77,32 @@ function hideToast() {
 	}
 }
 
+const launchDescription = "To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.";
 const TOAST_CONFIGS = {
-	"tutor plugins enable": {
-		title: "Your plugin was successfully enabled",
-		description:
-			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
-		showFooter: true,
-	},
-	"tutor plugins upgrade": {
-		title: "Your plugin was successfully updated",
-		description:
-			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
-		showFooter: true,
-	},
-	"tutor plugins install": {
-		title: "Plugin Installed Successfully",
-		description: "Enable it now to start using its features",
-		showFooter: false,
-	},
 	"tutor config save": {
-		title: "You have successfully modified parameters",
-		description:
-			"To apply the changes, run Launch Platform. This will update your platform and may take a few minutes to complete.",
+		title: "Configuration parameters were updated",
+		description: launchDescription,
 		showFooter: true,
 	},
 	"tutor local launch": {
-		title: "Launch platform was successfully executed",
+		title: "Platform was launched",
 		description: "",
 		showFooter: false,
+	},
+	"tutor plugins install": {
+		title: "Plugin was installed",
+		description: "Enable it now to start using its features",
+		showFooter: false,
+	},
+	"tutor plugins enable": {
+		title: "Plugin was enabled",
+		description: launchDescription,
+		showFooter: true,
+	},
+	"tutor plugins upgrade": {
+		title: "Plugin was updated",
+		description: launchDescription,
+		showFooter: true,
 	},
 };
 let toastTitle = document.getElementById("toast-title");
@@ -105,38 +121,7 @@ function setToastContent(cmd) {
 }
 
 // Each page defines its own relevant commands, we use them to check
-// if the currently running commands belong the currently opened page or not
-let relevantCommands = [];
-let onDeveloperPage = false;
-function onRelevantPage(command) {
-	if (onDeveloperPage) {
-		// Developer page is relevant to all commands
-		return true;
-	}
-	return relevantCommands.some((prefix) => command.startsWith(prefix));
-}
+// if the currently running commands belong the currently opened page or not.
+// A "*" relevant command matches all possible commands.
+let tutorCommandsToWatch = [];
 
-function activateInputs() {
-	document.querySelectorAll("button").forEach((button) => {
-		button.disabled = false;
-	});
-	document.querySelectorAll("input").forEach((input) => {
-		input.disabled = false;
-	});
-	document.querySelectorAll(".form-switch").forEach((formSwitch) => {
-		formSwitch.style.opacity = 1;
-	});
-	document.getElementById("warning-command-running").style.display = "none";
-}
-function deactivateInputs() {
-	document.querySelectorAll("button").forEach((button) => {
-		button.disabled = true;
-	});
-	document.querySelectorAll("input").forEach((input) => {
-		input.disabled = true;
-	});
-	document.querySelectorAll(".form-switch").forEach((formSwitch) => {
-		formSwitch.style.opacity = 0.5;
-	});
-	document.getElementById("warning-command-running").style.display = "flex";
-}

@@ -16,3 +16,13 @@
 
 <script src="{{ url_for('static', filename='js/config.js') }}"></script>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    tutorCommandsToWatch = ["tutor config save"];
+    function ShowRunCommandButton() {
+        // TODO we shouldn't have to implement dummy functions. We need to get rid of
+        // these imperative function calls.
+    }
+</script>
+{% endblock %}
