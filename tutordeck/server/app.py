@@ -18,13 +18,12 @@ from quart import (
     url_for,
 )
 from quart.typing import ResponseTypes
-from werkzeug.sansio.response import Response as BaseResponse
 from tutor.plugins.v1 import discover_package
+from werkzeug.sansio.response import Response as BaseResponse
 
 from tutordeck.server.utils import current_page_plugins, pagination_context
 
 from . import constants, tutorclient
-
 
 app = Quart(
     __name__,
@@ -490,9 +489,9 @@ def update_plugins_requiring_launch(
     response: Response, add: t.Optional[str] = None, remove: t.Optional[str] = None
 ) -> None:
     """
-    Store the list of plugins for which a recent set of changes require running "local launch".
-
-    This list is stored as a "+"-separated string in a cookie. Note that flask will automatically put the content in quotes.
+    Store the list of plugins for which a recent set of changes require
+    running "local launch". This list is stored as a "+"-separated string
+    in a cookie. Note that flask will automatically put the content in quotes.
     """
     # Note that comma, colon and semi-colon are not supported in cookie values
     separator = "+"
