@@ -18,13 +18,12 @@ from quart import (
     url_for,
 )
 from quart.typing import ResponseTypes
-from werkzeug.sansio.response import Response as BaseResponse
 from tutor.plugins.v1 import discover_package
+from werkzeug.sansio.response import Response as BaseResponse
 
 from tutordeck.server.utils import current_page_plugins, pagination_context
 
 from . import constants, tutorclient
-
 
 app = Quart(
     __name__,
@@ -372,8 +371,9 @@ async def process_config_update_request() -> None:
         cmd = ["config", "save"]
         for key, value in form.items():
             if value.startswith("{{"):
-                # Templated values that start with {{ should be explicitely converted to string
-                # Otherwise there will be a parsing error because it might be considered a dictionary
+                # Templated values that start with {{ should be explicitely
+                # converted to string otherwise there will be a parsing
+                # error because it might be considered a dictionary
                 value = f"'{value}'"
             cmd.extend(["--set", f"{key}={value}"])
         tutorclient.CliPool.run_sequential(cmd)
@@ -489,9 +489,9 @@ def update_plugins_requiring_launch(
     response: Response, add: t.Optional[str] = None, remove: t.Optional[str] = None
 ) -> None:
     """
-    Store the list of plugins for which a recent set of changes require running "local launch".
-
-    This list is stored as a "+"-separated string in a cookie. Note that flask will automatically put the content in quotes.
+    Store the list of plugins for which a recent set of changes require
+    running "local launch". This list is stored as a "+"-separated string
+    in a cookie. Note that flask will automatically put the content in quotes.
     """
     # Note that comma, colon and semi-colon are not supported in cookie values
     separator = "+"
