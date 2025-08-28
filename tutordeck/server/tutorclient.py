@@ -50,7 +50,9 @@ class Project:
     @classmethod
     def get_user_config(cls) -> Config:
         """
-        TODO load config dynamically from root anytime it is changed on disk? Maybe take the chance to clear sys.modules cache on reload?
+        TODO
+        Load config dynamically from root anytime it is changed on disk?
+        Maybe take the chance to clear sys.modules cache on reload?
         """
         return tutor.config.get_user(cls.ROOT)
 
@@ -131,8 +133,8 @@ class Cli:
         The first item is the log file path. Second item is the running command.
 
         This will handle gracefully file deletion. Note however that if the file is
-        truncated, all contents added to the beginning until the current position will be
-        missed.
+        truncated, all contents added to the beginning until the current position
+        will be missed.
         """
         yield f"$ {self.command}\n"
         async with aiofiles.open(self.log_path, "rb") as f:
