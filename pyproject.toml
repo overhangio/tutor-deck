@@ -28,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-  "tutor>=22.0.0,<23.0.0",
+  "tutor>=23.0.0,<24.0.0",
   "quart",
   "aiofiles",
   "markdown",
@@ -40,7 +40,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-  "tutor[dev]>=22.0.0,<23.0.0",
+  "tutor[dev]>=23.0.0,<24.0.0",
   "types-aiofiles",
   "types-Markdown",
   "ruff", 
