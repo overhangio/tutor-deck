@@ -375,7 +375,7 @@ class Client:
         return [
             {
                 "text": completion.text,
-                "display": completion.display,
+                "display": completion.display_text,
             }
             for completion in completions
         ]
