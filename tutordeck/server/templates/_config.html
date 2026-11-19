@@ -8,7 +8,8 @@
                 <!-- If checkbox is unchecked send false -->
                 <input type="hidden" name="{{ key }}" value="false">
                 {% else %}
-                <input type="text" name="{{ key }}" id="{{ key }}" value="{{ value }}" />
+                {# Do not show secrets to onlookers: they can still be edited. #}
+                <input type="{% if 'PASSWORD' in key or 'SECRET' in key or 'PRIVATE_KEY' in key %}password{% else %}text{% endif %}" name="{{ key }}" id="{{ key }}" value="{{ value }}" />
                 {% endif %}
                 {% if plugin_name %}
                 {# Plugin configuration #}

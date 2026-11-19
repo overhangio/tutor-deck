@@ -1,11 +1,14 @@
 import asyncio
+import hmac
 import json
 import logging
 import shlex
 import sys
 import typing as t
+from urllib.parse import urlparse
 
 import importlib_metadata
+import nh3
 from markdown import markdown
 from quart import (
     Quart,
@@ -81,10 +84,13 @@ class HttpAuthCredentials:
             # No credential was provided
             return False
 
-        # Check provided credentials
-        username = request.authorization.parameters.get("username")
-        password = request.authorization.parameters.get("password")
-        return username == cls.USERNAME and password == cls.PASSWORD
+        # Check provided credentials with a constant-time comparison to avoid
+        # leaking their length or contents through response timing.
+        username = request.authorization.parameters.get("username") or ""
+        password = request.authorization.parameters.get("password") or ""
+        username_matches = hmac.compare_digest(username, cls.USERNAME)
+        password_matches = hmac.compare_digest(password, cls.PASSWORD)
+        return username_matches and password_matches
 
 
 @app.before_request
@@ -98,6 +104,28 @@ def http_basic_auth() -> t.Optional[tuple[str, int, dict[str, str]]]:
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#authentication_schemes
         return "", 401, {"WWW-Authenticate": "basic"}
 
+    return None
+
+
+@app.before_request
+def reject_cross_site_requests() -> t.Optional[tuple[str, int]]:
+    """
+    Reject state-changing requests that come from another web origin.
+
+    Without this check, any web page opened in the same browser can post to e.g:
+    the /command endpoint, which amounts to arbitrary command execution. Browsers
+    always send the Sec-Fetch-Site header, and the Origin header on cross-site
+    POST requests; non-browser clients (such as curl) send neither, and are not
+    subject to cross-site request forgery.
+    """
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return None
+    sec_fetch_site = request.headers.get("Sec-Fetch-Site")
+    if sec_fetch_site and sec_fetch_site not in ("same-origin", "none"):
+        return "Cross-site requests are not allowed", 403
+    if origin := request.headers.get("Origin"):
+        if urlparse(origin).netloc != request.host:
+            return "Cross-site requests are not allowed", 403
     return None
 
 
@@ -154,7 +182,10 @@ async def configuration_update() -> BaseResponse:
 
     response: BaseResponse
     if next_url := request.args.get("next", ""):
-        # Handle non-ajax call
+        # Handle non-ajax call. Only redirect to a path within this application:
+        # redirecting to arbitrary URLs would be an open redirect.
+        if urlparse(next_url).netloc or not next_url.startswith("/"):
+            next_url = url_for("configuration")
         response = redirect(next_url)
     else:
         # Handle ajax call
@@ -279,7 +310,9 @@ async def plugin(name: str) -> Response:
     if not index_entry and name not in g.installed_plugins:
         return Response("Plugin not found", status=404)
 
-    description = markdown(index_entry.description) if index_entry else ""
+    # The plugin index may be third-party: sanitize the rendered HTML, which may
+    # otherwise carry scripts into the administrator's browser.
+    description = nh3.clean(markdown(index_entry.description)) if index_entry else ""
     rendered_template = await render_template(
         "plugin.html",
         plugin_name=name,
@@ -552,4 +585,9 @@ def set_cookie(response: BaseResponse, name: str, value: str) -> None:
     """
     Set a cookie with a consistent expiry time.
     """
-    response.set_cookie(name, value, max_age=60 * 60 * 24 * 30)  # 1 month
+    response.set_cookie(
+        name,
+        value,
+        max_age=60 * 60 * 24 * 30,
+        samesite="Lax",  # 1 month
+    )
