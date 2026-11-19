@@ -44,6 +44,15 @@ function checkAndClearCommandExecuted() {
 };
 checkAndClearCommandExecuted();
 
+// Each page defines its own command execution/cancellation toggle functions, but some
+// pages (e.g: the plugin store) define none: only call the ones that exist.
+function callIfDefined(functionName) {
+	const fn = window[functionName];
+	if (typeof fn === "function") {
+		fn();
+	}
+}
+
 let threadWasAlive = false;
 htmx.on("htmx:sseBeforeMessage", function (evt) {
 	// Don't swap content, we want to append
@@ -60,7 +69,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 			(prefix) => prefix === "*" || data.command.startsWith(prefix)
 		);
 		if(shouldDisplayLogs) {
-			ShowCancelCommandButton();
+			callIfDefined("ShowCancelCommandButton");
 			logsElement.style.display = "block";
 		} else {
 			// If we are not on relevant page we don't show the cancel button and disable all inputs
@@ -68,8 +77,9 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		}
 	}
 
-	// A parallel command was running, and now it's completed
-	const parallelCommandCompleted = threadWasAlive && !data.thread_alive;
+	// A parallel command was running, and now it's completed. The command result is
+	// set as soon as the command is done, possibly slightly before its thread exits.
+	const parallelCommandCompleted = threadWasAlive && (!data.thread_alive || data.result !== null);
 	// TODO this is a very brittle way of checking that we are on a plugin page... Let's not use static variables.
 	const onPluginPage = typeof pluginName !== "undefined";
 	// Note that sequential commands are only executed on the plugins page
@@ -79,8 +89,7 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 		onCommandComplete();
 		// There are certain commands for which we do not show the toast message
 		// Only show the toast if it was set in the `setToastContent` function and if the command ran successfully
-		// TODO this is brittle because it relies on a hard-coded "Success!" string that is sent from the backend.
-		if (data.stdout.includes("Success!")) {
+		if (data.result === "success") {
 			setToastContent(data.command);
 			if (toastTitle.textContent.trim()) {
 				showLaunchSuccessfulToast();
@@ -92,10 +101,12 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 					isPluginInstalled = true;
 				}
 				showPluginEnableDisableBar();
-				ShowRunCommandButton();
+				callIfDefined("ShowRunCommandButton");
 			});
 		} else {
-			ShowRunCommandButton();
+			// Not every page defines the command buttons (e.g: the plugin store), so
+			// only call the toggle functions on the pages that do.
+			callIfDefined("ShowRunCommandButton");
 		}
 	}
 
