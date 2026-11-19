@@ -174,9 +174,23 @@ async def plugin_installed() -> str:
     return await render_template("plugin_installed.html")
 
 
+def get_requested_page() -> int:
+    """
+    Current page number from the request arguments: a positive integer, where
+    invalid values fall back to the first page instead of crashing.
+    """
+    try:
+        return max(1, int(request.args.get("page", "1")))
+    except ValueError:
+        return 1
+
+
 @app.get("/plugin/store/list")
 async def plugin_store_list() -> str:
     search_query = request.args.get("search", "")
+    # Resolve matching plugin names once: resolving them for every plugin in the
+    # store would re-read the plugin indexes as many times as there are plugins.
+    matching = set(tutorclient.Client.plugins_matching_pattern(search_query))
     plugins: list[dict[str, t.Any]] = [
         {
             "name": p.name,
@@ -188,17 +202,20 @@ async def plugin_store_list() -> str:
             "is_enabled": p.name in g.enabled_plugins,
         }
         for p in tutorclient.Client.plugins_in_store()
-        if p.name in tutorclient.Client.plugins_matching_pattern(search_query)
+        if p.name in matching
     ]
 
-    current_page = int(request.args.get("page", "1"))
-    plugins = current_page_plugins(plugins, current_page)
+    current_page = get_requested_page()
+    # Compute the page count from the full list, before slicing it down to the
+    # current page: doing it the other way around always yielded a single page.
     pagination = pagination_context(plugins, current_page)
+    plugins = current_page_plugins(plugins, current_page)
 
     return await render_template(
         "_plugin_store_list.html",
         plugins=plugins,
         pagination=pagination,
+        search_query=search_query,
     )
 
 
