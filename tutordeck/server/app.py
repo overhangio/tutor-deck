@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import shlex
 import sys
 import typing as t
 
@@ -430,6 +431,7 @@ async def cli_logs_stream() -> ResponseTypes:
                             "stdout": data,
                             "command": tutorclient.CliPool.current_command(),
                             "thread_alive": tutorclient.CliPool.is_thread_alive(),
+                            "result": tutorclient.CliPool.current_result(),
                         }
                     )
                 }\nevent: logs\n\n"""
@@ -473,8 +475,14 @@ async def suggest() -> Response:
 async def command() -> BaseResponse:
     form = await request.form
     command_string = form.get("command", "")
-    command_args = command_string.split()
-    tutorclient.CliPool.run_parallel(app, command_args)
+    try:
+        # Parse the command like a shell would, such that quoted arguments that
+        # contain spaces (e.g: --set KEY="some value") are preserved.
+        command_args = shlex.split(command_string)
+    except ValueError:
+        command_args = []
+    if command_args:
+        tutorclient.CliPool.run_parallel(app, command_args)
     return redirect(url_for("advanced"))
 
 
