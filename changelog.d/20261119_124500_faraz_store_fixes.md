@@ -1,0 +1,2 @@
+- [Bugfix] Fix plugin store pagination: the page count was computed from the already-sliced page (so only one page ever showed), pagination links lost the active search query, and a non-numeric `page` parameter crashed the page. (by @Faraz32123)
+- [Improvement] Only resolve the plugin search pattern once per request, instead of once per plugin in the store.
