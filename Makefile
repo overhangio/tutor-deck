@@ -27,7 +27,7 @@ build-pythonpackage: ## Build the "tutor-deck" python package for upload to pypi
 	python -m build --sdist
 
 test-pythonpackage: build-pythonpackage ## Test that package can be uploaded to pypi
-	twine check dist/tutor_deck-$(shell make version).tar.gz
+	twine check dist/tutor_deck-$(shell $(MAKE) --no-print-directory version).tar.gz
 
 format: ## Format code automatically
 	ruff format ${SRC_DIRS}
