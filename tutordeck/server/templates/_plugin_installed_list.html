@@ -5,7 +5,7 @@
     <div class="details">
         <div class="name"><a href="{{ url_for('plugin', name=plugin.name) }}">{{ plugin.name }}</a></div>
         {% if plugin.author %}<div class="author">By {{ plugin.author }}</div>{% endif %}
-        {% if plugin.description %}<div class="description">{{ plugin.description|safe }}</div>{% endif %}
+        {% if plugin.description %}<div class="description">{{ plugin.description }}</div>{% endif %}
     </div>
     <div class="warning-launch-required" hx-preserve="true">
         <img src="{{ url_for('static', filename='img/Featured icon.svg')}}" alt="" title="Run launch platform for changes to this plugin to take effect">
