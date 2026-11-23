@@ -1,0 +1,4 @@
+- [Bugfix] Correctly report command failures: failed commands used to be reported as successful (any exit was treated as a success) or as "Cancelled!", and exceptions raised from the command thread disappeared without a trace. The command result ("success", "failure" or "cancelled") is now part of the log stream, instead of the hard-coded "Success!" string on which the frontend used to rely. (by @Faraz32123)
+- [Bugfix] Fix the UI occasionally staying stuck in the "command running" state when the last log output was read just before the command thread exited.
+- [Bugfix] Support quoted arguments with spaces (e.g: `config save --set KEY="some value"`) in developer mode, which used to be split on whitespace.
+- [Bugfix] Fix a JavaScript error when a command completed while browsing pages that do not define command buttons (e.g: the plugin store).

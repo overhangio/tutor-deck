@@ -6,6 +6,7 @@ import shlex
 import subprocess
 import tempfile
 import threading
+import traceback
 import typing as t
 
 import aiofiles
@@ -78,6 +79,8 @@ class Cli:
             "ab", prefix="tutor-deck-", suffix=".log"
         )
         self._stop_flag = threading.Event()
+        # None while the command is running, then "success", "failure" or "cancelled".
+        self.result: t.Optional[str] = None
 
     def log_to_file(self, content: str) -> None:
         with open(self.log_path, mode="ab") as f:
@@ -112,12 +115,35 @@ class Cli:
                 # pylint: disable=no-value-for-parameter
                 tutor.commands.cli.cli(self.args)
             except TutorError as e:
-                # This happens for incorrect commands and cancellation
-                self.log_to_file(e.args[0])
-                self.log_to_file("\nCancelled!\n")
-            except SystemExit:
-                # TODO Is there a better way to notify command completion??? The
-                # frontend relies on this hard-coded string to detect launch completion.
+                if e.args:
+                    self.log_to_file(f"{e.args[0]}\n")
+                if self._stop_flag.is_set():
+                    # The error was caused by the user cancelling the command
+                    self.result = "cancelled"
+                    self.log_to_file("\nCancelled!\n")
+                else:
+                    self.result = "failure"
+                    self.log_to_file("\nFailure!\n")
+            except SystemExit as e:
+                # Click always exits with SystemExit, including on usage errors: the
+                # exit code tells failure and success apart. The result is also exposed
+                # in the log stream (see app.py), on which the frontend relies to detect
+                # command completion.
+                code = e.code if isinstance(e.code, int) else 0 if e.code is None else 1
+                if code == 0:
+                    self.result = "success"
+                    self.log_to_file("\nSuccess!")
+                else:
+                    self.result = "failure"
+                    self.log_to_file("\nFailure!\n")
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Without this, exceptions raised from the worker thread would
+                # disappear into the void, and the frontend would report success.
+                self.result = "failure"
+                self.log_to_file(traceback.format_exc())
+                self.log_to_file("\nFailure!\n")
+            else:
+                self.result = "success"
                 self.log_to_file("\nSuccess!")
 
     def stop(self) -> None:
@@ -137,6 +163,7 @@ class Cli:
         will be missed.
         """
         yield f"$ {self.command}\n"
+        final_chunk_sent = False
         async with aiofiles.open(self.log_path, "rb") as f:
             # Note that file reading needs to happen from the file path, because it maye
             # be done from a separate thread, where the file object is not available.
@@ -144,6 +171,13 @@ class Cli:
                 content = await f.read()
                 if content:
                     yield content.decode()
+                elif self.result is not None and not final_chunk_sent:
+                    # The command completed and all its output was read: emit one final
+                    # (empty) chunk, such that subscribers are notified of the final
+                    # command state even when they already read the last output chunk
+                    # while the command was still running.
+                    final_chunk_sent = True
+                    yield ""
                 else:
                     await asyncio.sleep(constants.SHORT_SLEEP_SECONDS)
 
@@ -258,6 +292,16 @@ class CliPool:
         if cls.CLI_INSTANCE is None:
             raise RuntimeError("CLI_INSTANCE is not initialized.")
         return cls.CLI_INSTANCE.command
+
+    @classmethod
+    def current_result(cls) -> t.Optional[str]:
+        """
+        Result of the current or last command: None while it is running, then
+        "success", "failure" or "cancelled".
+        """
+        if cls.CLI_INSTANCE is None:
+            return None
+        return cls.CLI_INSTANCE.result
 
     @classmethod
     def is_thread_alive(cls) -> bool:
