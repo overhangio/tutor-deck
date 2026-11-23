@@ -1,5 +1,5 @@
-- [Security] Reject state-changing requests from other web origins (CSRF protection): any web page open in the same browser used to be able to post to Tutor Deck endpoints, including the developer mode endpoint that runs arbitrary Tutor commands. (by @Faraz32123)
-- [Security] Sanitize plugin descriptions before rendering them: plugin indexes are configurable and may be third-party, and descriptions used to be rendered as raw, unsanitized HTML.
-- [Security] Mask password, secret and private key values in the configuration page inputs.
-- [Security] Only follow internal redirect targets after saving the configuration (open redirect).
-- [Security] Compare HTTP basic auth credentials in constant time, and set the `SameSite=Lax` attribute on cookies.
+- [Security] Reject state-changing requests from other web origins: any web page open in the same browser used to be able to post to Tutor Deck endpoints, including the developer mode endpoint that runs arbitrary Tutor commands. This covers the common cross-site request forgery cases; DNS rebinding is not covered yet. (by @Faraz32123)
+- [Security] Sanitize plugin descriptions before rendering them: plugin indexes are configurable and may be third-party, and descriptions used to be rendered as raw, unsanitized HTML. (by @Faraz32123)
+- [Security] Mask password, secret and private key values in the configuration page inputs. (by @Faraz32123)
+- [Security] Only follow internal redirect targets after saving the configuration (open redirect). (by @Faraz32123)
+- [Security] Compare HTTP basic auth credentials in constant time, and set the `SameSite=Lax` attribute on cookies. (by @Faraz32123)

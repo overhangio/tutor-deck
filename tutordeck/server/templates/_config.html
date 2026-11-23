@@ -9,7 +9,7 @@
                 <input type="hidden" name="{{ key }}" value="false">
                 {% else %}
                 {# Do not show secrets to onlookers: they can still be edited. #}
-                <input type="{% if 'PASSWORD' in key or 'SECRET' in key or 'PRIVATE_KEY' in key %}password{% else %}text{% endif %}" name="{{ key }}" id="{{ key }}" value="{{ value }}" />
+                <input type="{% if 'PASSWORD' in key or 'SECRET' in key or 'PRIVATE_KEY' in key %}password{% else %}text{% endif %}" name="{{ key }}" id="{{ key }}" value="{{ value }}" autocomplete="new-password" />
                 {% endif %}
                 {% if plugin_name %}
                 {# Plugin configuration #}

@@ -78,6 +78,12 @@ You may add HTTP basic authentication by defining the following Tutor settings::
    tutor config save --set DECK_AUTH_USERNAME=myusername \
       --set DECK_AUTH_PASSWORD=s3cr3tpassw0rd
 
+State-changing requests are rejected when their ``Origin`` header does not match
+the ``Host`` header, to protect against cross-site request forgery. If you serve
+Tutor Deck behind a reverse proxy, make sure it forwards the original ``Host``
+header (e.g. ``proxy_set_header Host $host;`` in nginx), otherwise all POST
+requests will fail with a 403 error.
+
 Troubleshooting
 ***************
 

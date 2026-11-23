@@ -88,8 +88,9 @@ class HttpAuthCredentials:
         # leaking their length or contents through response timing.
         username = request.authorization.parameters.get("username") or ""
         password = request.authorization.parameters.get("password") or ""
-        username_matches = hmac.compare_digest(username, cls.USERNAME)
-        password_matches = hmac.compare_digest(password, cls.PASSWORD)
+        # Compare bytes: compare_digest raises TypeError on non-ASCII str.
+        username_matches = hmac.compare_digest(username.encode(), cls.USERNAME.encode())
+        password_matches = hmac.compare_digest(password.encode(), cls.PASSWORD.encode())
         return username_matches and password_matches
 
 
@@ -184,7 +185,13 @@ async def configuration_update() -> BaseResponse:
     if next_url := request.args.get("next", ""):
         # Handle non-ajax call. Only redirect to a path within this application:
         # redirecting to arbitrary URLs would be an open redirect.
-        if urlparse(next_url).netloc or not next_url.startswith("/"):
+        # Browsers treat "\" as "/", so "/\evil.com" would redirect to
+        # //evil.com despite having no netloc according to urlparse.
+        if (
+            not next_url.startswith("/")
+            or next_url.startswith("//")
+            or "\\" in next_url
+        ):
             next_url = url_for("configuration")
         response = redirect(next_url)
     else:
@@ -588,6 +595,6 @@ def set_cookie(response: BaseResponse, name: str, value: str) -> None:
     response.set_cookie(
         name,
         value,
-        max_age=60 * 60 * 24 * 30,
-        samesite="Lax",  # 1 month
+        max_age=60 * 60 * 24 * 30,  # 1 month
+        samesite="Lax",
     )
