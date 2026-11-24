@@ -3,6 +3,39 @@
 {% elif not services %}
 <p class="status-empty">No platform container was found. The platform is either stopped or was never launched.</p>
 {% else %}
+{% macro names(level) -%}
+{{ services|selectattr("level", "equalto", level)|map(attribute="service")|unique|join(", ") }}
+{%- endmacro %}
+{% set levels = services|map(attribute="level")|list %}
+{% set any_running = levels|reject("in", ["stopped", "done", "down"])|list %}
+{% set any_healthcheck = services|selectattr("health")|list %}
+{% if not any_running %}
+<div class="status-summary {% if "down" in levels %}status-summary-down{% else %}status-summary-neutral{% endif %}">
+    The platform is stopped.
+    {% if "down" in levels %}Failed: {{ names("down") }}.{% endif %}
+</div>
+{% elif "unhealthy" in levels or "down" in levels or "restarting" in levels %}
+<div class="status-summary status-summary-down">
+    {% if "restarting" in levels %}Restarting repeatedly: {{ names("restarting") }}.{% endif %}
+    {% if "unhealthy" in levels %}Unhealthy: {{ names("unhealthy") }}.{% endif %}
+    {% if "down" in levels %}Failed: {{ names("down") }}.{% endif %}
+    {% if "restarted" in levels %}Restarted automatically: {{ names("restarted") }}.{% endif %}
+    {% if "starting" in levels %}Starting: {{ names("starting") }}.{% endif %}
+    {% if "paused" in levels %}Paused: {{ names("paused") }}.{% endif %}
+    {% if "stopped" in levels %}Stopped: {{ names("stopped") }}.{% endif %}
+</div>
+{% elif "restarted" in levels or "starting" in levels or "paused" in levels or "stopped" in levels %}
+<div class="status-summary status-summary-warning">
+    {% if "restarted" in levels %}Restarted automatically in the last minute: {{ names("restarted") }}.{% endif %}
+    {% if "starting" in levels %}Starting: {{ names("starting") }}. Health checks have not passed yet.{% endif %}
+    {% if "paused" in levels %}Paused: {{ names("paused") }}.{% endif %}
+    {% if "stopped" in levels %}Stopped: {{ names("stopped") }}.{% endif %}
+</div>
+{% else %}
+<div class="status-summary status-summary-ok">
+    {% if any_healthcheck %}All services are healthy.{% else %}All services are running.{% endif %}
+</div>
+{% endif %}
 <table class="status-table">
     <thead>
         <tr>
@@ -18,8 +51,8 @@
         <tr>
             <td><a href="{{ url_for('service_logs', service=service.service) }}" title="View the logs of this service">{{ service.service }}</a></td>
             <td>
-                <span class="status-badge {% if service.state == 'running' and service.health in ('', 'healthy') %}status-badge-ok{% elif service.state == 'running' %}status-badge-warning{% else %}status-badge-down{% endif %}">
-                    {{ service.state }}{% if service.health %} ({{ service.health }}){% endif %}
+                <span class="status-badge {% if service.level in ('ok', 'done') %}status-badge-ok{% elif service.level in ('starting', 'paused', 'restarted') %}status-badge-warning{% elif service.level == 'stopped' %}status-badge-neutral{% else %}status-badge-down{% endif %}">
+                    {% if service.level == 'restarting' %}restarting{% else %}{{ service.state }}{% endif %}{% if service.health %} ({{ service.health }}){% endif %}
                 </span>
             </td>
             <td>{{ service.status }}</td>
@@ -31,6 +64,22 @@
                 </form>
             </td>
         </tr>
+        {% if service.health_output %}
+        <tr class="status-health-output">
+            <td colspan="5">
+                <span>Last health check:</span>
+                <code>{{ service.health_output }}</code>
+            </td>
+        </tr>
+        {% endif %}
+        {% if service.error %}
+        <tr class="status-health-output">
+            <td colspan="5">
+                <span>Error:</span>
+                <code>{{ service.error }}</code>
+            </td>
+        </tr>
+        {% endif %}
         {% endfor %}
     </tbody>
 </table>

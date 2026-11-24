@@ -11,6 +11,9 @@ $blue: #1570ef;
 $light-blue: #2e90fa;
 $green: #009951;
 $green-1: #edfff7;
+$yellow: #b45309;
+$yellow-1: #fff8e1;
+$red-1: #fef2f2;
 
 .htmx-indicator {
 	opacity: 0;
@@ -1076,12 +1079,46 @@ main {
 		color: $green;
 	}
 	&.status-badge-warning {
-		background-color: #fff8e1;
-		color: #b45309;
+		background-color: $yellow-1;
+		color: $yellow;
+	}
+	&.status-badge-neutral {
+		background-color: $gray-1;
+		color: $gray-5;
 	}
 	&.status-badge-down {
-		background-color: #fef2f2;
+		background-color: $red-1;
 		color: $red;
+	}
+}
+.status-summary {
+	border-radius: 0.5em;
+	padding: 0.8em 1em;
+	margin: 1em 0;
+	&.status-summary-ok {
+		background-color: $green-1;
+		color: $green;
+	}
+	&.status-summary-warning {
+		background-color: $yellow-1;
+		color: $yellow;
+	}
+	&.status-summary-neutral {
+		background-color: $gray-1;
+		color: $gray-5;
+	}
+	&.status-summary-down {
+		background-color: $red-1;
+		color: $red;
+	}
+}
+.status-health-output td {
+	padding-top: 0;
+	font-size: 0.85em;
+	color: $gray-4;
+	code {
+		white-space: pre-wrap;
+		word-break: break-word;
 	}
 }
 .status-error, .status-empty, .status-loading {

@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import datetime
 import json
 import logging
 import os
@@ -407,20 +408,48 @@ class Client:
         except subprocess.CalledProcessError as e:
             raise TutorError(f"Failed to query docker: {e.stderr.strip()}") from e
 
-        services = []
+        containers: list[dict[str, t.Any]] = []
         for line in process.stdout.splitlines():
             if not line.strip():
                 continue
-            # docker compose >= 2.21 prints one JSON object per line
-            container = json.loads(line)
+            # docker compose >= 2.21 prints one JSON object per line, while older
+            # versions print a single JSON array.
+            parsed = json.loads(line)
+            containers.extend(parsed if isinstance(parsed, list) else [parsed])
+
+        # Restart policies tell one-shot jobs from stopped services, restart
+        # counts reveal crash loops, and health logs explain failing checks.
+        details = inspect_containers(
+            [container["Name"] for container in containers if container.get("Name")]
+        )
+
+        services = []
+        for container in containers:
+            name = container.get("Name", "")
+            container_details = details.get(name, ContainerDetails())
+            level = service_level(
+                container.get("State", ""),
+                container.get("Health", ""),
+                container.get("ExitCode"),
+                restart_policy=container_details.restart_policy,
+                restart_count=container_details.restart_count,
+                recently_started=container_details.recently_started,
+                error=container_details.error,
+            )
             services.append(
                 {
                     "service": container.get("Service", ""),
-                    "name": container.get("Name", ""),
+                    "name": name,
                     "state": container.get("State", ""),
                     "status": container.get("Status", ""),
                     "health": container.get("Health", ""),
                     "ports": container.get("Ports", ""),
+                    "level": level,
+                    # Failed checks are expected while a container is starting
+                    "health_output": (
+                        container_details.health_output if level == "unhealthy" else ""
+                    ),
+                    "error": container_details.error,
                 }
             )
         return sorted(services, key=lambda service: service["service"])
@@ -494,3 +523,160 @@ class Client:
             }
             for completion in completions
         ]
+
+
+# Restart policies of long-running services: Docker restarts these containers
+# whatever their exit code, unless they were stopped on purpose.
+LONG_RUNNING_RESTART_POLICIES = ("always", "unless-stopped")
+
+# Automatic restarts that happened less than this number of seconds ago are
+# reported to users.
+RECENT_RESTART_SECONDS = 60
+
+# A container that was automatically restarted at least this number of times,
+# and recently, is considered to be crash-looping.
+CRASH_LOOP_RESTART_COUNT = 3
+
+
+def service_level(
+    state: str,
+    health: str,
+    exit_code: t.Union[int, str, None] = None,
+    restart_policy: t.Optional[str] = None,
+    restart_count: int = 0,
+    recently_started: bool = False,
+    error: str = "",
+) -> str:
+    """
+    Summarize the state of a platform container in a single word:
+
+    - "ok": running, and healthy if it defines a health check.
+    - "starting": running, but its health check has not passed yet.
+    - "unhealthy": running, but its health check is failing.
+    - "restarted": automatically restarted in the last minute, for instance
+      because it crashed while its dependencies were starting.
+    - "restarting": crash-looping, i.e. automatically restarted repeatedly.
+    - "paused": paused by the user.
+    - "stopped": a long-running service that was stopped, e.g. by `tutor local
+      stop`, whatever its exit code, or that was created but never started.
+    - "done": a one-shot container, such as the one that sets volume
+      permissions, that exited successfully, as expected.
+    - "down": a container that could not start, a one-shot container that
+      failed, or a dead container.
+
+    The restart policy is None when it is unknown, for instance because docker
+    could not be inspected. Exited containers are then reported as stopped: we
+    cannot tell whether they failed, or whether they were expected to exit.
+    """
+    if error and state in ("created", "exited", "dead"):
+        # Docker failed to start the container, e.g. because a port is in use
+        return "down"
+    if state == "restarting":
+        return "restarting"
+    if state == "running" and recently_started and restart_count > 0:
+        if restart_count >= CRASH_LOOP_RESTART_COUNT:
+            return "restarting"
+        return "restarted"
+    if state == "running":
+        if health == "starting":
+            return "starting"
+        if health == "unhealthy":
+            return "unhealthy"
+        return "ok"
+    if state == "paused":
+        return "paused"
+    if state == "created":
+        return "stopped"
+    if state == "exited":
+        if restart_policy is None or restart_policy in LONG_RUNNING_RESTART_POLICIES:
+            return "stopped"
+        if not isinstance(exit_code, (int, str)):
+            return "down"
+        try:
+            return "done" if int(exit_code) == 0 else "down"
+        except ValueError:
+            return "down"
+    return "down"
+
+
+class ContainerDetails(t.NamedTuple):
+    """
+    Container attributes that are not part of the docker compose ps output.
+    """
+
+    restart_policy: t.Optional[str] = None
+    health_output: str = ""
+    restart_count: int = 0
+    recently_started: bool = False
+    error: str = ""
+
+
+# Maximum length of the outputs that are displayed to users
+HEALTH_OUTPUT_MAX_LENGTH = 300
+
+
+def inspect_containers(container_names: list[str]) -> dict[str, ContainerDetails]:
+    """
+    Fetch the details of multiple containers with a single docker call.
+    Containers that cannot be inspected are silently skipped: this information
+    is only a hint.
+    """
+    if not container_names:
+        return {}
+    try:
+        process = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "--type",
+                "container",
+                "--format",
+                "{{ json .Name }}\t{{ json .HostConfig.RestartPolicy.Name }}"
+                "\t{{ json .RestartCount }}\t{{ json .State.StartedAt }}"
+                "\t{{ json .State.Error }}\t{{ json .State.Health }}",
+                *container_names,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            # Exits with 1 when any container is missing, but still prints the
+            # others: for instance, when one was removed in the meantime.
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    details = {}
+    for line in process.stdout.splitlines():
+        try:
+            name, restart_policy, restart_count, started_at, error, health = (
+                json.loads(field) for field in line.split("\t")
+            )
+            # Docker prints timestamps with nanoseconds, which Python < 3.11
+            # cannot parse: seconds are precise enough.
+            started = datetime.datetime.strptime(
+                str(started_at)[:19], "%Y-%m-%dT%H:%M:%S"
+            ).replace(tzinfo=datetime.timezone.utc)
+            health_log = (health or {}).get("Log") or []
+            output = (
+                str(health_log[-1].get("Output") or "").strip() if health_log else ""
+            )
+            details[str(name).lstrip("/")] = ContainerDetails(
+                restart_policy=str(restart_policy or ""),
+                health_output=truncate(output),
+                restart_count=int(restart_count or 0),
+                recently_started=(
+                    (now - started).total_seconds() < RECENT_RESTART_SECONDS
+                ),
+                error=truncate(str(error or "").strip()),
+            )
+        except (ValueError, TypeError, AttributeError):
+            continue
+    return details
+
+
+def truncate(text: str) -> str:
+    if len(text) > HEALTH_OUTPUT_MAX_LENGTH:
+        return text[:HEALTH_OUTPUT_MAX_LENGTH] + "…"
+    return text
