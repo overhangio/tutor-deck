@@ -1,0 +1,37 @@
+{% if error %}
+<p class="status-error">{{ error }}</p>
+{% elif not services %}
+<p class="status-empty">No platform container was found. The platform is either stopped or was never launched.</p>
+{% else %}
+<table class="status-table">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>State</th>
+            <th>Status</th>
+            <th>Ports</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+        <tr>
+            <td><a href="{{ url_for('service_logs', service=service.service) }}" title="View the logs of this service">{{ service.service }}</a></td>
+            <td>
+                <span class="status-badge {% if service.state == 'running' and service.health in ('', 'healthy') %}status-badge-ok{% elif service.state == 'running' %}status-badge-warning{% else %}status-badge-down{% endif %}">
+                    {{ service.state }}{% if service.health %} ({{ service.health }}){% endif %}
+                </span>
+            </td>
+            <td>{{ service.status }}</td>
+            <td>{{ service.ports }}</td>
+            <td>
+                <form method="post" action="{{ url_for('cli_local_restart') }}">
+                    <input type="hidden" name="service" value="{{ service.service }}">
+                    <button type="submit" class="status-restart-button" title="Restart this service">Restart</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}

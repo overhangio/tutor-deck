@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import json
 import logging
 import os
 import shlex
@@ -369,6 +370,76 @@ class Client:
     @classmethod
     def enabled_plugins(cls) -> list[str]:
         return list(hooks.Filters.PLUGINS_LOADED.iterate())
+
+    @classmethod
+    def services_status(cls) -> list[dict[str, str]]:
+        """
+        Status of the platform containers, as reported by docker compose.
+
+        Containers are queried by compose project name, so this works whatever
+        directory the platform was launched from. Raises TutorError when docker
+        cannot be reached.
+        """
+        project_name = str(
+            Project.get_config().get("LOCAL_PROJECT_NAME", "tutor_local")
+        )
+        try:
+            process = subprocess.run(
+                [
+                    "docker",
+                    "compose",
+                    "-p",
+                    project_name,
+                    "ps",
+                    "-a",
+                    "--format",
+                    "json",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=True,
+            )
+        except FileNotFoundError as e:
+            raise TutorError("The docker binary was not found") from e
+        except subprocess.TimeoutExpired as e:
+            raise TutorError("Timeout while querying docker") from e
+        except subprocess.CalledProcessError as e:
+            raise TutorError(f"Failed to query docker: {e.stderr.strip()}") from e
+
+        services = []
+        for line in process.stdout.splitlines():
+            if not line.strip():
+                continue
+            # docker compose >= 2.21 prints one JSON object per line
+            container = json.loads(line)
+            services.append(
+                {
+                    "service": container.get("Service", ""),
+                    "name": container.get("Name", ""),
+                    "state": container.get("State", ""),
+                    "status": container.get("Status", ""),
+                    "health": container.get("Health", ""),
+                    "ports": container.get("Ports", ""),
+                }
+            )
+        return sorted(services, key=lambda service: service["service"])
+
+    @classmethod
+    def running_services(cls) -> list[str]:
+        """
+        Names of the services that currently have a platform container, running or
+        not. Empty when docker cannot be reached: callers are expected to fall back
+        to a static list.
+        """
+        try:
+            return [
+                service["service"]
+                for service in cls.services_status()
+                if service["service"]
+            ]
+        except TutorError:
+            return []
 
     @classmethod
     def plugins_matching_pattern(cls, pattern: str) -> list[str]:

@@ -84,6 +84,21 @@ const TOAST_CONFIGS = {
 		description: launchDescription,
 		showFooter: true,
 	},
+	"tutor local start": {
+		title: "Platform was started",
+		description: "",
+		showFooter: false,
+	},
+	"tutor local stop": {
+		title: "Platform was stopped",
+		description: "",
+		showFooter: false,
+	},
+	"tutor local restart": {
+		title: "Platform was restarted",
+		description: "",
+		showFooter: false,
+	},
 	"tutor local launch": {
 		title: "Platform was launched",
 		description: "",
