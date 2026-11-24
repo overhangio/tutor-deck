@@ -72,7 +72,7 @@ def setup_sentry() -> None:
         return
     try:
         # The sentry-sdk package is an optional dependency.
-        import sentry_sdk  # type: ignore[import-not-found]
+        import sentry_sdk
     except ImportError:
         logger.warning(
             "DECK_SENTRY_DSN is defined, but the sentry-sdk package is not"
