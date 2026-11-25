@@ -32,6 +32,7 @@ dependencies = [
   "quart",
   "aiofiles",
   "markdown",
+  "nh3",
   "click",
   "click_repl",
 ]
