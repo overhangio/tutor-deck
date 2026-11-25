@@ -40,6 +40,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
+sentry = [
+  "sentry-sdk[quart]",
+]
 dev = [
   "tutor[dev]>=23.0.0.dev0,<24.0.0",
   "types-aiofiles",
