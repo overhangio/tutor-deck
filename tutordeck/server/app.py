@@ -25,9 +25,12 @@ from quart.typing import ResponseTypes
 from tutor.plugins.v1 import discover_package
 from werkzeug.sansio.response import Response as BaseResponse
 
+from tutordeck.__about__ import __version__ as deck_version
 from tutordeck.server.utils import current_page_plugins, pagination_context
 
 from . import constants, tutorclient
+
+logger = logging.getLogger(__name__)
 
 app = Quart(
     __name__,
@@ -48,12 +51,40 @@ def run(root: str, **app_kwargs: t.Any) -> None:
     handler.setFormatter(formatter)
     tutorclient.logger.addHandler(handler)
     tutorclient.logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
     # Configure authentication
     HttpAuthCredentials.load_credentials()
 
+    # Configure optional error reporting
+    setup_sentry()
+
     # TODO app.run() should be called only in development
     app.run(**app_kwargs)
+
+
+def setup_sentry() -> None:
+    """
+    Report unhandled errors to Sentry, when the DECK_SENTRY_DSN setting is defined
+    and the sentry-sdk package is installed. Error reporting is entirely opt-in:
+    nothing is reported by default.
+    """
+    dsn = tutorclient.Project.get_config().get("DECK_SENTRY_DSN")
+    if not dsn:
+        return
+    try:
+        # The sentry-sdk package is an optional dependency.
+        import sentry_sdk
+    except ImportError:
+        logger.warning(
+            "DECK_SENTRY_DSN is defined, but the sentry-sdk package is not"
+            " installed: errors will not be reported."
+            " Install it with: pip install 'tutor-deck[sentry]'"
+        )
+        return
+    sentry_sdk.init(dsn=str(dsn), release=f"tutor-deck@{deck_version}")
+    logger.info("Sentry error reporting is enabled")
 
 
 class HttpAuthCredentials:
