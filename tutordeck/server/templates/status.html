@@ -57,8 +57,14 @@ Health of the platform services, refreshed automatically.
 {% block scripts %}
 <script>
     tutorCommandsToWatch = ["tutor local start", "tutor local stop", "tutor local restart"];
-    // No run/cancel button toggling on this page
-    function ShowRunCommandButton() {}
-    function ShowCancelCommandButton() {}
+    // Only offer to cancel while a start/stop/restart command is running
+    const statusCancelButton = document.querySelector('.status-actions > .cancel-command-button');
+    function ShowRunCommandButton() {
+        statusCancelButton.style.display = 'none';
+    }
+    function ShowCancelCommandButton() {
+        statusCancelButton.style.display = 'block';
+    }
+    ShowRunCommandButton();
 </script>
 {% endblock %}

@@ -25,7 +25,7 @@ View the logs of the platform services, live.
             <option value="{{ service }}" {% if service == selected_service %}selected{% endif %}>{{ service }}</option>
             {% endfor %}
         </select>
-        <input type="number" name="tail" id="tail" value="100" min="1" max="10000" title="Number of lines to show from each container">
+        <input type="number" name="tail" id="tail" value="{{ tail }}" min="1" max="10000" title="Number of lines to show from each container">
         <button type="submit" class="run-command-button">View logs</button>
         <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-command-button" type="button">Stop</button>
     </form>
@@ -58,7 +58,10 @@ View the logs of the platform services, live.
     const errorsOnlyCheckbox = document.getElementById("errors-only");
     const errorLinePattern = /error|critical|exception|traceback|warn/i;
     let incompleteLine = "";
+    // Terminal color codes, as printed by some services (e.g. Django runserver)
+    const ansiEscapePattern = /\x1b\[[0-?]*[ -\/]*[@-~]/g;
     function transformLogChunk(chunk) {
+        chunk = chunk.replace(ansiEscapePattern, "");
         if (!errorsOnlyCheckbox.checked) {
             return chunk;
         }

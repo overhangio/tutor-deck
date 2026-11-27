@@ -1138,6 +1138,7 @@ main {
 		@include command();
 	}
 	.cancel-command-button {
+		@include command();
 		@include cancel-command();
 	}
 }

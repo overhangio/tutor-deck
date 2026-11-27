@@ -424,6 +424,15 @@ async def cli_local_launch() -> str:
 SERVICE_NAME_PATTERN = r"[a-zA-Z0-9._-]+"
 
 
+def logs_tail(value: str) -> str:
+    """
+    Number of log lines to show from each container, as accepted by the logs form.
+    """
+    if value.isascii() and value.isdecimal() and 1 <= int(value) <= 10000:
+        return value
+    return "100"
+
+
 @app.post("/cli/local/start")
 async def cli_local_start() -> BaseResponse:
     tutorclient.CliPool.run_parallel(app, ["local", "start", "--detach"])
@@ -513,12 +522,14 @@ async def service_logs() -> str:
     running = await asyncio.to_thread(tutorclient.Client.running_services)
     services = sorted(set(constants.OPENEDX_SERVICES) | set(running))
     selected = request.args.get("service", "")
-    if selected and selected not in services:
+    if selected and selected != "all" and selected not in services:
         services.append(selected)
+    tail = logs_tail(request.args.get("tail", ""))
     return await render_template(
         "service_logs.html",
         services=services,
         selected_service=selected,
+        tail=tail,
     )
 
 
@@ -530,9 +541,7 @@ async def cli_logs_view() -> BaseResponse:
     """
     form = await request.form
     service = form.get("service", "").strip()
-    tail = form.get("tail", "").strip() or "100"
-    if not tail.isdigit():
-        tail = "100"
+    tail = logs_tail(form.get("tail", "").strip())
     args = ["local", "logs", "--tail", tail, "--follow"]
     if service and service != "all":
         # Service names are passed as-is to docker compose, which rejects unknown
@@ -541,7 +550,8 @@ async def cli_logs_view() -> BaseResponse:
             return Response("Invalid service name", status=400)
         args.append(service)
     tutorclient.CliPool.run_parallel(app, args)
-    return redirect(url_for("service_logs"))
+    # Keep the form as it was submitted
+    return redirect(url_for("service_logs", service=service or "all", tail=tail))
 
 
 @app.get("/status")
@@ -550,6 +560,7 @@ async def platform_status() -> str:
         "status.html",
         tutor_version=tutor_version,
         deck_version=deck_version,
+        enabled_plugins=g.enabled_plugins,
         project_root=tutorclient.Project.ROOT,
     )
 
