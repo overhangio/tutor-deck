@@ -58,7 +58,9 @@ htmx.on("htmx:sseBeforeMessage", function (evt) {
 	// Don't swap content, we want to append
 	evt.preventDefault();
 	const data = JSON.parse(evt.detail.data);
-	evt.detail.elt.appendChild(document.createTextNode(data.stdout));
+	// Pages may define transformLogChunk to filter or rewrite output before display
+	const displayedChunk = (typeof transformLogChunk === "function") ? transformLogChunk(data.stdout) : data.stdout;
+	evt.detail.elt.appendChild(document.createTextNode(displayedChunk));
 
 	// This means a parallel command is executing
 	if (data.thread_alive) {

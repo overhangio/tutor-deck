@@ -1,0 +1,74 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+Service Logs
+{% endblock %}
+
+{% block page_description %}
+View the logs of the platform services, live.
+{% endblock %}
+
+{% block searchbar %}
+{% endblock %}
+
+{% block warning %}
+{% endblock %}
+
+{% set sidebar_active_tab = "service-logs" %}
+
+{% block workspace_content %}
+<div class="command-input">
+    <form method="post" action="{{ url_for('cli_logs_view') }}">
+        <select name="service" id="service">
+            <option value="all">All services</option>
+            {% for service in services %}
+            <option value="{{ service }}" {% if service == selected_service %}selected{% endif %}>{{ service }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="tail" id="tail" value="{{ tail }}" min="1" max="10000" title="Number of lines to show from each container">
+        <button type="submit" class="run-command-button">View logs</button>
+        <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-command-button" type="button">Stop</button>
+    </form>
+</div>
+<label class="logs-filter" title="Only display new log lines that look like errors">
+    <input type="checkbox" id="errors-only"> Errors only
+</label>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    tutorCommandsToWatch = ["tutor local logs"];
+    logsElement.style.display = "block";
+    const runCommandButton = document.querySelector('.run-command-button');
+    const cancelCommandButton = document.querySelector('.cancel-command-button');
+    const toggleButtons = ({run = false, cancel = false} = {}) => {
+        runCommandButton.style.display = run ? 'block' : 'none';
+        cancelCommandButton.style.display = cancel ? 'block' : 'none';
+    }
+    function ShowRunCommandButton(){
+        toggleButtons({run: true});
+    }
+    function ShowCancelCommandButton(){
+        toggleButtons({cancel: true});
+    }
+    ShowRunCommandButton();
+
+    // "Errors only" filter: only applies to new output, line by line. Chunks may
+    // end mid-line, so incomplete lines are buffered until their end arrives.
+    const errorsOnlyCheckbox = document.getElementById("errors-only");
+    const errorLinePattern = /error|critical|exception|traceback|warn/i;
+    let incompleteLine = "";
+    // Terminal color codes, as printed by some services (e.g. Django runserver)
+    const ansiEscapePattern = /\x1b\[[0-?]*[ -\/]*[@-~]/g;
+    function transformLogChunk(chunk) {
+        chunk = chunk.replace(ansiEscapePattern, "");
+        if (!errorsOnlyCheckbox.checked) {
+            return chunk;
+        }
+        incompleteLine += chunk;
+        const lines = incompleteLine.split("\n");
+        incompleteLine = lines.pop();
+        return lines.filter((line) => errorLinePattern.test(line)).map((line) => line + "\n").join("");
+    }
+</script>
+{% endblock %}

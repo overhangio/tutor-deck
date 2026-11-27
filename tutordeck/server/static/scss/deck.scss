@@ -11,6 +11,9 @@ $blue: #1570ef;
 $light-blue: #2e90fa;
 $green: #009951;
 $green-1: #edfff7;
+$yellow: #b45309;
+$yellow-1: #fff8e1;
+$red-1: #fef2f2;
 
 .htmx-indicator {
 	opacity: 0;
@@ -734,6 +737,7 @@ main {
 				form {
 					width: 100%;
 					display: flex;
+					gap: 0.5em;
 					input {
 						flex: 1;
 						font-size: 1em;
@@ -741,6 +745,18 @@ main {
 						border-radius: 10px;
 						padding-left: 1em;
 						border: 1px solid $gray-2;
+					}
+					select {
+						flex: 1;
+						font-size: 1em;
+						height: 3em;
+						border-radius: 10px;
+						padding-left: 1em;
+						border: 1px solid $gray-2;
+						background-color: white;
+					}
+					input[type="number"] {
+						flex: 0 1 7em;
 					}
 					button {
 						@include command();
@@ -1016,4 +1032,130 @@ main {
 	.show-on-command-running {
 		display: flex;
 	}
+}
+
+// Platform status page
+.status-info {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1em;
+	margin: 1em 0;
+	.status-info-card {
+		flex: 1 1 10em;
+		border: 1px solid $gray-1;
+		border-radius: 10px;
+		padding: 1em;
+		h5 {
+			margin: 0 0 0.5em 0;
+			color: $gray-4;
+			font-weight: 500;
+		}
+		span {
+			color: $black;
+			font-weight: 600;
+			word-break: break-all;
+		}
+	}
+}
+.status-table {
+	width: 100%;
+	border-collapse: collapse;
+	th, td {
+		text-align: left;
+		padding: 0.75em 1em;
+		border-bottom: 1px solid $gray-1;
+	}
+	th {
+		color: $gray-4;
+		font-weight: 500;
+	}
+}
+.status-badge {
+	border-radius: 1em;
+	padding: 0.2em 0.8em;
+	font-size: 0.9em;
+	&.status-badge-ok {
+		background-color: $green-1;
+		color: $green;
+	}
+	&.status-badge-warning {
+		background-color: $yellow-1;
+		color: $yellow;
+	}
+	&.status-badge-neutral {
+		background-color: $gray-1;
+		color: $gray-5;
+	}
+	&.status-badge-down {
+		background-color: $red-1;
+		color: $red;
+	}
+}
+.status-summary {
+	border-radius: 0.5em;
+	padding: 0.8em 1em;
+	margin: 1em 0;
+	&.status-summary-ok {
+		background-color: $green-1;
+		color: $green;
+	}
+	&.status-summary-warning {
+		background-color: $yellow-1;
+		color: $yellow;
+	}
+	&.status-summary-neutral {
+		background-color: $gray-1;
+		color: $gray-5;
+	}
+	&.status-summary-down {
+		background-color: $red-1;
+		color: $red;
+	}
+}
+.status-health-output td {
+	padding-top: 0;
+	font-size: 0.85em;
+	color: $gray-4;
+	code {
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+}
+.status-error, .status-empty, .status-loading {
+	color: $gray-4;
+	margin: 1em 0;
+}
+.status-error {
+	color: $red;
+}
+
+.status-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em;
+	margin-top: 1em;
+	.run-command-button {
+		@include command();
+	}
+	.cancel-command-button {
+		@include command();
+		@include cancel-command();
+	}
+}
+.status-restart-button {
+	border: 1px solid $gray-2;
+	border-radius: 10px;
+	background-color: white;
+	padding: 0.4em 1em;
+	cursor: pointer;
+	&:hover {
+		border-color: $blue;
+		color: $blue;
+	}
+}
+.logs-filter {
+	display: inline-block;
+	margin-top: 0.5em;
+	color: $gray-4;
+	cursor: pointer;
 }

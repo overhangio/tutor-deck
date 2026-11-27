@@ -1,0 +1,70 @@
+{% extends "_base_header.html" %}
+
+{% block page_title %}
+Platform Status
+{% endblock %}
+
+{% block page_description %}
+Health of the platform services, refreshed automatically.
+{% endblock %}
+
+{% block searchbar %}
+{% endblock %}
+
+{% block warning %}
+{% endblock %}
+
+{% set sidebar_active_tab = "platform-status" %}
+
+{% block workspace_content %}
+<div class="status-actions">
+    <form method="post" action="{{ url_for('cli_local_start') }}">
+        <button type="submit" class="run-command-button">Start platform</button>
+    </form>
+    <form method="post" action="{{ url_for('cli_local_restart') }}" onsubmit="return confirm('Restart the whole platform?');">
+        <button type="submit" class="run-command-button">Restart platform</button>
+    </form>
+    <form method="post" action="{{ url_for('cli_local_stop') }}" onsubmit="return confirm('Stop the whole platform?');">
+        <button type="submit" class="cancel-command-button">Stop platform</button>
+    </form>
+    <button hx-post="{{ url_for('cli_stop')}}" hx-trigger="click" hx-swap="none" class="cancel-command-button" type="button">Cancel command</button>
+</div>
+
+<div class="status-info">
+    <div class="status-info-card">
+        <h5>Tutor version</h5>
+        <span>{{ tutor_version }}</span>
+    </div>
+    <div class="status-info-card">
+        <h5>Tutor Deck version</h5>
+        <span>{{ deck_version }}</span>
+    </div>
+    <div class="status-info-card">
+        <h5>Enabled plugins</h5>
+        <span>{{ enabled_plugins | length }}</span>
+    </div>
+    <div class="status-info-card">
+        <h5>Project root</h5>
+        <span>{{ project_root }}</span>
+    </div>
+</div>
+
+<div id="status-services" hx-get="{{ url_for('platform_status_services') }}" hx-trigger="load, every 10s">
+    <p class="status-loading">Querying the platform services…</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    tutorCommandsToWatch = ["tutor local start", "tutor local stop", "tutor local restart"];
+    // Only offer to cancel while a start/stop/restart command is running
+    const statusCancelButton = document.querySelector('.status-actions > .cancel-command-button');
+    function ShowRunCommandButton() {
+        statusCancelButton.style.display = 'none';
+    }
+    function ShowCancelCommandButton() {
+        statusCancelButton.style.display = 'block';
+    }
+    ShowRunCommandButton();
+</script>
+{% endblock %}

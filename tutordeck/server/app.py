@@ -2,6 +2,7 @@ import asyncio
 import hmac
 import json
 import logging
+import re
 import shlex
 import sys
 import typing as t
@@ -22,6 +23,8 @@ from quart import (
     url_for,
 )
 from quart.typing import ResponseTypes
+from tutor.__about__ import __version__ as tutor_version
+from tutor.exceptions import TutorError
 from tutor.plugins.v1 import discover_package
 from werkzeug.sansio.response import Response as BaseResponse
 
@@ -488,6 +491,43 @@ async def cli_local_launch() -> str:
     )
 
 
+SERVICE_NAME_PATTERN = r"[a-zA-Z0-9._-]+"
+
+
+def logs_tail(value: str) -> str:
+    """
+    Number of log lines to show from each container, as accepted by the logs form.
+    """
+    if value.isascii() and value.isdecimal() and 1 <= int(value) <= 10000:
+        return value
+    return "100"
+
+
+@app.post("/cli/local/start")
+async def cli_local_start() -> BaseResponse:
+    tutorclient.CliPool.run_parallel(app, ["local", "start", "--detach"])
+    return redirect(url_for("platform_status"))
+
+
+@app.post("/cli/local/stop")
+async def cli_local_stop() -> BaseResponse:
+    tutorclient.CliPool.run_parallel(app, ["local", "stop"])
+    return redirect(url_for("platform_status"))
+
+
+@app.post("/cli/local/restart")
+async def cli_local_restart() -> BaseResponse:
+    """
+    Restart the whole platform, or a single service when one is passed.
+    """
+    form = await request.form
+    service = form.get("service", "").strip() or "all"
+    if not re.fullmatch(SERVICE_NAME_PATTERN, service):
+        return Response("Invalid service name", status=400)
+    tutorclient.CliPool.run_parallel(app, ["local", "restart", service])
+    return redirect(url_for("platform_status"))
+
+
 @app.get("/cli/logs/stream")
 async def cli_logs_stream() -> ResponseTypes:
     """
@@ -542,6 +582,76 @@ async def cli_logs_stream() -> ResponseTypes:
 async def cli_stop() -> Response:
     tutorclient.CliPool.stop()
     return Response(status=200)
+
+
+@app.get("/logs")
+async def service_logs() -> str:
+    # Offer every service that has a container (which includes plugin-provided
+    # services), on top of the core ones. Querying docker takes a little while:
+    # keep the event loop free.
+    running = await asyncio.to_thread(tutorclient.Client.running_services)
+    services = sorted(set(constants.OPENEDX_SERVICES) | set(running))
+    selected = request.args.get("service", "")
+    if selected and selected != "all" and selected not in services:
+        services.append(selected)
+    tail = logs_tail(request.args.get("tail", ""))
+    return await render_template(
+        "service_logs.html",
+        services=services,
+        selected_service=selected,
+        tail=tail,
+    )
+
+
+@app.post("/cli/logs/view")
+async def cli_logs_view() -> BaseResponse:
+    """
+    Stream the logs of one platform service (or all of them) through the regular
+    command log stream. This is a wrapper around `tutor local logs`.
+    """
+    form = await request.form
+    service = form.get("service", "").strip()
+    tail = logs_tail(form.get("tail", "").strip())
+    args = ["local", "logs", "--tail", tail, "--follow"]
+    if service and service != "all":
+        # Service names are passed as-is to docker compose, which rejects unknown
+        # ones: just make sure they look like service names.
+        if not re.fullmatch(SERVICE_NAME_PATTERN, service):
+            return Response("Invalid service name", status=400)
+        args.append(service)
+    tutorclient.CliPool.run_parallel(app, args)
+    # Keep the form as it was submitted
+    return redirect(url_for("service_logs", service=service or "all", tail=tail))
+
+
+@app.get("/status")
+async def platform_status() -> str:
+    return await render_template(
+        "status.html",
+        tutor_version=tutor_version,
+        deck_version=deck_version,
+        enabled_plugins=g.enabled_plugins,
+        project_root=tutorclient.Project.ROOT,
+    )
+
+
+@app.get("/status/services")
+async def platform_status_services() -> str:
+    """
+    htmx partial: the platform services table, refreshed periodically.
+    """
+    services: list[dict[str, str]] = []
+    error = ""
+    try:
+        # Querying docker takes a little while: keep the event loop free.
+        services = await asyncio.to_thread(tutorclient.Client.services_status)
+    except TutorError as e:
+        error = e.args[0] if e.args else "Failed to query docker"
+    return await render_template(
+        "_status_services.html",
+        services=services,
+        error=error,
+    )
 
 
 @app.get("/advanced")
